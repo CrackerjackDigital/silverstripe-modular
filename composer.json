@@ -1,7 +1,7 @@
 {
-    "name": "crackerjackdigital/silverstripe-utils",
+    "name": "crackerjackdigital/modular",
     "type": "silverstripe-module",
-    "description": "Crackerjack Digital common utilities and functionality for SilverStripe",
+    "description": "Crackerjack Digital common and module utilities and functionality for SilverStripe",
     "homepage": "http://www.crackerjack.net.nz/",
     "license": "BSD-3-Clause",
     "keywords": ["silverstripe"], 
@@ -21,7 +21,7 @@
         "silverstripe/framework": "3.1.*"
     },
     "extra": {
-        "installer-name": "crackerjack"
+        "installer-name": "modular"
     },
     "minimum-stability": "dev"
 }
