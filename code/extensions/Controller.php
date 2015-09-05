@@ -1,5 +1,5 @@
 <?php
-class CrackerJackControllerExtension extends DataExtension {
+class ModularControllerExtension extends DataExtension {
     const ActionPrefix = '';
 
     private static $action_prefix = '';
@@ -13,7 +13,7 @@ class CrackerJackControllerExtension extends DataExtension {
     public function ActionLink($action) {
         return Controller::join_links(
             $this()->Link(),
-//            CrackerjackModule::get_config_setting(get_called_class(), 'action_prefix') ?: static::ActionPrefix,
+//            ModularModule::get_config_setting(get_called_class(), 'action_prefix') ?: static::ActionPrefix,
             $action
         );
     }

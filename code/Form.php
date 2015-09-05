@@ -1,6 +1,6 @@
 <?php
 
-class CrackerjackForm extends Form {
+class ModularForm extends Form {
     const Good = 'good';
     const Bad = 'bad';
 
@@ -17,7 +17,7 @@ class CrackerjackForm extends Form {
      * @param      $fields
      * @param      $actions
      * @param null $validator
-     * @return CrackerjackForm
+     * @return ModularForm
      */
     public static function create_for_action($action, ContentController $controller, $name, FieldList $fields, FieldList $actions, $validator = null) {
         $formClassName = get_called_class();
@@ -34,7 +34,7 @@ class CrackerjackForm extends Form {
 
         self::add_actions($action, $actions);
 
-        /** @var CrackerjackForm $form */
+        /** @var ModularForm $form */
         $form = new $formClassName($controller, $name, $fields, $actions, $validator);
 
         $form->setFormAction($controller->Link($action));
@@ -47,7 +47,7 @@ class CrackerjackForm extends Form {
      * @return string HTML text of tabstrip in a 'ul'
      */
     public static function tab_strip($forAction, $fullLinks = false) {
-        $tabs = CrackerjackModule::get_config_setting(
+        $tabs = ModularModule::get_config_setting(
             get_called_class(),
             'tabs',
             $forAction
@@ -68,13 +68,13 @@ class CrackerjackForm extends Form {
             foreach ($tabs as $tabName => $info) {
                 if (is_array($info)) {
                     if ($fullLinks) {
-                        $html .= '<li class="tab ' . $current . '"><a href="' . $baseLink . '#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . CrackerJackUtils::decamel($tabName) . '</a></li>';
+                        $html .= '<li class="tab ' . $current . '"><a href="' . $baseLink . '#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . ModularUtils::decamel($tabName) . '</a></li>';
                     } else {
-                        $html .= '<li class="tab ' . $current . '"><a href="#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . CrackerJackUtils::decamel($tabName) . '</a></li>';
+                        $html .= '<li class="tab ' . $current . '"><a href="#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . ModularUtils::decamel($tabName) . '</a></li>';
                     }
                 } else {
                     // if $info is not an array then it is a link
-                    $html .= '<li class="' . $current . '"><a href="' . $info . '">' . CrackerJackUtils::decamel($tabName) . '</a></li>';
+                    $html .= '<li class="' . $current . '"><a href="' . $info . '">' . ModularUtils::decamel($tabName) . '</a></li>';
                 }
                 $current = '';
             }
@@ -130,7 +130,7 @@ class CrackerjackForm extends Form {
     }
 
     protected static function tabify($action, FieldList $fields) {
-        $tabs = CrackerjackModule::get_config_setting(
+        $tabs = ModularModule::get_config_setting(
             get_called_class(),
             'tabs',
             $action
@@ -191,10 +191,10 @@ class CrackerjackForm extends Form {
     }
 
     public static function form_fields($for) {
-        return CrackerjackModule::get_config_setting(get_called_class(), 'form_fields', $for);
+        return ModularModule::get_config_setting(get_called_class(), 'form_fields', $for);
     }
     public static function form_actions($for) {
-        return CrackerjackModule::get_config_setting(get_called_class(), 'form_actions', $for);
+        return ModularModule::get_config_setting(get_called_class(), 'form_actions', $for);
     }
 
     public static function make_field($fieldName, array $info, $value = null) {
@@ -253,7 +253,7 @@ class CrackerjackForm extends Form {
     }
 
     public static function get_field_label($fieldName, $default = null, array $data = []) {
-        return _t(get_called_class() . ".$fieldName." . self::LabelSuffix, $default ?: CrackerJackUtils::decamel($fieldName), $data);
+        return _t(get_called_class() . ".$fieldName." . self::LabelSuffix, $default ?: ModularUtils::decamel($fieldName), $data);
     }
 
     public static function get_form_message($type, $default = null, array $data = []) {

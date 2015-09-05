@@ -1,6 +1,6 @@
 <?php
 
-class CrackerJackDataExtension extends DataExtension {
+class ModularDataExtension extends DataExtension {
     const DefaultTabName = 'Root.Main';
 
     private static $enabled = true;
@@ -13,7 +13,7 @@ class CrackerJackDataExtension extends DataExtension {
     }
 
     public static function enabled() {
-        return CrackerjackModule::get_config_setting(get_called_class(), 'enabled');
+        return ModularModule::get_config_setting(get_called_class(), 'enabled');
     }
 
     public static function enable() {
@@ -34,7 +34,7 @@ class CrackerJackDataExtension extends DataExtension {
      * @return array|null|string
      */
     public static function own_config($name, $key = null, Callable $filterCallback = null) {
-        $value = CrackerjackModule::get_config_setting(
+        $value = ModularModule::get_config_setting(
             get_called_class(),
             $name,
             $key,
@@ -50,7 +50,7 @@ class CrackerJackDataExtension extends DataExtension {
     }
 
     public static function get_config_setting($name, $key = null, $options = null) {
-        return CrackerjackModule::get_config_setting(get_called_class(), $name, $key, $options);
+        return ModularModule::get_config_setting(get_called_class(), $name, $key, $options);
     }
 
 
@@ -61,17 +61,17 @@ class CrackerJackDataExtension extends DataExtension {
      */
 /* UNTESTED
     public function classTabName() {
-        $tabName = CrackerjackModule::get_config_setting(get_called_class(), 'tab_name');
+        $tabName = ModularModule::get_config_setting(get_called_class(), 'tab_name');
 
         // might have per-class/per-field tab name for the field
-        $multipleNames = CrackerjackModule::get_config_setting(
+        $multipleNames = ModularModule::get_config_setting(
             get_called_class(),
             'class_tab_names'
         ) ?: [];
 
         $ownerClass = get_class($this->owner);
 
-        return CrackerjackModule::detokenise(
+        return ModularModule::detokenise(
             $multipleNames
                 ? (isset($multipleNames[$ownerClass])
                 ? $multipleNames[$ownerClass]
@@ -88,12 +88,12 @@ class CrackerJackDataExtension extends DataExtension {
     }
 */
     public function fieldTabName($fieldName) {
-        $tabName = CrackerjackModule::get_config_setting(get_called_class(), 'tab_name') ?: self::DefaultTabName;
+        $tabName = ModularModule::get_config_setting(get_called_class(), 'tab_name') ?: self::DefaultTabName;
 
         // might have per-field tab name for the field
-        $multipleNames = CrackerjackModule::get_config_setting(get_called_class(), 'field_tab_names') ?: [];
+        $multipleNames = ModularModule::get_config_setting(get_called_class(), 'field_tab_names') ?: [];
 
-        return CrackerJackUtils::detokenise(
+        return ModularUtils::detokenise(
             $multipleNames
                 ? (isset($multipleNames[$fieldName])
                     ? $multipleNames[$fieldName]
@@ -104,13 +104,13 @@ class CrackerJackDataExtension extends DataExtension {
     }
 
     public function fieldLabel($fieldName, $default = '') {
-        $label = CrackerjackModule::get_localised_config_string(
+        $label = ModularModule::get_localised_config_string(
             get_class(),
             $fieldName,
             $default ?: $fieldName,
             $this->metaData()
         );
-        return CrackerJackUtils::decamel($label);
+        return ModularUtils::decamel($label);
     }
 
     protected function metaData() {

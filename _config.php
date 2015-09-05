@@ -3,18 +3,18 @@
  * Constants which can be set independantly of normal isDev etc, by default track it though.
  * Can be used e.g. in config with constantdefined.
  */
-if (!defined('CRACKERJACK_DEV')) {
+if (!defined('MODULAR_DEV')) {
     if (Director::isDev()) {
-        define('CRACKERJACK_DEV', 'auto');
+        define('MODULAR_DEV', 'auto');
     }
 }
-if (!defined('CRACKERJACK_TEST')) {
+if (!defined('MODULAR_TEST')) {
     if (Director::isTest()) {
-        define('CRACKERJACK_TEST', 'auto');
+        define('MODULAR_TEST', 'auto');
     }
 }
-if (!defined('CRACKERJACK_LIVE')) {
+if (!defined('MODULAR_LIVE')) {
     if (Director::isLive()) {
-        define('CRACKERJACK_LIVE', 'auto');
+        define('MODULAR_LIVE', 'auto');
     }
 }

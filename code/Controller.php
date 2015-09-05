@@ -1,5 +1,5 @@
 <?php
 
-class CrackerjackController extends Controller {
+class ModularController extends Controller {
 
 }

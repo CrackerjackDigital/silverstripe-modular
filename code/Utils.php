@@ -1,7 +1,7 @@
 <?php
 
 
-class CrackerJackUtils extends Object {
+class ModularUtils extends Object {
 
     /**
      * Replace {token} in string from provided map of token => value
