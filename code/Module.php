@@ -91,8 +91,8 @@ abstract class ModularModule extends Object {
             return _t($value, $value, $data);
         }
         return self::get_localised_config_string($source, $name, $default, $data, $configOptions);
-
     }
+
     /**
      * Return a string from localised language files or config or default in order of checking existence.
      *
@@ -158,6 +158,4 @@ abstract class ModularModule extends Object {
         }
         return $values;
     }
-
-
 }
