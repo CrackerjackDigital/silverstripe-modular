@@ -23,9 +23,6 @@ class ModularDataExtension extends DataExtension {
     public static function disable() {
         Config::inst()->update(get_called_class(), 'enabled', false);
     }
-
-
-
     /**
      * Return a configuration setting optionally filtered by filterCallback.
      * @param               $name
@@ -51,6 +48,14 @@ class ModularDataExtension extends DataExtension {
 
     public static function get_config_setting($name, $key = null, $options = null) {
         return ModularModule::get_config_setting(get_called_class(), $name, $key, $options);
+    }
+
+    public function ownerConfigSetting($name, $key = null, $options = null) {
+        $value = $this->owner->config()->get($name);
+        if ($key && is_array($value) && array_key_exists($key, $value)) {
+            return $value[$key];
+        }
+        return $value;
     }
 
 
