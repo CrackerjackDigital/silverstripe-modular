@@ -1,7 +1,8 @@
 <?php
+namespace Modular;
 
 trait bitfield {
-	public function bitfieldTest($bitField, $flag) {
+	public static function bitfieldTest($bitField, $flag) {
 		return $bitField & $flag === $flag;
 	}
 }

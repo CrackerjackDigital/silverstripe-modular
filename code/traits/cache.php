@@ -1,8 +1,9 @@
 <?php
+namespace Modular;
 
-trait memo {
-	public static function memo($key, $value = null) {
-		static $cache;
+trait cache {
+	public static function cache($key, $value = null) {
+		static $cache = [];
 
 		if (!self::enabled()) {
 			return null;
@@ -23,7 +24,7 @@ trait memo {
 	}
 
 	private static function enabled() {
-		$enabled = Config::inst()->get(get_called_class(), 'memo_enabled');
+		$enabled = \Config::inst()->get(get_called_class(), 'memo_enabled');
 
 		return is_null($enabled)
 			? true

@@ -42,10 +42,11 @@ class ModularForm extends Form {
         return $form;
     }
 
-    /**
-     * @param $forAction
-     * @return string HTML text of tabstrip in a 'ul'
-     */
+	/**
+	 * @param      $forAction
+	 * @param bool $fullLinks
+	 * @return string HTML text of tabstrip in a 'ul'
+	 */
     public static function tab_strip($forAction, $fullLinks = false) {
         $tabs = ModularModule::get_config_setting(
             get_called_class(),
@@ -139,7 +140,7 @@ class ModularForm extends Form {
         if ($tabs) {
             // check if we need to show the tab strip in the form
             if (static::config()->get('show_tab_strip_in_form')) {
-                $fields->push(new LiteralField('TabsTrip', self::tab_strip()));
+                $fields->push(new LiteralField('TabsTrip', self::tab_strip($action)));
             }
 
             $current = 'current';

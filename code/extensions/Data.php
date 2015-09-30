@@ -45,11 +45,6 @@ class ModularDataExtension extends DataExtension {
         }
         return $value;
     }
-
-    public static function get_config_setting($name, $key = null, $options = null) {
-        return ModularModule::get_config_setting(get_called_class(), $name, $key, $options);
-    }
-
     public function ownerConfigSetting($name, $key = null, $options = null) {
         $value = $this->owner->config()->get($name);
         if ($key && is_array($value) && array_key_exists($key, $value)) {
@@ -59,11 +54,12 @@ class ModularDataExtension extends DataExtension {
     }
 
 
-    /**
-     * Add a control to tab from config.class_tab_names depending on the class name of the extended object.
-     *
-     * @return mixed
-     */
+	/**
+	 * Add a control to tab from config.class_tab_names depending on the class name of the extended object.
+	 *
+	 * @param $fieldName
+	 * @return mixed
+	 */
 /* UNTESTED
     public function classTabName() {
         $tabName = ModularModule::get_config_setting(get_called_class(), 'tab_name');
