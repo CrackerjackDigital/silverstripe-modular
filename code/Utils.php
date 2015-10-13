@@ -37,4 +37,18 @@ class ModularUtils extends Object {
         $parts = preg_split("/((?<=[a-z])(?=[A-Z])|(?=[A-Z][a-z]))/", $in);
         return implode($join, $parts);
     }
+
+	/**
+	 * Create a ModularDebugger for provided level or get it from the per-level cache.
+	 *
+	 * @param $level
+	 * @return mixed
+	 */
+	public static function debugger($level) {
+		static $cache = [];
+		if (!isset($cache[$level])) {
+			$cache[$level] = new ModularDebugger($level);
+		}
+		return $cache[$level];
+	}
 }
