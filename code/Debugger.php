@@ -28,19 +28,63 @@ class ModularDebugger extends Object
 
 	protected $level = self::DefaultDebugLevel;
 
+	// prefix for log file names, email subjects etc
+	protected $prefix = 'debug-';
+
 	private static $log_path = 'logs';
 
-	public function __construct($level = self::DefaultDebugLevel) {
+	public function __construct($level = self::DefaultDebugLevel, $prefix = 'debug-') {
 		parent::__construct();
-		$this->configure($level);
+		$this->configure($level, $prefix);
 	}
 
-	public function configure($level) {
+	public function level($level = null) {
+		return $this->configure($level);
+	}
+	public function prefix($prefix) {
+		return $this->configure($this->level, $prefix);
+	}
+
+	/**
+	 * Enable a feature or features.
+	 *
+	 * @param $features bitfield of features to enable/turn on
+	 * @return $this|ModularDebugger
+	 */
+	public function enable($features) {
+		return $this->configure(
+			$this->level | $features
+		);
+	}
+
+	/**
+	 * Disable a feature or features
+	 *
+	 * level:               1001
+	 * features (disable):  0101
+	 * ~features:           1010
+	 * level & ~features:   1000
+	 *
+	 * @param $features bitfield of features to disable/turn off
+	 * @return $this|ModularDebugger
+	 */
+	public function disable($features) {
+		return $this->configure(
+			$this->level & ~$features
+		);
+	}
+
+	protected function configure($level, $prefix = null) {
 		$this->level = $level;
+		$prefix = is_null($prefix) ? $this->prefix : $prefix;
+
+		SS_Log::clear_writers();
+
 		if ($this->bitfieldTest($level, self::DebugFile)) {
-			SS_Log::add_writer(new SS_LogFileWriter(self::log_file_name('debug'), $this->level));
+			SS_Log::add_writer(new SS_LogFileWriter(self::log_file_name($prefix), $this->level));
+
 			if ($this->bitfieldTest($level, self::DebugPerClass)) {
-				// TODO Implement per-class debug logging
+				// TODO Implement per-class debug logging, could handle by prefix for now
 				// SS_Log::add_writer(new SS_LogFileWriter(self::log_path())
 			}
 		}
@@ -49,6 +93,7 @@ class ModularDebugger extends Object
 				SS_Log::add_writer(new SS_LogEmailWriter($email));
 			}
 		}
+		return $this;
 	}
 
 	public function formatMessage($message, $severity, $source = '') {
@@ -64,21 +109,25 @@ class ModularDebugger extends Object
 	public function trace($message, $source = '') {
 		$message = $this->formatMessage($message, 'TRACE', $source);
 		SS_Log::log($message, self::DebugTrace);
+		return $this;
 	}
 
 	public function notice($message, $source = '') {
 		$message = $this->formatMessage($message, 'WARN ', $source);
 		SS_Log::log($message, self::DebugNotice);
+		return $this;
 	}
 
 	public function warn($message, $source = '') {
 		$message = $this->formatMessage($message, 'WARN ', $source);
 		SS_Log::log($message, self::DebugWarn);
+		return $this;
 	}
 
 	public function error($message, $source = '') {
 		$message = $this->formatMessage($message, 'ERROR', $source);
 		SS_Log::log($message, self::DebugErr);
+		return $this;
 	}
 
 	/**
