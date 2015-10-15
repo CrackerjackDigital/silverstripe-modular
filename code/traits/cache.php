@@ -2,6 +2,11 @@
 namespace Modular;
 
 trait cache {
+	/**
+	 * @param      $key
+	 * @param mixed|callable $value
+	 * @return null
+	 */
 	public static function cache($key, $value = null) {
 		static $cache = [];
 
@@ -15,8 +20,13 @@ trait cache {
 			}
 		} else {
 			if (is_null($value)) {
+
 				unset($cache[$key]);
+			} elseif (is_callable($value)) {
+
+				$cache[$key] = $value();
 			} else {
+
 				$cache[$key] = $value;
 			}
 		}
