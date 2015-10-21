@@ -1,6 +1,8 @@
 <?php
 
 class ModularDataExtension extends DataExtension {
+	use Modular\config;
+
     const DefaultTabName = 'Root.Main';
 
     private static $enabled = true;
@@ -13,7 +15,7 @@ class ModularDataExtension extends DataExtension {
     }
 
     public static function enabled() {
-        return ModularModule::get_config_setting(get_called_class(), 'enabled');
+        return static::get_config_setting('enabled');
     }
 
     public static function enable() {
@@ -32,9 +34,9 @@ class ModularDataExtension extends DataExtension {
      */
     public static function own_config($name, $key = null, Callable $filterCallback = null) {
         $value = ModularModule::get_config_setting(
-            get_called_class(),
             $name,
             $key,
+            null,
             Config::UNINHERITED
         );
         if (is_array($value) && $filterCallback) {
@@ -89,10 +91,10 @@ class ModularDataExtension extends DataExtension {
     }
 */
     public function fieldTabName($fieldName) {
-        $tabName = ModularModule::get_config_setting(get_called_class(), 'tab_name') ?: self::DefaultTabName;
+        $tabName = ModularModule::get_config_setting('tab_name') ?: self::DefaultTabName;
 
         // might have per-field tab name for the field
-        $multipleNames = ModularModule::get_config_setting(get_called_class(), 'field_tab_names') ?: [];
+        $multipleNames = ModularModule::get_config_setting('field_tab_names') ?: [];
 
         return ModularUtils::detokenise(
             $multipleNames

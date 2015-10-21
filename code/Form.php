@@ -2,6 +2,8 @@
 
 class ModularForm extends Form
 {
+	use Modular\config;
+
 	const Good = 'good';
 	const Bad  = 'bad';
 
@@ -57,8 +59,7 @@ class ModularForm extends Form
 	 * @return string HTML text of tabstrip in a 'ul'
 	 */
 	public static function tab_strip($forAction, $fullLinks = false) {
-		$tabs = ModularModule::get_config_setting(
-			get_called_class(),
+		$tabs = static::get_config_setting(
 			'tabs',
 			$forAction
 		) ?: [];
@@ -141,8 +142,7 @@ class ModularForm extends Form
 	}
 
 	protected static function tabify($action, FieldList $fields) {
-		$tabs = ModularModule::get_config_setting(
-			get_called_class(),
+		$tabs = static::get_config_setting(
 			'tabs',
 			$action
 		) ?: [];
@@ -202,11 +202,11 @@ class ModularForm extends Form
 	}
 
 	public static function form_fields($for) {
-		return ModularModule::get_config_setting(get_called_class(), 'form_fields', $for);
+		return static::get_config_setting('form_fields', $for);
 	}
 
 	public static function form_actions($for) {
-		return ModularModule::get_config_setting(get_called_class(), 'form_actions', $for);
+		return static::get_config_setting('form_actions', $for);
 	}
 
 	public static function make_field($fieldName, array $info, $value = null) {

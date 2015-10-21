@@ -7,14 +7,14 @@ trait config {
 	}
 
 	/**
-	 * @param      $className
 	 * @param      $name
-	 * @param null $key
+	 * @param null $key if value is an array and key is supplied return this key or null
+	 * @param null $className class name to get config of or null for get_called_class()
 	 * @param null $sourceOptions SilverStripe config.get options e.g. Config::UNINHERITED
 	 * @return array|null|string
 	 */
-	public static function get_config_setting($className, $name, $key = null, $sourceOptions = null) {
-		$value = static::config($className)->get($name, $sourceOptions);
+	public static function get_config_setting($name, $key = null, $className = null, $sourceOptions = null) {
+		$value = static::config($className ?: get_called_class())->get($name, $sourceOptions);
 
 		if ($key && is_array($value)) {
 			if (array_key_exists($key, $value)) {

@@ -1,0 +1,6 @@
+---
+Name: modular-config
+---
+ContentController:
+  extensions:
+    - ModularContentControllerExtension
