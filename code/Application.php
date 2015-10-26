@@ -1,6 +1,7 @@
 <?php
 
 class ModularApp extends ModularModule {
+	// base dir for loading requirements from, if not set then theme folder will be used (e.g. themes/default/)
 	private static $requirements_path;
 
 	/**

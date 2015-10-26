@@ -5,6 +5,7 @@ trait debugging {
 	private static $debugging_level = \ModularDebugger::DebugOff;
 
 	/**
+	 * @param int $level
 	 * @return mixed
 	 */
 	public static function debugging($level = \ModularDebugger::DefaultDebugLevel) {

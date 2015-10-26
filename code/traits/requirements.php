@@ -29,7 +29,7 @@ trait requirements {
 	 * @param               $modulePath
 	 * @param string        $beforeOrAfterInit wether to include before or after requirements
 	 */
-	public static function requirements($modulePath, $beforeOrAfterInit = \ModularModule::RequireAll) {
+	public static function requirements($modulePath, $beforeOrAfterInit = \ModularModule::BothInit) {
 		$requirements = static::config()->get('requirements');
 
 		if (isset($requirements[$beforeOrAfterInit])) {

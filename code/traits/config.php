@@ -34,13 +34,13 @@ trait config {
 	 * @param null $sourceOptions
 	 * @return array
 	 */
-	public static function get_config_settings($className, array $names, $sourceOptions = null) {
+	public static function get_config_settings(array $names, $className, $sourceOptions = null) {
 		$values = array();
 		foreach ($names as $key => $name) {
 			if (is_int($key)) {
-				$values[] = static::get_config_setting($className, $name, null, $sourceOptions);
+				$values[] = static::get_config_setting($name, null, $className, $sourceOptions);
 			} else {
-				$values[] = static::get_config_setting($className, $key, $name, $sourceOptions);
+				$values[] = static::get_config_setting($key, $name, $className, $sourceOptions);
 			}
 		}
 		return $values;
