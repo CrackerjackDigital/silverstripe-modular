@@ -1,6 +1,7 @@
 <?php
 /**
- * Calls through to JSON class while traits are worked out properly in SS.
+ * Calls through to JSON class while traits are worked out properly in SS (config
+ * is applied?)
  */
 namespace Modular;
 
