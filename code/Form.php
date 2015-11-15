@@ -79,13 +79,13 @@ class ModularForm extends Form
 			foreach ($tabs as $tabName => $info) {
 				if (is_array($info)) {
 					if ($fullLinks) {
-						$html .= '<li class="tab ' . $current . '"><a href="' . $baseLink . '#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . ModularUtils::decamel($tabName) . '</a></li>';
+						$html .= '<li class="tab ' . $current . '"><a href="' . $baseLink . '#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . Strings::decamel($tabName) . '</a></li>';
 					} else {
-						$html .= '<li class="tab ' . $current . '"><a href="#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . ModularUtils::decamel($tabName) . '</a></li>';
+						$html .= '<li class="tab ' . $current . '"><a href="#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . Strings::decamel($tabName) . '</a></li>';
 					}
 				} else {
 					// if $info is not an array then it is a link
-					$html .= '<li class="' . $current . '"><a href="' . $info . '">' . ModularUtils::decamel($tabName) . '</a></li>';
+					$html .= '<li class="' . $current . '"><a href="' . $info . '">' . Strings::decamel($tabName) . '</a></li>';
 				}
 				$current = '';
 			}
@@ -263,7 +263,7 @@ class ModularForm extends Form
 	}
 
 	public static function get_field_label($fieldName, $default = null, array $data = []) {
-		return _t(get_called_class() . ".$fieldName." . self::LabelSuffix, $default ?: ModularUtils::decamel($fieldName), $data);
+		return _t(get_called_class() . ".$fieldName." . self::LabelSuffix, $default ?: Strings::decamel($fieldName), $data);
 	}
 
 	/**
@@ -274,7 +274,7 @@ class ModularForm extends Form
 	 * @return string
 	 */
 	public static function get_form_message($messageOrLangKey, $default = null, array $data = []) {
-		return _t(get_called_class() . ".$messageOrLangKey", $default ?: ModularUtils::decamel($messageOrLangKey), $data);
+		return _t(get_called_class() . ".$messageOrLangKey", $default ?: Strings::decamel($messageOrLangKey), $data);
 	}
 
 	public static function set_form_message($code, $type, array $data = []) {

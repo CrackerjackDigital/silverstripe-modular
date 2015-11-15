@@ -16,7 +16,7 @@ trait config {
 	public static function get_config_setting($name, $key = null, $className = null, $sourceOptions = null) {
 		$value = static::config($className ?: get_called_class())->get($name, $sourceOptions);
 
-		if ($key && is_array($value)) {
+		if ($key && $value && is_array($value)) {
 			if (array_key_exists($key, $value)) {
 				$value = $value[$key];
 			} else {

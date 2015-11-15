@@ -96,7 +96,7 @@ class ModularDataExtension extends DataExtension {
         // might have per-field tab name for the field
         $multipleNames = ModularModule::get_config_setting('field_tab_names') ?: [];
 
-        return ModularUtils::detokenise(
+        return Strings::detokenise(
             $multipleNames
                 ? (isset($multipleNames[$fieldName])
                     ? $multipleNames[$fieldName]
@@ -113,7 +113,7 @@ class ModularDataExtension extends DataExtension {
             $default ?: $fieldName,
             $this->metaData()
         );
-        return ModularUtils::decamel($label);
+        return Strings::decamel($label);
     }
 
     protected function metaData() {

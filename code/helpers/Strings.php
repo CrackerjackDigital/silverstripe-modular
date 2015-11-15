@@ -1,7 +1,7 @@
 <?php
+namespace Modular\Helpers;
 
-
-class ModularUtils extends Object {
+class Strings extends \Object {
 
     /**
      * Replace {token} in string from provided map of token => value
@@ -38,17 +38,4 @@ class ModularUtils extends Object {
         return implode($join, $parts);
     }
 
-	/**
-	 * Create a ModularDebugger for provided level or get it from the per-level cache.
-	 *
-	 * @param $level
-	 * @return mixed
-	 */
-	public static function debugger($level) {
-		static $cache = [];
-		if (!isset($cache[$level])) {
-			$cache[$level] = new ModularDebugger($level);
-		}
-		return $cache[$level];
-	}
 }
