@@ -1,6 +1,4 @@
 <?php
-use \Modular\Helpers\Strings as Strings;
-
 use Modular\Helpers\Strings;
 
 class ModularForm extends Form {
