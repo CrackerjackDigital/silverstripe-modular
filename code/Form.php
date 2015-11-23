@@ -1,12 +1,13 @@
 <?php
 use \Modular\Helpers\Strings as Strings;
 
-class ModularForm extends Form
-{
+use Modular\Helpers\Strings;
+
+class ModularForm extends Form {
 	use Modular\config;
 
 	const Good = 'good';
-	const Bad  = 'bad';
+	const Bad = 'bad';
 
 	const LabelSuffix = 'Label';
 	const TabIDPrefix = '';
