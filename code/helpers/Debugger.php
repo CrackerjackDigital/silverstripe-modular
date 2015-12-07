@@ -5,7 +5,7 @@ class ModularDebugger extends Object
 {
 	use \Modular\bitfield;
 
-	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no'
+	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
 	const DebugErr    = SS_Log::ERR;           // 3
 	const DebugWarn   = SS_Log::WARN;
 	const DebugInfo   = SS_Log::INFO;
@@ -35,14 +35,14 @@ class ModularDebugger extends Object
 
 	public function __construct($level = self::DefaultDebugLevel, $prefix = 'debug-') {
 		parent::__construct();
-		$this->configure($level, $prefix);
+		$this->setup($level, $prefix);
 	}
 
 	public function level($level = null) {
-		return $this->configure($level);
+		return $this->setup($level);
 	}
 	public function prefix($prefix) {
-		return $this->configure($this->level, $prefix);
+		return $this->setup($this->level, $prefix);
 	}
 
 	/**
@@ -52,7 +52,7 @@ class ModularDebugger extends Object
 	 * @return $this|ModularDebugger
 	 */
 	public function enable($features) {
-		return $this->configure(
+		return $this->setup(
 			$this->level | $features
 		);
 	}
@@ -69,12 +69,12 @@ class ModularDebugger extends Object
 	 * @return $this|ModularDebugger
 	 */
 	public function disable($features) {
-		return $this->configure(
+		return $this->setup(
 			$this->level & ~$features
 		);
 	}
 
-	protected function configure($level, $prefix = null) {
+	protected function setup($level, $prefix = null) {
 		$this->level = $level;
 		$prefix = is_null($prefix) ? $this->prefix : $prefix;
 
