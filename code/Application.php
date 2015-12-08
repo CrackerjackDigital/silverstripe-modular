@@ -26,6 +26,14 @@ class ModularApplication extends ModularModule {
 	}
 
 	/**
+	 * Return the device mode, e.g.  'mobile', 'desktop', 'default'. At the moment just uses domain_theme.
+	 * TODO: allow this to be found out in alternative ways, e.g. UserAgent
+	 */
+	public static function device_mode() {
+		return static::domain_theme();
+	}
+
+	/**
 	 * Return the theme name matching on domain name via config.theme_domains
 	 * @return string
 	 */
