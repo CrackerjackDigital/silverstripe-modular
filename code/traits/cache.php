@@ -34,7 +34,7 @@ trait cache {
 	}
 
 	private static function enabled() {
-		$enabled = \Config::inst()->get(get_called_class(), 'memo_enabled');
+		$enabled = \Config::inst()->get(get_called_class(), 'cache_enabled');
 
 		return is_null($enabled)
 			? true

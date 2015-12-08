@@ -15,6 +15,7 @@ class ModularApplication extends ModularModule {
 	   #	self::ThemeMobile => [ 'm.*' ],
 	];
 
+	// use this
 	private static $default_theme = self::ThemeDefault;
 
 	/**
