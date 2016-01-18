@@ -41,13 +41,14 @@ class ModularUtils extends Object {
 	/**
 	 * Create a ModularDebugger for provided level or get it from the per-level cache.
 	 *
-	 * @param $level
+	 * @param        $level bitfield from ModularDebugger or'd DebugABC constants
+	 * @param string $prefix for filenames, email subjects etc
 	 * @return mixed
 	 */
-	public static function debugger($level) {
+	public static function debugger($level, $prefix = 'debug-') {
 		static $cache = [];
 		if (!isset($cache[$level])) {
-			$cache[$level] = new ModularDebugger($level);
+			$cache[$level] = new ModularDebugger($level, $prefix);
 		}
 		return $cache[$level];
 	}

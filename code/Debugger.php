@@ -29,13 +29,17 @@ class ModularDebugger extends Object
 	protected $level = self::DefaultDebugLevel;
 
 	// prefix for log file names, email subjects etc
-	protected $prefix = 'debug-';
+	protected $prefix = '';
 
 	private static $log_path = 'logs';
 
-	public function __construct($level = self::DefaultDebugLevel, $prefix = 'debug-') {
+	private static $default_prefix = 'debug-';
+
+	private static $email = '';
+
+	public function __construct($level = self::DefaultDebugLevel, $prefix = null) {
 		parent::__construct();
-		$this->configure($level, $prefix);
+		$this->configure($level, is_null($prefix) ? static::config()->get('default_prefix') : $prefix);
 	}
 
 	public function level($level = null) {
@@ -76,12 +80,12 @@ class ModularDebugger extends Object
 
 	protected function configure($level, $prefix = null) {
 		$this->level = $level;
-		$prefix = is_null($prefix) ? $this->prefix : $prefix;
+		$this->prefix = is_null($prefix) ? $this->prefix : $prefix;
 
 		SS_Log::clear_writers();
 
 		if ($this->bitfieldTest($level, self::DebugFile)) {
-			SS_Log::add_writer(new SS_LogFileWriter(self::log_file_name($prefix), $this->level));
+			SS_Log::add_writer(new SS_LogFileWriter(self::log_file_name($this->prefix), $this->level));
 
 			if ($this->bitfieldTest($level, self::DebugPerClass)) {
 				// TODO Implement per-class debug logging, could handle by prefix for now
@@ -89,8 +93,11 @@ class ModularDebugger extends Object
 			}
 		}
 		if ($this->bitfieldTest($level, self::DebugEmail)) {
-			if ($email = $this->config()->get('email')) {
+			$email = $this->config()->get('email') ?: Email::config()->get('admin_email');
+			if ($email) {
 				SS_Log::add_writer(new SS_LogEmailWriter($email));
+			} else {
+				$this->warn("No debug email recipient found");
 			}
 		}
 		return $this;
