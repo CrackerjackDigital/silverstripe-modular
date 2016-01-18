@@ -1,7 +1,9 @@
 <?php
 
+namespace Modular\Helpers;
 
-class ModularUtils extends Object {
+
+class Strings extends Object {
 
     /**
      * Replace {token} in string from provided map of token => value

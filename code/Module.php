@@ -1,11 +1,13 @@
 <?php
 use Modular\ModularObject as Object;
 
-abstract class ModularModule extends Object
-{
-	const CSSExtension        = 'css';
-	const JSExtension         = 'js';
-	const JSTemplateExtension = 'jst';
+abstract class ModularModule extends Object {
+	// handled file types which for simplicity are also the file extensions
+	const FileTypeCSS                = 'css';
+	const FileTypeJavascript         = 'js';
+	const FileTypeJavascriptTemplate = 'jst';
+
+	const RequirementsTemplateDataExtensionMethod = 'modularRequirementsTemplateData';
 
 	use \Modular\config;
 
@@ -27,8 +29,11 @@ abstract class ModularModule extends Object
 			// Examples: either a numerically indexed array or map with file name => enabled status e.g:
 			// if starts with '/' then loaded from webroot, otherwise relative to the current module dir
 			# 'components/select2/select2.js',
-			# '/themes/default/js/example.js' => false,
-			# 'components/select2/select2.js' => false
+			# 'components/select2/select2.js' => false,         // disable default library loading
+			# '/themes/default/js/debug.js' => ['dev'],           // only load in dev mode, array means test mode
+			# '/themes/default/js/debug.js' => ['dev', 'test']           // load in dev and test modes
+			# '/app/js/mosaic.jst' => 'Application.MosaicJST' // call Application.MosaicJST to populate this javascriptTemplate
+
 		],
 		// load these onAfterInit
 		self::AfterInit  => [
@@ -46,9 +51,9 @@ abstract class ModularModule extends Object
 	private static $requirements_path;
 
 	private static $script_types = [
-		self::CSSExtension        => true,
-		self::JSExtension         => true,
-		self::JSTemplateExtension => true,
+		self::FileTypeCSS                => true,
+		self::FileTypeJavascript         => true,
+		self::FileTypeJavascriptTemplate => true,
 	];
 	/**
 	 * Files to combine by map [type => yes/no]
@@ -56,21 +61,30 @@ abstract class ModularModule extends Object
 	 * @var array
 	 */
 	private static $combine = [
-		self::CSSExtension        => false,
-		self::JSExtension         => true,
-		self::JSTemplateExtension => true       // javascript templates end with 'JST'.
+		self::FileTypeCSS                => false,
+		self::FileTypeJavascript         => true,
+		self::FileTypeJavascriptTemplate => true
+		// javascript templates end with 'JST'.
 
 		// TODO: implement ordering and filtering, exclusions
 		# 'ordered' => [ 'jquery.min.js' => 1, 'jquery-extension.min.js' => 2 ]
 		# 'excluded' => [ 'trouble-if-not-loaded-first.js' => 'before', 'load-last-separately.js' => 'after' ]
 	];
 
+	// JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE | JSON_OBJECT_AS_ARRAY
+	private static $json_encode_options = 288;
+
+	private static $json_decode_options = 0;
+
+	private static $decode_depth = 512;
+
 	/**
-	 * Adds javascript files to requirements based on them ending in '.js' using config.install_dir as base path.
+	 * Adds javascript files to requirements based on them ending in '.js'
+	 * using config.install_dir as base path.
 	 *
 	 * @param string $when - look at before or after components.
 	 */
-	public static function requirements($when) {
+	public static function requirements($controller, $when) {
 		$forClass = get_called_class();
 
 		// have to save and pass as later calls will be this class not the real caller.
@@ -80,10 +94,11 @@ abstract class ModularModule extends Object
 
 			static::block(static::get_config_setting('requirements', self::Block, $forClass));
 
-		} else {
+		}
+		else {
 			$requirements = static::get_config_setting('requirements', $when, $forClass);
 
-			$required = static::add_requirements($requirements, $moduleName);
+			$required = static::add_requirements($controller, $requirements, $moduleName);
 
 			if (static::config()->get('combine')) {
 				static::combine($required, $moduleName);
@@ -92,7 +107,8 @@ abstract class ModularModule extends Object
 	}
 
 	/**
-	 * Iterate config.$configVariable map and return map excluding false values and with 'true' values as []
+	 * Iterate config.$configVariable map and return map excluding false values
+	 * and with 'true' values as []
 	 *
 	 * @param string $configVariable
 	 * @return array
@@ -113,6 +129,7 @@ abstract class ModularModule extends Object
 
 	/**
 	 * Iterate through 'block' key in config.requirements and block each script.
+	 *
 	 * @param array $block map of paths to block.
 	 * @return array of blocked scripts as ['js' => 'path'] type entries
 	 */
@@ -123,9 +140,12 @@ abstract class ModularModule extends Object
 			$required = array_merge(
 				$scriptTypes,
 				[
-					self::CSSExtension        => Requirements::backend()->get_css(),
-					self::JSExtension         => Requirements::backend()->get_javascript(),
-					self::JSTemplateExtension => Requirements::backend()->get_custom_scripts(),
+					self::FileTypeCSS                => Requirements::backend()
+						->get_css(),
+					self::FileTypeJavascript         => Requirements::backend()
+						->get_javascript(),
+					self::FileTypeJavascriptTemplate => Requirements::backend()
+						->get_custom_scripts(),
 				]
 			);
 
@@ -151,20 +171,48 @@ abstract class ModularModule extends Object
 		}
 	}
 
-	protected static function add_requirements(array $requirements, $moduleName) {
+	/**
+	 * Iterate through configured requirements and require if:
+	 *
+	 * - The type (jst, etc from FileTypeABC constants) is enabled
+	 * - The settings for the file match e.g. the current runtime environment
+	 * (dev, test etc)
+	 * - The file exists (this may be loosened once backend requirements can
+	 * handle non-existant files)
+	 *
+	 * @param array $requirements
+	 * @param       $moduleName
+	 * @return array
+	 */
+	protected static function add_requirements($controller, array $requirements, $moduleName) {
 		if ($requirements) {
 
 			// files to get combined get added here under key of file type, e.g. 'js', or 'css'
 			$required = self::include_script_types();
 
+			$envType = Director::get_environment_type();
+
 			foreach ($requirements as $key => $path) {
-				if (!is_numeric($key)) {
-					// map with file as key, enabled state as value
-					if (!$path) {
-						continue;
-					}
+				if (is_numeric($key)) {
+					$info = true;
+				}
+				else {
+					// map has file path as key, information as value, if info is false then don't include
+					$info = $path;
 					$path = $key;
 				}
+				if (!$info) {
+					// info is falsish, skip this requirement.
+					continue;
+				}
+				if (is_array($info)) {
+					// info is an array of environments in which to load this requirement,
+					// test if any matches current environment
+					if (!in_array($envType, $info)) {
+						continue;
+					}
+				}
+
 				$path = static::requirement_path($path);
 
 				if (!is_file(Controller::join_links(Director::baseFolder(), $path))) {
@@ -173,7 +221,8 @@ abstract class ModularModule extends Object
 				foreach (static::include_script_types() as $extension => $_) {
 					if (substr($path, -strlen($extension)) == $extension) {
 
-						static::$extension($path);
+						// MAGIC METHOD CALL through to self::js, self::css etc
+						static::$extension($controller, $path, $info);
 
 						$required[$extension][basename($path)] = $path;
 					}
@@ -184,23 +233,47 @@ abstract class ModularModule extends Object
 		}
 	}
 
-	protected static function css($path) {
+	/**
+	 * SilverStripe require CSS
+	 *
+	 * @param $path
+	 */
+	protected static function css($controller, $path) {
 		Requirements::css($path);
 	}
 
-	protected static function js($path) {
+	/**
+	 * SilverStripe require javascript
+	 *
+	 * @param $path
+	 */
+	protected static function js($controller, $path) {
 		Requirements::javascript($path);
 	}
 
-	protected static function jst($path) {
+	/**
+	 * SilverStripe require javascript template, using self.template_data to
+	 * gather variables to pass in (which in turn calls extensions on the
+	 * current controller to get relevant info).
+	 *
+	 * @param      $controller
+	 * @param      $path
+	 * @param null $info
+	 */
+	protected static function jst($controller, $path, $info = null) {
 		Requirements::javascriptTemplate(
 			$path,
-			static::template_data(self::JSTemplateExtension)
+			self::requirements_template_data(
+				$controller,
+				self::FileTypeJavascriptTemplate,
+				$info
+			)
 		);
 	}
 
 	/**
-	 * @param array $requirements map of [ 'js' => [javascripts], 'css' => [css files]]
+	 * @param array $requirements map of [ 'js' => [javascripts], 'css' => [css
+	 *                            files]]
 	 * @param       $moduleName
 	 * @return array
 	 */
@@ -213,8 +286,8 @@ abstract class ModularModule extends Object
 				if ($combine = static::get_config_setting('combine', $fileType)) {
 
 					if (is_array($combine[$fileType])) {
-						// if config is an array then we are filtering, at the moment exclusion only by
-						// file name not path
+						// if config is an array then we are filtering,
+						// at the moment exclusion only by file name not path
 						$requirements[$fileType] = array_diff_key(
 							$requirements[$fileType],
 							array_map(
@@ -235,33 +308,13 @@ abstract class ModularModule extends Object
 		}
 	}
 
-
 	/**
-	 * Return an array of merged results from an extend.provideJavascriptTemplateData call
-	 * on the current controller.
-	 *
-	 * @param string $path to template script passed to extension call.
-	 * @return array
-	 */
-	protected static function template_data($fileType) {
-		return array_reduce(
-			Controller::curr()->extend('provideTemplateData', $fileType),
-			function ($carry, $extensionResult) {
-				return array_merge(
-					$carry,
-					$extensionResult
-				);
-			},
-			[]
-		);
-	}
-
-	/**
-	 * Return path in suitable format for Requirements either from the module install dir or from web root depending
-	 * on path staring with '/' or not.
+	 * Return path in suitable format for Requirements either from the module
+	 * install dir or from web root depending on path staring with '/' or not.
 	 *
 	 * @param string      $path
-	 * @param string|null $baseDir to use building path or null for the current module install dir.
+	 * @param string|null $baseDir to use building path or null for the current
+	 *                             module install dir.
 	 * @return string
 	 */
 	public static function requirement_path($path, $baseDir = null) {
@@ -283,13 +336,15 @@ abstract class ModularModule extends Object
 	 * @return string
 	 */
 	public static function module_name() {
-		return static::config()->get('module_name') ?: rtrim(static::module_path(), '/');
+		return static::config()->get('module_name')
+			?: rtrim(static::module_path(), '/');
 	}
 
 	/**
-	 * This should be overriden by/copy-pasted to implementation to provide a default module path to the module,
-	 * where the module installs relative to site root e.g. '/swipestreak-gallery'. Sadly
-	 * can't seem to declare a static method abstract in php without getting an E_STRICT.
+	 * This should be overriden by/copy-pasted to implementation to provide a
+	 * default module path to the module, where the module installs relative to
+	 * site root e.g. '/swipestreak-gallery'. Sadly can't seem to declare a
+	 * static method abstract in php without getting an E_STRICT.
 	 *
 	 * @param string $append - add this to end of found path
 	 * @return string
@@ -300,7 +355,8 @@ abstract class ModularModule extends Object
 		}
 		// TODO fix so we can find directory of called class not this class's directory
 		return Controller::join_links(
-			ltrim(static::config()->get('module_path') ?: Director::makeRelative(realpath(__DIR__ . '/../')), '/'),
+			ltrim(static::config()->get('module_path')
+				?: Director::makeRelative(realpath(__DIR__ . '/../')), '/'),
 			$append
 		);
 	}
@@ -312,6 +368,34 @@ abstract class ModularModule extends Object
 	 */
 	public static function requirements_path() {
 		return static::module_path();
+	}
+
+	/**
+	 * Return an array of merged results from an
+	 * extend.modularRequirementsTemplateData call on the current controller.
+	 *
+	 * @param string $fileType e.g. ModularModule::JavascriptTemplateFile constant
+	 * @param string $info
+	 * @return array
+	 */
+	protected static function requirements_template_data($controller, $fileType, $info = '') {
+		$controller = Controller::curr();
+
+		return array_reduce(
+			$controller->extend(
+				self::RequirementsTemplateDataExtensionMethod,
+				$controller,
+				$fileType,
+				$info
+			),
+			function ($carry, $extensionResult) {
+				return array_merge(
+					$carry ?: [],
+					$extensionResult
+				);
+			},
+			[]
+		);
 	}
 
 }

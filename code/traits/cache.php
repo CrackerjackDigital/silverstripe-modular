@@ -10,34 +10,23 @@ trait cache {
 	public static function cache($key, $value = null) {
 		static $cache = [];
 
-		if (!self::enabled()) {
-			return null;
-		}
-
 		if (func_num_args() == 1) {
 			if (array_key_exists($key, $cache)) {
 				$value = $cache[$key];
 			}
 		} else {
-			if (is_null($value)) {
-
-				unset($cache[$key]);
-			} elseif (is_callable($value)) {
-
-				$cache[$key] = $value();
-			} else {
-
-				$cache[$key] = $value;
+			if (is_callable($value)) {
+				$value = $value();
 			}
 		}
+		if (self::enabled()) {
+			$cache[$key] = $value;
+		}
+
 		return $value;
 	}
 
 	private static function enabled() {
-		$enabled = \Config::inst()->get(get_called_class(), 'memo_enabled');
-
-		return is_null($enabled)
-			? true
-			: $enabled;
+		return \Config::inst()->get(get_called_class(), 'cache_enabled');
 	}
 }

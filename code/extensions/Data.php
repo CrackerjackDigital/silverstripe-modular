@@ -1,4 +1,5 @@
 <?php
+use \Modular\Helpers\Strings;
 
 class ModularDataExtension extends DataExtension {
 	use Modular\config;
@@ -14,17 +15,16 @@ class ModularDataExtension extends DataExtension {
         return $this->owner;
     }
 
-    public static function enabled() {
-        return static::get_config_setting('enabled');
+    /**
+     * Writes the extended model and returns it if write returns truthish, otherwise returns null.
+     * @return \DataObject|null
+     */
+    public function writeAndReturn() {
+        if ($this()->write()) {
+            return $this();
+        }
     }
 
-    public static function enable() {
-        Config::inst()->update(get_called_class(), 'enabled', true);
-    }
-
-    public static function disable() {
-        Config::inst()->update(get_called_class(), 'enabled', false);
-    }
     /**
      * Return a configuration setting optionally filtered by filterCallback.
      * @param               $name
@@ -96,7 +96,7 @@ class ModularDataExtension extends DataExtension {
         // might have per-field tab name for the field
         $multipleNames = ModularModule::get_config_setting('field_tab_names') ?: [];
 
-        return ModularUtils::detokenise(
+        return Strings::detokenise(
             $multipleNames
                 ? (isset($multipleNames[$fieldName])
                     ? $multipleNames[$fieldName]
@@ -113,7 +113,7 @@ class ModularDataExtension extends DataExtension {
             $default ?: $fieldName,
             $this->metaData()
         );
-        return ModularUtils::decamel($label);
+        return Strings::decamel($label);
     }
 
     protected function metaData() {
@@ -126,4 +126,15 @@ class ModularDataExtension extends DataExtension {
         );
     }
 
+    public static function enabled() {
+        return static::get_config_setting('enabled');
+    }
+
+    public static function enable() {
+        Config::inst()->update(get_called_class(), 'enabled', true);
+    }
+
+    public static function disable() {
+        Config::inst()->update(get_called_class(), 'enabled', false);
+    }
 }

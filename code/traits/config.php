@@ -7,6 +7,19 @@ trait config {
 	}
 
 	/**
+	 * Given an array of variable name => value do a config.update for config on the called
+	 * class or supplied class name.
+	 *
+	 * @param array $options
+	 * @param null  $className optional class to configure if not provided get_called_class is used
+	 */
+	public static function configure(array $options, $className = null) {
+		foreach ($options as $variable => $value) {
+			\Config::inst()->update($className ?: get_called_class(), $variable, $value);
+		}
+	}
+
+	/**
 	 * @param      $name
 	 * @param null $key if value is an array and key is supplied return this key or null
 	 * @param null $className class name to get config of or null for get_called_class()
@@ -16,7 +29,7 @@ trait config {
 	public static function get_config_setting($name, $key = null, $className = null, $sourceOptions = null) {
 		$value = static::config($className ?: get_called_class())->get($name, $sourceOptions);
 
-		if ($key && is_array($value)) {
+		if ($key && $value && is_array($value)) {
 			if (array_key_exists($key, $value)) {
 				$value = $value[$key];
 			} else {
