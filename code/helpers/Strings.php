@@ -3,7 +3,9 @@
 namespace Modular\Helpers;
 
 
-class Strings extends Object {
+use Modular\ModularObject;
+
+class Strings extends ModularObject {
 
     /**
      * Replace {token} in string from provided map of token => value
@@ -50,7 +52,7 @@ class Strings extends Object {
 	public static function debugger($level, $prefix = 'debug-') {
 		static $cache = [];
 		if (!isset($cache[$level])) {
-			$cache[$level] = new ModularDebugger($level, $prefix);
+			$cache[$level] = new \ModularDebugger($level, $prefix);
 		}
 		return $cache[$level];
 	}
