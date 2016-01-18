@@ -38,6 +38,10 @@ class ModularDebugger extends Object
 		$this->setup($level, $prefix);
 	}
 
+	public static function debugger($level, $prefix = 'debug-') {
+		return new ModularDebugger($level, $prefix);
+	}
+
 	public function level($level = null) {
 		return $this->setup($level);
 	}
