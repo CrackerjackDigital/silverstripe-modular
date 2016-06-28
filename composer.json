@@ -2,7 +2,7 @@
     "name": "crackerjackdigital/modular",
     "type": "silverstripe-module",
     "description": "Crackerjack Digital common and module utilities and functionality for SilverStripe",
-    "homepage": "http://www.crackerjack.net.nz/",
+    "homepage": "http://github.com/crackerjackdigital",
     "license": "BSD-3-Clause",
     "keywords": ["silverstripe"], 
     "authors": [
@@ -18,7 +18,7 @@
     "require": {
         "php": ">=5.3.2",
         "composer/installers": "*",
-        "silverstripe/framework": "3.1.*",
+        "silverstripe/framework": "3.3.*",
 		"stevie-mayhew/trait-loader": "dev-master"
     },
     "extra": {
