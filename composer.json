@@ -1,5 +1,5 @@
 {
-    "name": "crackerjackdigital/modular",
+    "name": "crackerjackdigital/silverstripe-modular",
     "type": "silverstripe-module",
     "description": "Crackerjack Digital common and module utilities and functionality for SilverStripe",
     "homepage": "http://github.com/crackerjackdigital",
