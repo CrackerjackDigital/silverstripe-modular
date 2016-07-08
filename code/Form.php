@@ -5,7 +5,7 @@ class ModularForm extends Form {
 	use Modular\config;
 
 	const Good = 'good';
-	const Bad = 'bad';
+	const Bad  = 'bad';
 
 	const LabelSuffix = 'Label';
 	const TabIDPrefix = '';
@@ -105,8 +105,8 @@ class ModularForm extends Form {
 	protected static function filter_data($action, $data) {
 		$formFields = static::form_fields($action);
 		foreach ($data as $fieldName => $_) {
-			if (!isset($formFields[$fieldName])) {
-				unset($data[$fieldName]);
+			if (!isset($formFields[ $fieldName ])) {
+				unset($data[ $fieldName ]);
 			}
 		}
 		return $data;
@@ -170,7 +170,7 @@ class ModularForm extends Form {
 							if ($field = $fields->dataFieldByName($tabFieldName)) {
 								$fields->removeByName($tabFieldName);
 
-								$tabFields[$tabFieldName] = $field;
+								$tabFields[ $tabFieldName ] = $field;
 							}
 						} else {
 							// wildcard so have to scan all fields by name and match
@@ -180,7 +180,7 @@ class ModularForm extends Form {
 								if (fnmatch($tabFieldName, $fieldName)) {
 									$fields->removeByName($fieldName);
 
-									$tabFields[$fieldName] = $field;
+									$tabFields[ $fieldName ] = $field;
 								}
 							}
 						}

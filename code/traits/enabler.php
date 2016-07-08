@@ -29,5 +29,4 @@ trait enabler {
 		\Config::inst()->update(get_called_class(), 'enabled', false);
 	}
 
-
 }

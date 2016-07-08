@@ -32,8 +32,8 @@ trait requirements {
 	public static function requirements($modulePath, $beforeOrAfterInit = \ModularModule::BothInit) {
 		$requirements = static::config()->get('requirements');
 
-		if (isset($requirements[$beforeOrAfterInit])) {
-			$requirements = $requirements[$beforeOrAfterInit];
+		if (isset($requirements[ $beforeOrAfterInit ])) {
+			$requirements = $requirements[ $beforeOrAfterInit ];
 		}
 
 		foreach ($requirements as $requirement) {

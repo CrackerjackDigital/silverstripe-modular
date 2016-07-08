@@ -29,11 +29,11 @@ trait lang {
 	/**
 	 * Return a string from localised language files or config or default in order of checking existence.
 	 *
-	 * @param       $source     - classname localised too or config classname
-	 * @param       $name       - e.g. fieldname on object or message name in lang
-	 * @param       $default    - default to use if not found in lang or config
-	 * @param array $data       - data for tokens in resulting string
-	 * @param null  $configOptions    - options for config, e.g. Config.UNINHERITED
+	 * @param       $source        - classname localised too or config classname
+	 * @param       $name          - e.g. fieldname on object or message name in lang
+	 * @param       $default       - default to use if not found in lang or config
+	 * @param array $data          - data for tokens in resulting string
+	 * @param null  $configOptions - options for config, e.g. Config.UNINHERITED
 	 * @return string
 	 */
 	public static function get_localised_config_string($source, $name, $default, array $data = [], $configOptions = null) {

@@ -21,8 +21,8 @@ trait config {
 
 	/**
 	 * @param      $name
-	 * @param null $key if value is an array and key is supplied return this key or null
-	 * @param null $className class name to get config of or null for get_called_class()
+	 * @param null $key           if value is an array and key is supplied return this key or null
+	 * @param null $className     class name to get config of or null for get_called_class()
 	 * @param null $sourceOptions SilverStripe config.get options e.g. Config::UNINHERITED
 	 * @return array|null|string
 	 */
@@ -31,7 +31,7 @@ trait config {
 
 		if ($key && $value && is_array($value)) {
 			if (array_key_exists($key, $value)) {
-				$value = $value[$key];
+				$value = $value[ $key ];
 			} else {
 				$value = null;
 			}
@@ -42,9 +42,9 @@ trait config {
 	/**
 	 * Return multiple config settings for class as an array in provided order with null as value where not found.
 	 *
-	 * @param $className
+	 * @param       $className
 	 * @param array $names either names as values or names as key and key into value as value
-	 * @param null $sourceOptions
+	 * @param null  $sourceOptions
 	 * @return array
 	 */
 	public static function get_config_settings(array $names, $className, $sourceOptions = null) {

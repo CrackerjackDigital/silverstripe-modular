@@ -82,6 +82,7 @@ abstract class ModularModule extends Object {
 	 * Adds javascript files to requirements based on them ending in '.js'
 	 * using config.install_dir as base path.
 	 *
+	 * @param        $controller
 	 * @param string $when - look at before or after components.
 	 */
 	public static function requirements($controller, $when) {
@@ -94,8 +95,7 @@ abstract class ModularModule extends Object {
 
 			static::block(static::get_config_setting('requirements', self::Block, $forClass));
 
-		}
-		else {
+		} else {
 			$requirements = static::get_config_setting('requirements', $when, $forClass);
 
 			$required = static::add_requirements($controller, $requirements, $moduleName);
@@ -154,11 +154,11 @@ abstract class ModularModule extends Object {
 
 					$path = static::requirement_path($path);
 
-					foreach ($required[$fileType] as $require) {
+					foreach ($required[ $fileType ] as $require) {
 
 						if (fnmatch($path, $require)) {
 
-							$blocked[$fileType][] = $require;
+							$blocked[ $fileType ][] = $require;
 
 							Requirements::block(
 								$required
@@ -180,6 +180,7 @@ abstract class ModularModule extends Object {
 	 * - The file exists (this may be loosened once backend requirements can
 	 * handle non-existant files)
 	 *
+	 * @param       $controller
 	 * @param array $requirements
 	 * @param       $moduleName
 	 * @return array
@@ -195,8 +196,7 @@ abstract class ModularModule extends Object {
 			foreach ($requirements as $key => $path) {
 				if (is_numeric($key)) {
 					$info = true;
-				}
-				else {
+				} else {
 					// map has file path as key, information as value, if info is false then don't include
 					$info = $path;
 					$path = $key;
@@ -224,7 +224,7 @@ abstract class ModularModule extends Object {
 						// MAGIC METHOD CALL through to self::js, self::css etc
 						static::$extension($controller, $path, $info);
 
-						$required[$extension][basename($path)] = $path;
+						$required[ $extension ][ basename($path) ] = $path;
 					}
 				}
 
@@ -236,6 +236,7 @@ abstract class ModularModule extends Object {
 	/**
 	 * SilverStripe require CSS
 	 *
+	 * @param $controller
 	 * @param $path
 	 */
 	protected static function css($controller, $path) {
@@ -245,6 +246,7 @@ abstract class ModularModule extends Object {
 	/**
 	 * SilverStripe require javascript
 	 *
+	 * @param $controller
 	 * @param $path
 	 */
 	protected static function js($controller, $path) {
@@ -285,21 +287,21 @@ abstract class ModularModule extends Object {
 				// check we should combine this file type
 				if ($combine = static::get_config_setting('combine', $fileType)) {
 
-					if (is_array($combine[$fileType])) {
+					if (is_array($combine[ $fileType ])) {
 						// if config is an array then we are filtering,
 						// at the moment exclusion only by file name not path
-						$requirements[$fileType] = array_diff_key(
-							$requirements[$fileType],
+						$requirements[ $fileType ] = array_diff_key(
+							$requirements[ $fileType ],
 							array_map(
 								'basename',
-								$combine[$fileType]
+								$combine[ $fileType ]
 							)
 						);
 					}
-					if (!empty($requirements[$fileType])) {
+					if (!empty($requirements[ $fileType ])) {
 						Requirements::combine_files(
 							"{$moduleName}.$fileType",
-							$requirements[$fileType]
+							$requirements[ $fileType ]
 						);
 					}
 				}
@@ -374,6 +376,7 @@ abstract class ModularModule extends Object {
 	 * Return an array of merged results from an
 	 * extend.modularRequirementsTemplateData call on the current controller.
 	 *
+	 * @param        $controller
 	 * @param string $fileType e.g. ModularModule::JavascriptTemplateFile constant
 	 * @param string $info
 	 * @return array

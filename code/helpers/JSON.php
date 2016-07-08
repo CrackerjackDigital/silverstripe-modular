@@ -13,10 +13,10 @@ class JSON extends ModularObject {
 
 	private static $decode_depth = 512;
 
-
 	public static function json_encode_options() {
 		return static::config()->get('json_encode_options');
 	}
+
 	public static function json_decode_options() {
 		return static::config()->get('json_decode_options');
 	}
@@ -34,9 +34,10 @@ class JSON extends ModularObject {
 
 	/**
 	 * Encode to a json string suitable for emitting as a template variable.
-	 * @param      $data
-	 * @param null $returnArrayForObject
+	 *
+	 * @param $data
 	 * @return mixed
+	 * @internal param null $returnArrayForObject
 	 */
 	public static function template_encode($data) {
 		$out = [];

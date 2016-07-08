@@ -3,7 +3,7 @@ namespace Modular;
 
 trait cache {
 	/**
-	 * @param      $key
+	 * @param                $key
 	 * @param mixed|callable $value
 	 * @return null
 	 */
@@ -12,7 +12,7 @@ trait cache {
 
 		if (func_num_args() == 1) {
 			if (array_key_exists($key, $cache)) {
-				$value = $cache[$key];
+				$value = $cache[ $key ];
 			}
 		} else {
 			if (is_callable($value)) {
@@ -20,7 +20,7 @@ trait cache {
 			}
 		}
 		if (self::enabled()) {
-			$cache[$key] = $value;
+			$cache[ $key ] = $value;
 		}
 
 		return $value;

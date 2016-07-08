@@ -1,8 +1,7 @@
 <?php
 use \Modular\ModularObject as Object;
 
-class ModularDebugger extends Object
-{
+class ModularDebugger extends Object {
 	use \Modular\bitfield;
 
 	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
@@ -13,7 +12,7 @@ class ModularDebugger extends Object
 	const DebugTrace  = SS_Log::DEBUG;       // 7
 
 	// disable all debugging
-	const DebugOff    = 16;
+	const DebugOff = 16;
 
 	const DebugFile   = 32;
 	const DebugScreen = 64;
@@ -45,6 +44,7 @@ class ModularDebugger extends Object
 	public function level($level = null) {
 		return $this->setup($level);
 	}
+
 	public function prefix($prefix) {
 		return $this->setup($this->level, $prefix);
 	}
@@ -106,7 +106,7 @@ class ModularDebugger extends Object
 			date('h:i:s'),
 			"$severity:",
 			$source,
-		    $message
+			$message,
 		]);
 	}
 

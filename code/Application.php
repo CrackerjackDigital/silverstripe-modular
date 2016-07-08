@@ -11,8 +11,8 @@ class ModularApplication extends ModularModule {
 	// map theme names to domains, these need to be in reverse specificity as config will append to the map so
 	// most specific must be last so are checked first.
 	private static $theme_domains = [
-	   self::ThemeDefault => ['*'],
-	   #	self::ThemeMobile => [ 'm.*' ],
+		self::ThemeDefault => ['*'],
+		#	self::ThemeMobile => [ 'm.*' ],
 	];
 
 	// use this
@@ -20,6 +20,7 @@ class ModularApplication extends ModularModule {
 
 	/**
 	 * Override to provide current theme folder if requirements_path not set.
+	 *
 	 * @return string
 	 */
 	public static function requirements_path() {
@@ -36,6 +37,7 @@ class ModularApplication extends ModularModule {
 
 	/**
 	 * Return the theme name matching on domain name via config.theme_domains
+	 *
 	 * @return string
 	 */
 	public static function domain_theme() {
@@ -64,11 +66,11 @@ class ModularApplication extends ModularModule {
 		if (Director::is_cli()) {
 			$root = Director::baseFolder();
 
-			if (!isset($_FILE_TO_URL_MAPPING[$root])) {
+			if (!isset($_FILE_TO_URL_MAPPING[ $root ])) {
 				throw new ModularException("Please setup a FILE_TO_URL_MAPPING for '$path'");
 			}
 
-			$hostname = parse_url($_FILE_TO_URL_MAPPING[$root], PHP_URL_HOST);
+			$hostname = parse_url($_FILE_TO_URL_MAPPING[ $root ], PHP_URL_HOST);
 		} else {
 			$hostname = $_SERVER['HTTP_HOST'];
 		}
