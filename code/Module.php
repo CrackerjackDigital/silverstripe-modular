@@ -231,6 +231,7 @@ abstract class ModularModule extends Object {
 			}
 			return $required;
 		}
+		return [];
 	}
 
 	/**
