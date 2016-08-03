@@ -1,8 +1,6 @@
 <?php
 namespace Modular;
 
-use Config;
-use Modular\Helpers\Debugger;
 use SS_Log;
 use SS_LogFileWriter;
 use SS_LogEmailWriter;
