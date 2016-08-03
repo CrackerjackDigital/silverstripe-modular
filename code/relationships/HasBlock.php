@@ -5,7 +5,8 @@ use ValidationException;
 use Modular\Model;
 use DropdownField;
 use ValidationResult;
-use Modular\Fields;
+use Modular\Fields\Fields;
+use Controller;
 
 /**
  * Class which adds a single block to a model

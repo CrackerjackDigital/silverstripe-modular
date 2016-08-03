@@ -1,6 +1,7 @@
 <?php
-namespace Modular\Fields;
+namespace Modular\Relationships;
 
+use Modular\Fields\Fields;
 use Modular\Interfaces\Imagery;
 use ArrayList;
 use FormField;

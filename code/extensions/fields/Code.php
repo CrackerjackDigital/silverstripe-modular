@@ -1,14 +1,14 @@
 <?php
 namespace Modular\Fields;
 
-use \ReadonlyField;
-use \HiddenField;
-use \TextField;
-use \ValidationResult;
-use \ValidationException;
-use \SQLQuery;
-use \Permission;
-use \Config;
+use ReadonlyField;
+use HiddenField;
+use TextField;
+use ValidationResult;
+use ValidationException;
+use SQLQuery;
+use Permission;
+use Config;
 
 /**
  * Adds a 5-letter 'Code' field to the extended model and makes it readonly in CMS,

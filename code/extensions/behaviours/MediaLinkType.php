@@ -1,14 +1,15 @@
 <?php
 namespace Modular\Behaviours;
 
-use Modular\Fields\Fields;
-use Modular\Fields\EmbedCode;
-use Modular\Fields\Media;
-use Modular\Fields\ExternalLink;
-use Modular\Fields\InternalLink;
-use FormField;
 use ClassInfo;
 use DropdownField;
+use FormField;
+use Modular\Fields\EmbedCode;
+use Modular\Fields\ExternalLink;
+use Modular\Fields\Fields;
+use Modular\Fields\InternalLink;
+use Modular\Relationships\Media;
+
 /**
  * Link type field and logic for a model which has an EmbedCode, InternalLink and ExternalLink fields.
  */
@@ -16,9 +17,9 @@ class MediaLinkTypeBehaviour extends Fields {
 	const MediaLinkTypeFieldName = 'MediaLinkType';
 
 	private static $enum_values = [
-		EmbedCode::EmbedCodeOption,
-	    Media::UploadedFileOption,
-	    ExternalLink::ExternalLinkOption
+		\Modular\Fields\EmbedCode::EmbedCodeOption,
+		\Modular\Relationships\Media::UploadedFileOption,
+		\Modular\Fields\ExternalLink::ExternalLinkOption,
 	];
 
 	public function IsExternalLink() {
@@ -59,7 +60,7 @@ class MediaLinkTypeBehaviour extends Fields {
 			parent::extraStatics($class, $extension) ?: [],
 			[
 				'db' => [
-					self::MediaLinkTypeFieldName => 'enum("' . $values . '")'
+					self::MediaLinkTypeFieldName => 'enum("' . $values . '")',
 				],
 			]
 		);
@@ -69,14 +70,15 @@ class MediaLinkTypeBehaviour extends Fields {
 		return [
 			new DropdownField(self::MediaLinkTypeFieldName, 'Link type', [
 				EmbedCode::EmbedCodeOption       => $this->translatedMessage(EmbedCode::EmbedCodeOption, 'Label', 'Embed Code'),
-				Media::UploadedFileOption    => $this->translatedMessage(Media::UploadedFileOption, 'Label', 'Uploaded File'),
+				Media::UploadedFileOption        => $this->translatedMessage(Media::UploadedFileOption, 'Label', 'Uploaded File'),
 				ExternalLink::ExternalLinkOption => $this->translatedMessage(ExternalLink::ExternalLinkFieldName, 'Label', 'External Link'),
-			])
+			]),
 		];
 	}
 
 	/**
 	 * Show/hide External and EnbedCode fields depending on selected MediaLinkType.
+	 *
 	 * @param \FormField $field
 	 * @param array      $allFieldConstraints
 	 */

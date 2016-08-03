@@ -29,7 +29,7 @@ class LinkAttributeFields extends Fields {
 		self::InternalLinkRelationship => 'SiteTree',
 	];
 	private static $summary_fields = [
-		Title::TitleFieldName => 'Title',
+		\Modular\Fields\Title::TitleFieldName => 'Title',
 		self::LinkTypeFieldName             => 'Link Type',
 		'ResolvedLink'                      => 'Link', // method value
 	];

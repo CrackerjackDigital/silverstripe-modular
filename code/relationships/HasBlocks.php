@@ -1,7 +1,8 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields;
+use Modular\Blocks\Block;
+use Modular\Fields\Fields;
 
 /**
  * Add a gridfield to which blocks can be added and managed.

@@ -12,8 +12,8 @@ class InternalOrExternalLinkBehaviour extends Fields {
 	const LinkTypeFieldName = 'LinkType';
 
 	private static $enum_values = [
-		InternalLink::InternalLinkOption,
-		ExternalLink::ExternalLinkOption,
+		\Modular\Fields\InternalLink::InternalLinkOption,
+		\Modular\Fields\ExternalLink::ExternalLinkOption,
 	];
 
 	public function IsExternalLink() {

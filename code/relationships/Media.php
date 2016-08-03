@@ -1,5 +1,7 @@
 <?php
-namespace Modular\Fields;
+namespace Modular\Relationships;
+
+use Modular\Fields\UploadedFile;
 
 abstract class Media extends UploadedFile {
 	const RelationshipName = 'Media';

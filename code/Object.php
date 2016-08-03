@@ -8,6 +8,7 @@ require_once 'traits/debugging.php';
 require_once 'traits/enabler.php';
 require_once 'traits/json.php';
 require_once 'traits/lang.php';
+require_once 'traits/owned.php';
 
 class Object extends \Object {
 	use cache;

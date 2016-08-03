@@ -1,9 +1,10 @@
 <?php
 namespace Modular\Fields;
 
-use \ArrayList;
-use \Image;
-use \FormField;
+use ArrayList;
+use Image;
+use FormField;
+use Modular\Relationships\Media;
 
 /**
  * HasAudioField

@@ -1,20 +1,22 @@
 <?php
 namespace Modular\Fields;
 
+use DateField;
+use DatetimeField;
+use DisplayLogicWrapper;
 use FieldList;
+use File;
 use FormField;
 use GridField;
 use GridFieldOrderableRows;
+use LiteralField;
+use Modular\Model;
+use Modular\ModelExtension;
+use SS_List;
+use TimeField;
+use UploadField;
 use ValidationException;
 use ValidationResult;
-use DisplayLogicWrapper;
-use LiteralField;
-use SS_List;
-use File;
-use UploadField;
-use DateField;
-use DatetimeField;
-use TimeField;
 
 /**
  * Validation rules from the extensions config.validation are formatted as a map of:
@@ -29,7 +31,7 @@ use TimeField;
  * - a minlength of > 0 or a boolean true means required
  * - a maxlength of 0 means no limit
  *
- * @property Model $owner
+ * @property \Modular\Model $owner
  */
 abstract class Fields extends ModelExtension {
 	const UploadFolderName = 'incoming';
@@ -60,6 +62,15 @@ abstract class Fields extends ModelExtension {
 	 */
 	public function __invoke() {
 		return $this->owner;
+	}
+
+	/**
+	 * Should override in concrete classes to provide an array of fields which this extension adds.
+	 *
+	 * @return array
+	 */
+	public function cmsFields() {
+		return [];
 	}
 
 	/**
@@ -589,7 +600,4 @@ abstract class Fields extends ModelExtension {
 			)
 		);
 	}
-
-	abstract public function cmsFields();
-
 }
