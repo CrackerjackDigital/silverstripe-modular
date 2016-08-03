@@ -1,6 +1,9 @@
 <?php
+namespace Modular\Blocks;
 
-class ImageGalleryBlock extends BlockModel implements ImageryInterface {
+use Modular\Interfaces\Imagery;
+
+class ImageGalleryBlock extends Block implements Imagery {
 
 	private static $allowed_files = 'image';
 

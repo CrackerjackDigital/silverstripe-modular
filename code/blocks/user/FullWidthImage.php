@@ -1,6 +1,10 @@
 <?php
+namespace Modular\Blocks;
 
-class FullWidthImageBlock extends BlockModel implements ImageryInterface {
+use ArrayList;
+use Modular\Interfaces\Imagery;
+
+class FullWidthImageBlock extends Block implements Imagery {
 
 	private static $allowed_files = 'image';
 

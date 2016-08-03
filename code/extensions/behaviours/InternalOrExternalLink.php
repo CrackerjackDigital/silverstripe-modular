@@ -8,7 +8,7 @@ use ClassInfo;
 use DropdownField;
 use FormField;
 
-class InternalOrExternalLinkBehaviour extends Fields {
+class InternalOrExternalLink extends Fields {
 	const LinkTypeFieldName = 'LinkType';
 
 	private static $enum_values = [

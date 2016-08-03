@@ -2,7 +2,7 @@
 Name: modular-config
 ---
 Injector:
-  Application: Application
+  Application: Modular\Application
 ContentController:
   extensions:
-    - ModularContentControllerExtension
+    - Modular\ContentControllerExtension

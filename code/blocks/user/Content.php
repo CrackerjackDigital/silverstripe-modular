@@ -1,5 +1,6 @@
 <?php
+namespace Modular\Blocks;
 
-class ContentBlock extends BlockModel {
+class ContentBlock extends Block {
 
 }

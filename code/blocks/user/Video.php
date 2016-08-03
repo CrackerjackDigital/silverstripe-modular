@@ -1,11 +1,15 @@
 <?php
+namespace Modular\Blocks;
+use Modular\Fields\ExternalLink;
+use Modular\Fields\InternalLink;
+use ArrayList;
 
 /**
  * VideoBlock
  *
  * @method File Video provided by HasVideoField
- * @method bool IsExternalLink provided by InternalOrExternalLinkBehaviour
- * @method bool IsInternalLink provided by InternalOrExternalLinkBehaviour
+ * @method bool IsExternalLink provided by InternalOrExternalLink
+ * @method bool IsInternalLink provided by InternalOrExternalLink
  */
 class VideoBlock extends FileBlock {
 	private static $allowed_files = 'mov';
@@ -16,9 +20,9 @@ class VideoBlock extends FileBlock {
 	 */
 	public function PlayerLink() {
 		if ($this->IsExternalLink()) {
-			return $this->{HasExternalLinkField::ExternalLinkFieldName};
+			return $this->{ExternalLink::ExternalLinkFieldName};
 		} elseif ($this->IsInternalLink()) {
-			if ($target = $this->{HasInternalLinkField::RelationshipName}()) {
+			if ($target = $this->{InternalLink::RelationshipName}()) {
 				return $target->Link();
 			}
 		}
@@ -35,13 +39,13 @@ class VideoBlock extends FileBlock {
 
 	public function IsVimeo() {
 		if ($this->IsExternalLink()) {
-			return false !== strpos($this->{HasExternalLinkField::ExternalLinkFieldName}, 'vimeo');
+			return false !== strpos($this->{ExternalLink::ExternalLinkFieldName}, 'vimeo');
 		}
 	}
 
 	public function IsYouTube() {
 		if ($this->IsExternalLink()) {
-			return false !== strpos($this->{HasExternalLinkField::ExternalLinkFieldName}, 'youtube');
+			return false !== strpos($this->{ExternalLink::ExternalLinkFieldName}, 'youtube');
 		}
 	}
 }

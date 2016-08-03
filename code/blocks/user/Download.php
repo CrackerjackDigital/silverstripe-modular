@@ -1,4 +1,5 @@
 <?php
+namespace Modular\Blocks;
 
 class DownloadBlock extends FileBlock {
 	private static $allowed_files = 'download';
