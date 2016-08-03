@@ -3,20 +3,62 @@ namespace Modular;
 
 use Config;
 use Modular\Helpers\Debugger;
+use SS_Log;
+use SS_LogFileWriter;
+use SS_LogEmailWriter;
 
 trait debugging {
-	private static $debugging_level = Debugger::DebugOff;
-
 	/**
-	 * @param int  $level
-	 * @param null $prefix
-	 * @return mixed
+	 * Writes to config.errorlog_path_name if set and
+	 * sends email to config.errorlog_email_address if set
+	 * as well as writing to 'normal' log by log method.
+	 *
+	 * @param string $message
+	 * @param mixed  $extras
 	 */
-	public static function debugging($level = Debugger::DefaultDebugLevel, $prefix = null) {
-		return Debugger::debugger($level, is_null($prefix) ? get_called_class() : $prefix);
+	public static function log_error($message, $extras = null) {
+		static $log;
+
+		if (!$log) {
+			$log = new SS_Log();
+
+			// if config.log_file_name set then log to this file in assets/logs/
+			if ($logFilePathName = static::config()->get('errorlog_path_name')) {
+				$log->add_writer(
+					new SS_LogFileWriter(ASSETS_PATH . "/$logFilePathName")
+				);
+			}
+			if ($emailErrorAddress = static::config()->get('errorlog_email_address')) {
+				$log->add_writer(
+					new SS_LogEmailWriter($emailErrorAddress)
+				);
+			}
+		}
+		static::log_message($message, SS_Log::ERR, $extras);
+		$log->log($message, SS_Log::ERR, $extras);
 	}
 
-	public static function set_debugging_level($level) {
-		Config::inst()->update(get_called_class(), 'debugging_level', $level);
+	/**
+	 * Writes to config.log_path_name if set
+	 *
+	 * @param string $message
+	 * @param mixed  $level
+	 * @param mixed  $extras
+	 */
+	public static function log_message($message, $level = SS_Log::INFO, $extras = null) {
+		static $log;
+
+		if (!$log) {
+			$log = new SS_Log();
+			// if config.log_file_name set then log to this file in assets/logs/
+			if ($logFilePathName = static::config()->get('log_path_name')) {
+				$log->add_writer(
+					new SS_LogFileWriter(
+						ASSETS_PATH . "/$logFilePathName"
+					)
+				);
+			}
+		}
+		$log->log($message, $level, $extras);
 	}
 }

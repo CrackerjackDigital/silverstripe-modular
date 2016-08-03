@@ -1,6 +1,7 @@
 <?php
 namespace Modular;
 
+use Quaff\Module;
 use \Requirements as Requirement;
 
 trait requirements {
@@ -29,7 +30,7 @@ trait requirements {
 	 * @param               $modulePath
 	 * @param string        $beforeOrAfterInit wether to include before or after requirements
 	 */
-	public static function requirements($modulePath, $beforeOrAfterInit = \ModularModule::BothInit) {
+	public static function requirements($modulePath, $beforeOrAfterInit = Module::BothInit) {
 		$requirements = static::config()->get('requirements');
 
 		if (isset($requirements[ $beforeOrAfterInit ])) {
