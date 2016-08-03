@@ -1,7 +1,9 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
-class HasContentField extends HasFieldsExtension {
+use HtmlEditorField;
+
+class Content extends Fields {
 	const ContentFieldName = 'Content';
 
 	private static $db = [

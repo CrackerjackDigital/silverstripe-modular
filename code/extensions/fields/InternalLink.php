@@ -1,7 +1,10 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
-class HasInternalLinkField extends HasFieldsExtension {
+use DisplayLogicWrapper;
+use TreeDropdownField;
+
+class InternalLink extends Fields {
 	const InternalLinkOption    = 'InternalLink';
 	const InternalLinkFieldName = 'InternalLinkID';
 	const RelationshipName = 'InternalLink';

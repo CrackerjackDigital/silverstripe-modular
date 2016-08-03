@@ -1,12 +1,12 @@
 <?php
-namespace Modular;
+namespace Modular\GridField;
 
 /**
  * Alters the config to be suitable for adding/removing blocks from an article.
  *
  * Adds an 'AddNewMultiClass' selector
  */
-class HasBlocksGridFieldConfig extends ModularGridFieldConfig {
+class HasBlocksGridFieldConfig extends GridFieldConfig {
 	public function __construct($itemsPerPage = null) {
 		parent::__construct($itemsPerPage);
 

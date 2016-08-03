@@ -1,5 +1,5 @@
 <?php
-namespace Modular;
+namespace Modular\GridField;
 
 use \GridFieldConfig_RelationEditor;
 

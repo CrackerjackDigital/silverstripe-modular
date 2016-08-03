@@ -1,16 +1,17 @@
 <?php
-namespace Modular;
+namespace Modular\Relationships;
 
 use ValidationException;
 use Modular\Model;
 use DropdownField;
 use ValidationResult;
+use Modular\Fields;
 
 /**
  * Class which adds a single block to a model
  */
 
-class HasBlock extends HasFieldsExtension {
+class HasBlock extends Fields {
 	const RelationshipName = 'Block';
 	const RelationshipFieldName = 'BlockID';
 

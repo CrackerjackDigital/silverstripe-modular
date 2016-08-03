@@ -1,12 +1,14 @@
 <?php
-namespace Modular;
+namespace Modular\Relationships;
+
+use Modular\Fields;
 
 /**
  * Add a gridfield to which blocks can be added and managed.
  *
- * @method DataList Blocks
+ * @method \DataList Blocks
  */
-class HasBlocks extends HasFieldsExtension {
+class HasBlocks extends Fields {
 	const RelationshipName = 'Blocks';
 
 	private static $many_many = [
@@ -14,7 +16,7 @@ class HasBlocks extends HasFieldsExtension {
 	];
 	private static $many_many_extraFields = [
 		self::RelationshipName => [
-			HasFieldsExtension::GridFieldOrderableRowsFieldName => 'Int',
+			self::GridFieldOrderableRowsFieldName => 'Int',
 		],
 	];
 
@@ -30,7 +32,7 @@ class HasBlocks extends HasFieldsExtension {
 	 * When a page with blocks is published we also need to publish blocks. Blocks should also publish their 'sub' blocks.
 	 */
 	public function onAfterPublish() {
-		/** @var BlockModel|Versioned $block */
+		/** @var Block|\Versioned $block */
 		foreach ($this()->Blocks() as $block) {
 			if ($block->hasExtension('Versioned')) {
 				$block->publish('Stage', 'Live', false);

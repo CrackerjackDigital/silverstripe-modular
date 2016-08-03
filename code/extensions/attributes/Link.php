@@ -1,16 +1,20 @@
 <?php
 namespace Modular;
 
-use FieldList;
-use DropdownField;
-use TextField;
+use Director;
 use DisplayLogicWrapper;
-use TreeDropdownField;
+use DropdownField;
+use FieldList;
 use FormField;
+use Modular\Fields\Fields;
+use Modular\Fields\Title;
+use TextField;
+use TreeDropdownField;
+
 /**
  * Add fields and functionality to LinkAttribute model.
  */
-class LinkAttributeFields extends HasFieldsExtension {
+class LinkAttributeFields extends Fields {
 	const ExternalLinkFieldName    = 'ExternalLink';
 	const InternalLinkRelationship = 'InternalLink';
 	const ExternalLinkValue        = self::ExternalLinkFieldName;
@@ -25,9 +29,9 @@ class LinkAttributeFields extends HasFieldsExtension {
 		self::InternalLinkRelationship => 'SiteTree',
 	];
 	private static $summary_fields = [
-		HasTitleField::TitleFieldName => 'Title',
-		self::LinkTypeFieldName => 'Link Type',
-		'ResolvedLink' => 'Link', // method value
+		Title::TitleFieldName => 'Title',
+		self::LinkTypeFieldName             => 'Link Type',
+		'ResolvedLink'                      => 'Link', // method value
 	];
 
 	public function updateCMSFields(FieldList $fields) {

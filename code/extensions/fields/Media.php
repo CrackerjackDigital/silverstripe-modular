@@ -1,7 +1,7 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
-abstract class HasMediaFileField extends HasUploadedFileField {
+abstract class Media extends UploadedFile {
 	const RelationshipName = 'Media';
 	const UploadFieldName  = 'MediaID';      // keep in sync with RelationshipName
 	// override in concrete class e.g. 'audio' or 'video'

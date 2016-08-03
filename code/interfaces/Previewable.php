@@ -1,6 +1,10 @@
 <?PHP
+namespace Modular\Interfaces;
 
-interface PreviewableInterface {
+use SiteTree;
+use CMSPreviewable;
+
+interface Previewable {
 	/*
 	* Return the Link to display the CMSPreviewable object
 	*

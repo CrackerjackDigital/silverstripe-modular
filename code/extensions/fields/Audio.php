@@ -1,17 +1,18 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
+
+use \ArrayList;
+use \Image;
+use \FormField;
 
 /**
- * HasVideoField
+ * HasAudioField
  *
  * @method Media
  */
-class HasVideoField extends HasUploadedFileField {
-	const RelationshipName = 'Media';
-	const UploadFieldName  = 'MediaID';      // keep in sync with RelationshipName
-	const UploadFolderName = 'video';
+class Audio extends Media {
 
-	private static $allowed_video_files = 'mov';
+	private static $allowed_audio_files = 'audio';
 
 	/**
 	 * Return a list with only item being the single related image.
@@ -19,15 +20,15 @@ class HasVideoField extends HasUploadedFileField {
 	 * @return \ArrayList
 	 */
 	public function Medias() {
-		return new ArrayList(array_filter([$this->Video()]));
+		return new ArrayList(array_filter([$this->Audio()]));
 	}
 
 	/**
 	 * Return the single related image
 	 *
-	 * @return File|null
+	 * @return Image|null
 	 */
-	public function Video() {
+	public function Audio() {
 		return $this()->Media();
 	}
 
@@ -47,8 +48,8 @@ class HasVideoField extends HasUploadedFileField {
 		$fieldName = $field->getName();
 
 		if ($fieldName == self::RelationshipName) {
-			$this->configureUploadField($field, 'allowed_video_files');
+			$this->configureUploadField($field, 'allowed_audio_files');
 		}
-	}
 
+	}
 }

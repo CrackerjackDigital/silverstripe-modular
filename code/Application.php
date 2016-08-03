@@ -1,6 +1,10 @@
 <?php
+namespace Modular;
 
-class ModularApplication extends ModularModule {
+use SSViewer;
+use Director;
+
+class Application extends Module {
 	const ThemeMobile  = 'mobile';
 	const ThemeDesktop = 'desktop';
 	const ThemeDefault = 'default';
@@ -58,7 +62,7 @@ class ModularApplication extends ModularModule {
 	 * setup in environment file for the server.
 	 *
 	 * @return string
-	 * @throws \ModularException
+	 * @throws Exception
 	 */
 	public static function hostname() {
 		global $_FILE_TO_URL_MAPPING;
@@ -67,7 +71,7 @@ class ModularApplication extends ModularModule {
 			$root = Director::baseFolder();
 
 			if (!isset($_FILE_TO_URL_MAPPING[ $root ])) {
-				throw new ModularException("Please setup a FILE_TO_URL_MAPPING for '$root'");
+				throw new Exception("Please setup a FILE_TO_URL_MAPPING for '$root'");
 			}
 
 			$hostname = parse_url($_FILE_TO_URL_MAPPING[ $root ], PHP_URL_HOST);
@@ -75,7 +79,7 @@ class ModularApplication extends ModularModule {
 			$hostname = $_SERVER['HTTP_HOST'];
 		}
 		if (!$hostname) {
-			throw new ModularException("Can't determine hostname");
+			throw new Exception("Can't determine hostname");
 		}
 		return $hostname;
 	}

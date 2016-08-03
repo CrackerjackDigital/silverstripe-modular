@@ -1,5 +1,20 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
+
+use FieldList;
+use FormField;
+use GridField;
+use GridFieldOrderableRows;
+use ValidationException;
+use ValidationResult;
+use DisplayLogicWrapper;
+use LiteralField;
+use SS_List;
+use File;
+use UploadField;
+use DateField;
+use DatetimeField;
+use TimeField;
 
 /**
  * Validation rules from the extensions config.validation are formatted as a map of:
@@ -14,9 +29,9 @@ namespace Modular;
  * - a minlength of > 0 or a boolean true means required
  * - a maxlength of 0 means no limit
  *
- * @property ModularModel $owner
+ * @property Model $owner
  */
-abstract class HasFieldsExtension extends ModularModelExtension {
+abstract class Fields extends ModelExtension {
 	const UploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';
@@ -41,7 +56,7 @@ abstract class HasFieldsExtension extends ModularModelExtension {
 	/**
 	 * If we use invocation we can type-cast the result to a ModularModel
 	 *
-	 * @return ModularModel
+	 * @return Model
 	 */
 	public function __invoke() {
 		return $this->owner;
@@ -513,7 +528,7 @@ abstract class HasFieldsExtension extends ModularModelExtension {
 	}
 
 	/**
-	 * Load message from lang.yml for the extension class (e.g. HasImageField) and then the extended class (e.g. FullWidthImageBlock) which may override.
+	 * Load message from lang.yml for the extension class (e.g. ImageField) and then the extended class (e.g. FullWidthImageBlock) which may override.
 	 *
 	 * If not found in lang file use the default.
 	 *
@@ -565,7 +580,14 @@ abstract class HasFieldsExtension extends ModularModelExtension {
 	}
 
 	protected function saveMasterHint() {
-		return new LiteralField(static::RelationshipName . 'Hint', $this->translatedMessage(static::RelationshipName, 'SaveMasterHint', "<b>Please save the master first</b>"));
+		return new LiteralField(
+			static::RelationshipName . 'Hint',
+			$this->translatedMessage(
+				static::RelationshipName,
+				'SaveMasterHint',
+				"<b>Please save the master first</b>"
+			)
+		);
 	}
 
 	abstract public function cmsFields();

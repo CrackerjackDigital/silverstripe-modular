@@ -1,6 +1,11 @@
 <?php
-namespace Modular;
+namespace Modular\Behaviours;
 
+use Modular\ModelExtension;
+use Controller;
+use SilverStripeNavigator;
+use LiteralField;
+use CMSPreviewable;
 /**
  * Adds preview pane to CMS for extended Models.
  *
@@ -8,8 +13,11 @@ namespace Modular;
  * the Modular code and data model.
  */
 
-class PreviewableBehaviour extends ModelExtension {
+class Previewable extends ModelExtension {
 
+	/**
+	 * @param \Form $form
+	 */
 	public function updateItemEditForm(&$form) {
 		$fields = $form->Fields();
 		if ($this->owner->record instanceof CMSPreviewable && !$fields->fieldByName('SilverStripeNavigator')) {
@@ -17,6 +25,10 @@ class PreviewableBehaviour extends ModelExtension {
 		}
 	}
 
+	/**
+	 * @param \Form $form
+	 * @param \FieldList $fields
+	 */
 	private function injectNavigatorAndPreview(&$form, &$fields) {
 		$template = Controller::curr()->getTemplatesWithSuffix('_SilverStripeNavigator');
 		$navigator = new SilverStripeNavigator($this->owner->record);

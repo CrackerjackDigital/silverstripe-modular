@@ -1,7 +1,10 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
-class HasDownloadField extends HasFieldsExtension {
+use UploadField;
+use FormField;
+
+class Download extends Fields {
 	const RelationshipName = 'Download';
 	const UploadFolderName = 'downloads';
 

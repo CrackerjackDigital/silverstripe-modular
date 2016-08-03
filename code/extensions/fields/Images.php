@@ -1,7 +1,10 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
-class HasImagesField extends HasFieldsExtension implements ImageryInterface {
+use Modular\Interfaces\Imagery;
+use FormField;
+
+class Images extends Fields implements Imagery {
 	const RelationshipName = 'Images';
 	const UploadFieldName = 'Images';
 	const UploadFolderName = 'images';

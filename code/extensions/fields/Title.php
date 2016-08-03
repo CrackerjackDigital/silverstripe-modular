@@ -1,7 +1,9 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
-class HasTitleField extends HasFieldsExtension {
+use TextField;
+
+class Title extends Fields {
 	const TitleFieldName = 'Title';
 
 	private static $db = [

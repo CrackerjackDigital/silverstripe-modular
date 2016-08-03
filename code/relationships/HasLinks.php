@@ -4,7 +4,7 @@ namespace Modular;
 /**
  * @method SS_List Links
  */
-class HasLinks extends HasFieldsExtension {
+class Links extends Fields {
 	const RelationshipName = 'Links';
 
 	private static $many_many = [

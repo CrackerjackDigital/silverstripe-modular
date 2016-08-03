@@ -1,6 +1,11 @@
 <?php
+namespace Modular;
 
-class ModularContentControllerExtension extends Extension {
+use Extension;
+use Injector;
+use Modular\Module;
+
+class ContentControllerExtension extends Extension {
 	const ApplicationServiceClassName = 'Application';
 
 	/**
@@ -13,13 +18,13 @@ class ModularContentControllerExtension extends Extension {
 	public function onBeforeInit() {
 		// expect an Application object derived from ModularModule to be configured.
 		Injector::inst()->create(static::ApplicationServiceClassName)
-			->requirements($this(), ModularModule::BeforeInit);
+			->requirements($this(), Module::BeforeInit);
 	}
 
 	public function onAfterInit() {
 		// expect an Application object derived from ModularModule to be configured.
 		Injector::inst()->create(static::ApplicationServiceClassName)
-			->requirements($this(), ModularModule::AfterInit);
+			->requirements($this(), Module::AfterInit);
 	}
 
 	public function ActionLink($action) {

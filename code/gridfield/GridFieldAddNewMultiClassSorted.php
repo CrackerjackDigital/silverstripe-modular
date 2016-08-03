@@ -1,7 +1,8 @@
 <?php
-namespace Modular;
+namespace Modular\GridField;
 
-use \GridFieldAddNewMultiClass;
+use GridFieldAddNewMultiClass;
+use GridField;
 
 /**
  * A component which lets the user select from a list of classes to create a new record form.

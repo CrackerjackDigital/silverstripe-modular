@@ -1,7 +1,9 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
-class HasExternalLinkField extends HasFieldsExtension {
+use TextField;
+
+class ExternalLink extends Fields {
 	const ExternalLinkOption    = 'ExternalLink';
 	const ExternalLinkFieldName = 'ExternalLink';
 	const RelationshipName      = 'ExternalLink';

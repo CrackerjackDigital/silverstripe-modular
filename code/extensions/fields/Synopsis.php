@@ -1,9 +1,9 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
 use \HtmlEditorField;
 
-class HasSynopsisField extends HasFieldsExtension {
+class Synopsis extends Fields {
 	const FieldName = 'Synopsis';
 
 	private static $db = [

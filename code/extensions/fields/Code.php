@@ -1,5 +1,5 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
 use \ReadonlyField;
 use \HiddenField;
@@ -14,7 +14,7 @@ use \Config;
  * Adds a 5-letter 'Code' field to the extended model and makes it readonly in CMS,
  * and adds ability for a code of SYSTM to be filtered out via augmentSQL extension call.
  */
-class HasCodeField extends HasFieldsExtension {
+class Code extends Fields {
 	const SystemCode = '_SYS_';
 	const CodeFieldName = 'Code';
 

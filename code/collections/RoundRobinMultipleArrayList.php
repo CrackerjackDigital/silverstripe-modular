@@ -1,4 +1,10 @@
 <?php
+namespace Modular\Collections;
+
+use ArrayList;
+use MultipleIterator;
+use DataList;
+use SS_List;
 
 class RoundRobinMultipleArrayList extends ArrayList {
 	/**
