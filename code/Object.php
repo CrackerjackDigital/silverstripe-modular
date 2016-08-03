@@ -9,7 +9,7 @@ require_once 'traits/enabler.php';
 require_once 'traits/json.php';
 require_once 'traits/lang.php';
 
-class ModularObject extends \Object {
+class Object extends \Object {
 	use cache;
 	use lang;
 	use bitfield;

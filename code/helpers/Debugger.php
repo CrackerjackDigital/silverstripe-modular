@@ -1,8 +1,15 @@
 <?php
-use \Modular\ModularObject as Object;
+namespace Modular\Helpers;
 
-class ModularDebugger extends Object {
-	use \Modular\bitfield;
+use Object;
+use SS_Log;
+use SS_LogFileWriter;
+use SS_LogEmailWriter;
+use Filesystem;
+use Modular\bitfield;
+
+class Debugger extends Object {
+	use bitfield;
 
 	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
 	const DebugErr    = SS_Log::ERR;           // 3
@@ -38,7 +45,7 @@ class ModularDebugger extends Object {
 	}
 
 	public static function debugger($level, $prefix = 'debug-') {
-		return new ModularDebugger($level, $prefix);
+		return new Debugger($level, $prefix);
 	}
 
 	public function level($level = null) {
@@ -53,7 +60,7 @@ class ModularDebugger extends Object {
 	 * Enable a feature or features.
 	 *
 	 * @param $features bitfield of features to enable/turn on
-	 * @return $this|ModularDebugger
+	 * @return $this|Debugger
 	 */
 	public function enable($features) {
 		return $this->setup(
@@ -70,7 +77,7 @@ class ModularDebugger extends Object {
 	 * level & ~features:   1000
 	 *
 	 * @param $features bitfield of features to disable/turn off
-	 * @return $this|ModularDebugger
+	 * @return $this|Debugger
 	 */
 	public function disable($features) {
 		return $this->setup(

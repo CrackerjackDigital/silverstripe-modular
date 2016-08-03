@@ -1,15 +1,18 @@
 <?php
-use Modular\ModularObject as Object;
+namespace Modular;
 
-abstract class ModularModule extends Object {
+use Director;
+use Requirements;
+
+abstract class Module extends Object {
+	use config;
+
 	// handled file types which for simplicity are also the file extensions
 	const FileTypeCSS                = 'css';
 	const FileTypeJavascript         = 'js';
 	const FileTypeJavascriptTemplate = 'jst';
 
 	const RequirementsTemplateDataExtensionMethod = 'modularRequirementsTemplateData';
-
-	use \Modular\config;
 
 	const BeforeInit = 'before';
 	const AfterInit  = 'after';
@@ -169,6 +172,7 @@ abstract class ModularModule extends Object {
 			}
 			return $blocked;
 		}
+		return [];
 	}
 
 	/**
@@ -309,6 +313,7 @@ abstract class ModularModule extends Object {
 			}
 			return $requirements;
 		}
+		return [];
 	}
 
 	/**
@@ -383,7 +388,7 @@ abstract class ModularModule extends Object {
 	 * @return array
 	 */
 	protected static function requirements_template_data($controller, $fileType, $info = '') {
-		$controller = Controller::curr();
+		$controller = $controller ?: Controller::curr();
 
 		return array_reduce(
 			$controller->extend(

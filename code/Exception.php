@@ -1,8 +1,9 @@
 <?php
+namespace Modular;
 
 /**
  * Assist in determining where problems arose.
  */
-class ModularException extends Exception {
+class Exception extends \Exception {
 
 }

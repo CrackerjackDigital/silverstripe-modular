@@ -1,5 +1,6 @@
 <?php
+namespace Modular;
 
-class ModularController extends Controller {
+class Controller extends \Controller {
 
 }

@@ -1,8 +1,18 @@
 <?php
-use Modular\Helpers\Strings;
+namespace Modular;
 
-class ModularForm extends Form {
-	use Modular\config;
+use Modular\Helpers\Strings;
+use \ContentController;
+use \FieldList;
+use \RequiredFields;
+use \Session;
+use \Requirements;
+use \LiteralField;
+use \FormField;
+
+
+class Form extends \Form {
+	use config;
 
 	const Good = 'good';
 	const Bad  = 'bad';
@@ -20,7 +30,7 @@ class ModularForm extends Form {
 	 * @param      $fields
 	 * @param      $actions
 	 * @param null $validator
-	 * @return ModularForm
+	 * @return Form
 	 */
 	public static function create_for_action($action, ContentController $controller, $name, FieldList $fields, FieldList $actions, $validator = null) {
 		$formClassName = get_called_class();
@@ -37,7 +47,7 @@ class ModularForm extends Form {
 
 		self::add_actions($action, $actions);
 
-		/** @var ModularForm $form */
+		/** @var Form $form */
 		$form = new $formClassName($controller, $name, $fields, $actions, $validator);
 
 		$form->setFormAction($controller->Link($action));
@@ -52,50 +62,6 @@ class ModularForm extends Form {
 			$messageType
 		);
 	}
-
-	/**
-	 * @param      $forAction
-	 * @param bool $fullLinks
-	 * @return string HTML text of tabstrip in a 'ul'
-	 */
-	public static function tab_strip($forAction, $fullLinks = false) {
-		$tabs = static::get_config_setting(
-			'tabs',
-			$forAction
-		) ?: [];
-
-		$html = '';
-		$baseLink = '';
-
-		if ($profiledPage = ProfiledPage::get()->first()) {
-			$baseLink = $profiledPage->Link();
-		}
-
-		if ($tabs) {
-			$current = 'current';
-
-			$html .= '<ul class="profiled-tabs">';
-
-			foreach ($tabs as $tabName => $info) {
-				if (is_array($info)) {
-					if ($fullLinks) {
-						$html .= '<li class="tab ' . $current . '"><a href="' . $baseLink . '#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . Strings::decamel($tabName) . '</a></li>';
-					} else {
-						$html .= '<li class="tab ' . $current . '"><a href="#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . Strings::decamel($tabName) . '</a></li>';
-					}
-				} else {
-					// if $info is not an array then it is a link
-					$html .= '<li class="' . $current . '"><a href="' . $info . '">' . Strings::decamel($tabName) . '</a></li>';
-				}
-				$current = '';
-			}
-
-			$html .= '</ul>';
-		}
-
-		return $html;
-	}
-
 	/**
 	 * Filter out elements in $data that don't exist in config.form_fields.action
 	 *
@@ -139,6 +105,50 @@ class ModularForm extends Form {
 			}
 		}
 
+	}
+
+	/**
+	 * TODO why is profiled in here?
+	 * @param      $forAction
+	 * @param bool $fullLinks
+	 * @return string HTML text of tabstrip in a 'ul'
+	 */
+	public static function tab_strip($forAction, $fullLinks = false) {
+		$tabs = static::get_config_setting(
+			'tabs',
+			$forAction
+		) ?: [];
+
+		$html = '';
+		$baseLink = '';
+
+		if ($profiledPage = ProfiledPage::get()->first()) {
+			$baseLink = $profiledPage->Link();
+		}
+
+		if ($tabs) {
+			$current = 'current';
+
+			$html .= '<ul class="profiled-tabs">';
+
+			foreach ($tabs as $tabName => $info) {
+				if (is_array($info)) {
+					if ($fullLinks) {
+						$html .= '<li class="tab ' . $current . '"><a href="' . $baseLink . '#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . Strings::decamel($tabName) . '</a></li>';
+					} else {
+						$html .= '<li class="tab ' . $current . '"><a href="#' . self::TabIDPrefix . $tabName . self::TabIDSuffix . '">' . Strings::decamel($tabName) . '</a></li>';
+					}
+				} else {
+					// if $info is not an array then it is a link
+					$html .= '<li class="' . $current . '"><a href="' . $info . '">' . Strings::decamel($tabName) . '</a></li>';
+				}
+				$current = '';
+			}
+
+			$html .= '</ul>';
+		}
+
+		return $html;
 	}
 
 	protected static function tabify($action, FieldList $fields) {

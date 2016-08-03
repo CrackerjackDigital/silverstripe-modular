@@ -67,7 +67,7 @@ class ModularApplication extends ModularModule {
 			$root = Director::baseFolder();
 
 			if (!isset($_FILE_TO_URL_MAPPING[ $root ])) {
-				throw new ModularException("Please setup a FILE_TO_URL_MAPPING for '$path'");
+				throw new ModularException("Please setup a FILE_TO_URL_MAPPING for '$root'");
 			}
 
 			$hostname = parse_url($_FILE_TO_URL_MAPPING[ $root ], PHP_URL_HOST);

@@ -1,9 +1,9 @@
 <?php
 namespace Modular\Helpers;
 
-use Modular\ModularObject;
+use Modular\Object;
 
-class JSON extends ModularObject {
+class JSON extends Object {
 	// JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE
 	private static $json_encode_options = 288;
 

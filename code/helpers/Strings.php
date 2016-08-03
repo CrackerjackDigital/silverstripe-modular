@@ -2,9 +2,9 @@
 
 namespace Modular\Helpers;
 
-use Modular\ModularObject;
+use Modular\Object;
 
-class Strings extends ModularObject {
+class Strings extends Object {
 
 	/**
 	 * Replace {token} in string from provided map of token => value
@@ -43,16 +43,16 @@ class Strings extends ModularObject {
 	}
 
 	/**
-	 * Create a ModularDebugger for provided level or get it from the per-level cache.
+	 * Create a Debugger for provided level or get it from the per-level cache.
 	 *
-	 * @param int    $level  bitfield from ModularDebugger or'd DebugABC constants
+	 * @param int    $level  bitfield from Debugger or'd DebugABC constants
 	 * @param string $prefix for filenames, email subjects etc
 	 * @return mixed
 	 */
 	public static function debugger($level, $prefix = 'debug-') {
 		static $cache = [];
 		if (!isset($cache[ $level ])) {
-			$cache[ $level ] = new \ModularDebugger($level, $prefix);
+			$cache[ $level ] = new Debugger($level, $prefix);
 		}
 		return $cache[ $level ];
 	}
