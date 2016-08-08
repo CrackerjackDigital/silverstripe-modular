@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Blocks;
 
-class HeroSlideBlock extends Block {
+class HeroSlide extends Block {
 	private static $db = [
 		"Title" => "Varchar(255)",
 		"Content" => "HTMLText",

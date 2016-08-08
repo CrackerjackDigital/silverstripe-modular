@@ -6,7 +6,7 @@ use Modular\InternalLinkField;
 use Modular\ExternalLinkField;
 
 
-class CallToActionBlock extends Block {
+class CallToAction extends Block {
 	public function ResolvedLink() {
 		if ($this->{InternalOrExternalLinkBehaviour::LinkTypeFieldName} == InternalLinkField::InternalLinkOption) {
 

@@ -1,6 +1,6 @@
 <?php
 namespace Modular\Blocks;
 
-class LinksBlock extends Block {
+class Links extends Block {
 
 }

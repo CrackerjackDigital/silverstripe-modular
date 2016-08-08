@@ -4,7 +4,7 @@ namespace Modular\Fields;
 use DisplayLogicWrapper;
 use TreeDropdownField;
 
-class InternalLink extends Fields {
+class InternalLink extends Field {
 	const InternalLinkOption    = 'InternalLink';
 	const InternalLinkFieldName = 'InternalLinkID';
 	const RelationshipName = 'InternalLink';

@@ -11,7 +11,7 @@ use ArrayList;
  * @method bool IsExternalLink provided by InternalOrExternalLink
  * @method bool IsInternalLink provided by InternalOrExternalLink
  */
-class VideoBlock extends FileBlock {
+class Video extends File {
 	private static $allowed_files = 'mov';
 
 	/**

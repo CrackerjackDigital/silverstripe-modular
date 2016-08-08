@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Constants which can be set independantly of normal isDev etc, by default track it though.
  * Can be used e.g. in config with constantdefined.

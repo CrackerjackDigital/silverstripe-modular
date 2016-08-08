@@ -13,8 +13,6 @@ class ModelExtension extends DataExtension {
 
 	const DefaultTabName = 'Root.Main';
 
-	private static $enabled = true;
-
 	private static $cms_tab_name = '';
 
 	/**

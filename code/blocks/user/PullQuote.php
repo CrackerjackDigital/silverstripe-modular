@@ -1,6 +1,6 @@
 <?php
 namespace Modular\Blocks;
 
-class PullQuoteBlock extends Block {
+class PullQuote extends Block {
 
 }

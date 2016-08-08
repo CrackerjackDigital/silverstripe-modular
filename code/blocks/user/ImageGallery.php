@@ -3,7 +3,7 @@ namespace Modular\Blocks;
 
 use Modular\Interfaces\Imagery;
 
-class ImageGalleryBlock extends Block implements Imagery {
+class ImageGallery extends Block implements Imagery {
 
 	private static $allowed_files = 'image';
 

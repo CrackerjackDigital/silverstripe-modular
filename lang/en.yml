@@ -1,0 +1,169 @@
+en:
+  Has:
+    ImageID:
+      Label: "Image"
+      Guide: "Upload image to appear on timeline"
+    AssociatedRecordsPrompt:
+      Label: '<p>{plural} can only be associated to Content or Image events</p>'
+  HasBlocks:
+    Blocks:
+      Label: 'Content Blocks'
+  HasCodeField:
+    Code:
+      Label: "Unique code"
+      Guide: "A unique code of 5 capital letters and/or numbers e.g. 'GU1DE' "
+      Placeholder: "e.g. 'PL4CE'"
+      Error: "{label} should be 5 capital letters and/or numbers e.g. '3RDEF' "
+      Format: "{label} should be 5 capital letters and/or numbers e.g. '3RFMT' "
+      Length: "{label} should be 5 capital letters and/or numbers e.g. 'ERL3N' "
+      Duplicate: "{label} should be unique, the {singular} '{title}' already uses '{code}'"
+  HasDurationField:
+    Duration:
+      Label: 'Duration (hh:mm:ss)'
+      Guide: 'Max 10 mins.'
+  HasEventDateField:
+    EventDate:
+      Label: 'Narrative Date'
+  HasImageField:
+    Image:
+      Label: 'Image'
+      Guide: 'Upload a full-width image'
+  HasImagesField:
+    Images:
+      Label: 'Images'
+      Guide: "Upload images (up to {maxlength} images allowed). The first image will be used as the 'cover' image"
+  HasInternalLinkField:
+    InternalLinkID:
+      Label: 'Page on this site'
+      Guide: 'Choose a page on this site to link to'
+  HasKeywordsField:
+    Keywords:
+      Guide: "Enter any keywords that are relevant to this {singular} but fall outside of the above views"
+  HasMediaFields:
+    EmbedCode:
+      Label: "External link"
+      Guide: "Link to another site, e.g. vimeo"
+      Placeholder: "https://vimeo.com/46589834"
+    UploadedFile:
+      Label: "Uploaded file"
+      Guide: "File upload directly to the website. Allowed extensions are ({extensions})"
+  HasMediaLinkTypeField:
+    LinkType:
+      EmbedCode: "Embedded Code"
+      UploadedFile: "Uploaded File"
+      ExternalLink: "External Link"
+  HasSynopsisField:
+      Guide: "Write a brief introduction or overview to the {singular}. This will be displayed above the content and styled differently to body copy, this will also be what shows in search results on the website."
+      Length: "{label} needs to be between {minlength} and {maxlength} characters long"
+  HasTitleField:
+    Title:
+      Label: 'Title'
+      Placeholder: "Short descriptive title for this {singular}"
+      Guide: 'Title of this {singular}'
+      Length: "{label} needs to be between {minlength} and {maxlength} characters long"
+# block types
+  Audio:
+    DESCRIPTION: 'Media - Audio'
+    SINGULARNAME: 'Audio (podcast etc)'
+    PLURALNAME: 'Audio (podcasts etc)'
+    LinkType:
+      Label: 'Audio link type'
+    EmbedCode:
+      Label: 'Embed code'
+      Label: 'Embeded code for external audio player'
+    Media:
+      Label: 'Upload an audio file {extensions}'
+    Duration:
+      Guide: 'Max 10 mins.'
+    Transcript:
+      Label: 'Accessibility requirement for the {singular} in PDF format. This is a required field.'
+  CallToAction:
+    SINGULARNAME: 'Call to Action block'
+    PLURALNAME: 'Call to Action blocks'
+    Content:
+      Label: 'Content'
+  Checklist:
+    DESCRIPTION: 'A checklist which contains other blocks'
+    SINGULARNAME: 'Checklist'
+    PLURALNAME: 'Checklists'
+    Title:
+      Guide: 'This title of the checklist will be displayed on the website above your checklist items'
+  Content:
+    DESCRIPTION: 'Text'
+    SINGULARNAME: 'Text block'
+    PLURALNAME: 'Text blocks'
+  Download:
+    DESCRIPTION: 'Download'
+    SINGULARNAME: 'Download'
+    PLURALNAME: 'Downloads'
+    LinkType:
+      Label: 'Link type'
+    EmbedCode:
+      Label: 'Embed code'
+    UploadedFile:
+      Label: 'Uploaded file'
+  Footnotes:
+    SINGULARNAME: 'Footnote'
+    PLURALNAME: 'Footnotes'
+    Content:
+      Label: "Footnotes"
+      Guide: "Footnotes area for you to add in your footnotes. You will need to manually add in a footnote indicator into your text blocks"
+  FullWidthImage:
+    DESCRIPTION: 'Image'
+    SINGULARNAME: 'Image (Single, Large)'
+    PLURALNAME: 'Full width images'
+    Title:
+      Guide: 'This title of the image is for CMS use only and not displayed on the website'
+    Image:
+      Label: 'Upload an {singular}, JPG format recommended'
+      Guide: 'Add a single full width image to this {singular}'
+    LinkType:
+      Label: 'Image link type'
+    EmbedCode:
+      Label: 'Link to external image'
+    UploadedFile:
+      Label: 'Uploaded image'
+  ImageGallery:
+    DESCRIPTION: 'Image gallery images'
+    SINGULARNAME: "Images (image gallery)"
+    PLURALNAME: "Image galleries"
+    Title:
+      Guide: "Image gallery title (may show on web site, individual images have their own title)"
+    Images:
+      Guide: "Add an image to this {article.singular}. The first image will become the article's thumbnail image. You can drag and drop the order here to change it"
+  Links:
+    DISCRIPTION: 'A set of links'
+    SINGULARNAME: 'External Links'
+    PLURALNAME: 'External Links'
+    Title:
+      Guide: 'This title is for CMS use only and not displayed on the website (each link has its own title)'
+  Sources:
+    DISCRIPTION: 'A set of source links (citations)'
+    SINGULARNAME: 'Source Links'
+    PLURALNAME: 'Source Links'
+    Title:
+      Guide: 'This title is for CMS use only and not displayed on the website (each link has its own title)'
+  PullQuote:
+    SINGULARNAME: 'Pull Quote'
+    PLURALNAME: 'Pull Quotes'
+    Title:
+      Guide: 'This title of the pullquote is for CMS use only and not displayed on the website'
+    Content:
+      Guide: 'Add a pull quote for this {article.singular}'
+  Video:
+    DESCRIPTION: 'Video'
+    SINGULARNAME: 'Video'
+    PLURALNAME: 'Videos'
+    LinkTypeLabel: 'Video link type'
+    Title:
+      Guide: 'Title for this video is for the CMS use only, and not displayed on the website'
+    Duration:
+      Guide: 'Recommended length is no longer than 10min. This is for CMS use only and not displayed on the website'
+    EmbedCode:
+      Label: 'Embeded code for external video player'
+      Guide: 'Approx 10 minutes max'
+    Media:
+      Label: 'Upload a video file {extensions}'
+    Transcript:
+      Label: 'Accessibility requirement for the {singular} in PDF format. This is a required field.'
+      Guide: 'This is required'

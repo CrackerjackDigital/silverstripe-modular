@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Blocks;
 
-class FileBlock extends Block {
+class File extends Block {
 	private static $upload_folder = '';
 
 	private static $allowed_files = '';

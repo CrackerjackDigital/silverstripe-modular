@@ -1,6 +1,6 @@
 <?php
 namespace Modular\Blocks;
 
-class FootnotesBlock extends Block {
+class Footnotes extends Block {
 
 }

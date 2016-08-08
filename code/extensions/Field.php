@@ -10,8 +10,11 @@ use FormField;
 use GridField;
 use GridFieldOrderableRows;
 use LiteralField;
+use Modular\Exception;
+use Modular\GridField\GridFieldConfig;
 use Modular\Model;
 use Modular\ModelExtension;
+use Modular\Object;
 use SS_List;
 use TimeField;
 use UploadField;
@@ -33,7 +36,7 @@ use ValidationResult;
  *
  * @property \Modular\Model $owner
  */
-abstract class Fields extends ModelExtension {
+abstract class Field extends ModelExtension {
 	const UploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';

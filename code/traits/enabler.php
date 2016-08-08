@@ -2,7 +2,6 @@
 namespace Modular;
 
 trait enabler {
-
 	/**
 	 * Is extension enabled? This should be checked before doing processing checks, augmenting SQL etc, it is not
 	 * 'magical' so will need to be called on a case-by-case basis.

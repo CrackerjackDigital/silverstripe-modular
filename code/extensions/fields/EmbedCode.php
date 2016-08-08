@@ -3,7 +3,7 @@ namespace Modular\Fields;
 
 use TextField;
 
-class EmbedCode extends Fields {
+class EmbedCode extends Field {
 	const EmbedCodeFieldName = 'EmbedCode';
 	const EmbedCodeOption    = 'EmbedCode';
 

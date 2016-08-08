@@ -7,7 +7,7 @@ use ArrayList;
  *
  * @method Audio
  */
-class AudioBlock extends File {
+class Audio extends File {
 
 	private static $allowed_files = 'audio';
 
