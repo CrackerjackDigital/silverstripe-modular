@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Fields;
 
-abstract class UploadedFile extends Field {
+abstract class UploadedFile extends Fields {
 	const RelationshipName = '';
 	const UploadFieldName  = '';      // keep in sync with RelationshipName, ie '<RelationshipName>ID' for has_one field name
 	const UploadFolderName = 'uploads';

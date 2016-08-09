@@ -14,7 +14,6 @@ use Modular\Exception;
 use Modular\GridField\GridFieldConfig;
 use Modular\Model;
 use Modular\ModelExtension;
-use Modular\Object;
 use SS_List;
 use TimeField;
 use UploadField;
@@ -36,7 +35,7 @@ use ValidationResult;
  *
  * @property \Modular\Model $owner
  */
-abstract class Field extends ModelExtension {
+abstract class Fields extends ModelExtension {
 	const UploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';
@@ -209,9 +208,7 @@ abstract class Field extends ModelExtension {
 				?: get_class($this) . 'GridFieldConfig';
 
 		/** @var GridFieldConfig $config */
-		$config = Object::create(
-			$configClassName
-		);
+		$config = $configClassName::create();
 
 		/** @var GridField $gridField */
 		$gridField = GridField::create(

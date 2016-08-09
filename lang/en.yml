@@ -62,7 +62,7 @@ en:
       Guide: 'Title of this {singular}'
       Length: "{label} needs to be between {minlength} and {maxlength} characters long"
 # block types
-  Audio:
+  Modular\Blocks\Audio:
     DESCRIPTION: 'Media - Audio'
     SINGULARNAME: 'Audio (podcast etc)'
     PLURALNAME: 'Audio (podcasts etc)'
@@ -77,22 +77,22 @@ en:
       Guide: 'Max 10 mins.'
     Transcript:
       Label: 'Accessibility requirement for the {singular} in PDF format. This is a required field.'
-  CallToAction:
+  Modular\Blocks\CallToAction:
     SINGULARNAME: 'Call to Action block'
     PLURALNAME: 'Call to Action blocks'
     Content:
       Label: 'Content'
-  Checklist:
+  Modular\Blocks\Checklist:
     DESCRIPTION: 'A checklist which contains other blocks'
     SINGULARNAME: 'Checklist'
     PLURALNAME: 'Checklists'
     Title:
       Guide: 'This title of the checklist will be displayed on the website above your checklist items'
-  Content:
+  Modular\Blocks\Content:
     DESCRIPTION: 'Text'
     SINGULARNAME: 'Text block'
     PLURALNAME: 'Text blocks'
-  Download:
+  Modular\Blocks\Download:
     DESCRIPTION: 'Download'
     SINGULARNAME: 'Download'
     PLURALNAME: 'Downloads'
@@ -102,13 +102,13 @@ en:
       Label: 'Embed code'
     UploadedFile:
       Label: 'Uploaded file'
-  Footnotes:
+  Modular\Blocks\Footnotes:
     SINGULARNAME: 'Footnote'
     PLURALNAME: 'Footnotes'
     Content:
       Label: "Footnotes"
       Guide: "Footnotes area for you to add in your footnotes. You will need to manually add in a footnote indicator into your text blocks"
-  FullWidthImage:
+  Modular\Blocks\FullWidthImage:
     DESCRIPTION: 'Image'
     SINGULARNAME: 'Image (Single, Large)'
     PLURALNAME: 'Full width images'
@@ -123,7 +123,7 @@ en:
       Label: 'Link to external image'
     UploadedFile:
       Label: 'Uploaded image'
-  ImageGallery:
+  Modular\Blocks\ImageGallery:
     DESCRIPTION: 'Image gallery images'
     SINGULARNAME: "Images (image gallery)"
     PLURALNAME: "Image galleries"
@@ -131,26 +131,26 @@ en:
       Guide: "Image gallery title (may show on web site, individual images have their own title)"
     Images:
       Guide: "Add an image to this {article.singular}. The first image will become the article's thumbnail image. You can drag and drop the order here to change it"
-  Links:
+  Modular\Blocks\Links:
     DISCRIPTION: 'A set of links'
     SINGULARNAME: 'External Links'
     PLURALNAME: 'External Links'
     Title:
       Guide: 'This title is for CMS use only and not displayed on the website (each link has its own title)'
-  Sources:
+  Modular\Blocks\Sources:
     DISCRIPTION: 'A set of source links (citations)'
     SINGULARNAME: 'Source Links'
     PLURALNAME: 'Source Links'
     Title:
       Guide: 'This title is for CMS use only and not displayed on the website (each link has its own title)'
-  PullQuote:
+  Modular\Blocks\PullQuote:
     SINGULARNAME: 'Pull Quote'
     PLURALNAME: 'Pull Quotes'
     Title:
       Guide: 'This title of the pullquote is for CMS use only and not displayed on the website'
     Content:
       Guide: 'Add a pull quote for this {article.singular}'
-  Video:
+  Modular\Blocks\Video:
     DESCRIPTION: 'Video'
     SINGULARNAME: 'Video'
     PLURALNAME: 'Videos'

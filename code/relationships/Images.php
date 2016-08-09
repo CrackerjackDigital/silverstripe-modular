@@ -1,11 +1,11 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\Field;
+use Modular\Fields\Fields;
 use Modular\Interfaces\Imagery;
 use FormField;
 
-class Images extends Field implements Imagery {
+class Images extends Fields implements Imagery {
 	const RelationshipName = 'Images';
 	const UploadFieldName = 'Images';
 	const UploadFolderName = 'images';

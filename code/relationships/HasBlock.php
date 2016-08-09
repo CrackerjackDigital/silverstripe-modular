@@ -5,14 +5,14 @@ use ValidationException;
 use Modular\Model;
 use DropdownField;
 use ValidationResult;
-use Modular\Fields\Field;
+use Modular\Fields\Fields;
 use Controller;
 
 /**
  * Class which adds a single block to a model
  */
 
-class HasBlock extends Field {
+class HasBlock extends Fields {
 	const RelationshipName = 'Block';
 	const RelationshipFieldName = 'BlockID';
 

@@ -2,18 +2,20 @@
 namespace Modular\Relationships;
 
 use Modular\Blocks\Block;
-use Modular\Fields\Field;
+use Modular\Fields\Fields;
 
 /**
  * Add a gridfield to which blocks can be added and managed.
  *
  * @method \DataList Blocks
  */
-class HasBlocks extends Field {
+class HasBlocks extends Fields {
 	const RelationshipName = 'Blocks';
+	const BlockClassName = 'Modular\Blocks\Block';
+	const GridFieldConfigName = 'Modular\GridField\HasBlocksGridFieldConfig';
 
 	private static $many_many = [
-		self::RelationshipName => 'BlockModel',
+		self::RelationshipName => self::BlockClassName
 	];
 	private static $many_many_extraFields = [
 		self::RelationshipName => [

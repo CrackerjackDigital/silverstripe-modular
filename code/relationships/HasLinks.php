@@ -1,13 +1,13 @@
 <?php
 namespace Modular;
 
-use Modular\Fields\Field;
+use Modular\Fields\Fields;
 use SS_List;
 
 /**
  * @method SS_List Links
  */
-class Links extends Field {
+class Links extends Fields {
 	const RelationshipName = 'Links';
 
 	private static $many_many = [

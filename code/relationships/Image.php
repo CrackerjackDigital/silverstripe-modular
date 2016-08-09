@@ -1,12 +1,12 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\Field;
+use Modular\Fields\Fields;
 use Modular\Interfaces\Imagery;
 use ArrayList;
 use FormField;
 
-class Image extends Field implements Imagery {
+class Image extends Fields implements Imagery {
 	const RelationshipName = 'Image';
 	const UploadFieldName = 'ImageID';      // keep in sync with RelationshipName
 	const UploadFolderName = 'images';

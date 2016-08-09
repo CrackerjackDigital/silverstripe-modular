@@ -1,14 +1,14 @@
 <?php
 namespace Modular\Behaviours;
 
-use Modular\Fields\Field;
+use Modular\Fields\Fields;
 use Modular\Fields\InternalLink;
 use Modular\Fields\ExternalLink;
 use ClassInfo;
 use DropdownField;
 use FormField;
 
-class InternalOrExternalLink extends Field {
+class InternalOrExternalLink extends Fields {
 	const LinkTypeFieldName = 'LinkType';
 
 	private static $enum_values = [
