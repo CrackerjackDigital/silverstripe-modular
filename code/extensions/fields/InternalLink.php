@@ -4,10 +4,10 @@ namespace Modular\Fields;
 use DisplayLogicWrapper;
 use TreeDropdownField;
 
-class InternalLink extends Fields {
+class InternalLink extends Field {
 	const InternalLinkOption    = 'InternalLink';
 	const InternalLinkFieldName = 'InternalLinkID';
-	const RelationshipName = 'InternalLink';
+	const RelationshipName      = 'InternalLink';
 
 	private static $has_one = [
 		self::RelationshipName => 'SiteTree',
@@ -17,7 +17,7 @@ class InternalLink extends Fields {
 		return [
 			(new DisplayLogicWrapper(
 				new TreeDropdownField(self::InternalLinkFieldName, 'Link to', 'SiteTree')
-			))->setName(self::InternalLinkFieldName)->setID(self::InternalLinkFieldName)
+			))->setName(self::InternalLinkFieldName)->setID(self::InternalLinkFieldName),
 		];
 	}
 

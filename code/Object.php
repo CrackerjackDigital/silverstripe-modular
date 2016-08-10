@@ -14,6 +14,7 @@ require_once 'traits/json.php';
 require_once 'traits/lang.php';
 require_once 'traits/owned.php';
 require_once 'traits/options.php';
+require_once 'traits/tokens.php';
 
 class Object extends \Object {
 	use cache;

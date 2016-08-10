@@ -6,7 +6,7 @@ use DisplayLogicWrapper;
 use DropdownField;
 use FieldList;
 use FormField;
-use Modular\Fields\Fields;
+use Modular\Fields\Field;
 use Modular\Fields\Title;
 use TextField;
 use TreeDropdownField;
@@ -14,7 +14,7 @@ use TreeDropdownField;
 /**
  * Add fields and functionality to LinkAttribute model.
  */
-class LinkAttributeFields extends Fields {
+class LinkAttributeField extends Field {
 	const ExternalLinkFieldName    = 'ExternalLink';
 	const InternalLinkRelationship = 'InternalLink';
 	const ExternalLinkValue        = self::ExternalLinkFieldName;

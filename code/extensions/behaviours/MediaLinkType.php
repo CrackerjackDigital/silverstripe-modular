@@ -6,19 +6,19 @@ use DropdownField;
 use FormField;
 use Modular\Fields\EmbedCode;
 use Modular\Fields\ExternalLink;
-use Modular\Fields\Fields;
+use Modular\Fields\Field;
 use Modular\Fields\InternalLink;
-use Modular\Relationships\Media;
+use Modular\Fields\Media;
 
 /**
  * Link type field and logic for a model which has an EmbedCode, InternalLink and ExternalLink fields.
  */
-class MediaLinkTypeBehaviour extends Fields {
+class MediaLinkTypeBehaviour extends Field {
 	const MediaLinkTypeFieldName = 'MediaLinkType';
 
 	private static $enum_values = [
 		\Modular\Fields\EmbedCode::EmbedCodeOption,
-		\Modular\Relationships\Media::UploadedFileOption,
+		\Modular\Fields\Media::UploadedFileOption,
 		\Modular\Fields\ExternalLink::ExternalLinkOption,
 	];
 

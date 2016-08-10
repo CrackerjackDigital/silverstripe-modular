@@ -3,7 +3,7 @@ namespace Modular\Fields;
 
 use TextField;
 
-class Title extends Fields {
+class Title extends Field {
 	const TitleFieldName = 'Title';
 
 	private static $db = [

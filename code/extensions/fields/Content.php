@@ -3,7 +3,7 @@ namespace Modular\Fields;
 
 use HtmlEditorField;
 
-class Content extends Fields {
+class Content extends Field {
 	const ContentFieldName = 'Content';
 
 	private static $db = [

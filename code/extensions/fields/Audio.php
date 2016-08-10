@@ -4,7 +4,6 @@ namespace Modular\Fields;
 use ArrayList;
 use Image;
 use FormField;
-use Modular\Relationships\Media;
 
 /**
  * HasAudioField
@@ -51,6 +50,5 @@ class Audio extends Media {
 		if ($fieldName == self::RelationshipName) {
 			$this->configureUploadField($field, 'allowed_audio_files');
 		}
-
 	}
 }

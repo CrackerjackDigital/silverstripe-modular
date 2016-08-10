@@ -14,7 +14,7 @@ use Config;
  * Adds a 5-letter 'Code' field to the extended model and makes it readonly in CMS,
  * and adds ability for a code of SYSTM to be filtered out via augmentSQL extension call.
  */
-class Code extends Fields {
+class Code extends Field {
 	const SystemCode = '_SYS_';
 	const CodeFieldName = 'Code';
 

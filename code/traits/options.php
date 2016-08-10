@@ -2,7 +2,7 @@
 namespace Modular;
 
 trait options {
-	private $options;
+	private $options = [];
 
 	/**
 	 * Get, set or update options.
@@ -14,7 +14,7 @@ trait options {
 	 *                                  or set otherwise
 	 * @return null
 	 */
-	public function options($options = null, $merge = true) {
+	public function options($options = [], $merge = true) {
 		if (func_num_args()) {
 			if (!$merge) {
 				$this->options = $options;

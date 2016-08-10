@@ -3,7 +3,7 @@ namespace Modular\Fields;
 
 use TextField;
 
-class ExternalLink extends Fields {
+class ExternalLink extends Field {
 	const ExternalLinkOption    = 'ExternalLink';
 	const ExternalLinkFieldName = 'ExternalLink';
 	const RelationshipName      = 'ExternalLink';

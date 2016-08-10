@@ -35,7 +35,7 @@ use ValidationResult;
  *
  * @property \Modular\Model $owner
  */
-abstract class Fields extends ModelExtension {
+abstract class Field extends ModelExtension {
 	const UploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';

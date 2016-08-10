@@ -10,9 +10,7 @@ use File;
  *
  * @method Media
  */
-class Video extends UploadedFile {
-	const RelationshipName = 'Media';
-	const UploadFieldName  = 'MediaID';      // keep in sync with RelationshipName
+class Video extends Media {
 	const UploadFolderName = 'video';
 
 	private static $allowed_video_files = 'mov';
