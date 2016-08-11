@@ -1,7 +1,6 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
-use Modular\Fields\Field;
 use SS_List;
 
 /**

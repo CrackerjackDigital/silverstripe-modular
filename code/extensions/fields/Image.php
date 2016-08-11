@@ -1,5 +1,5 @@
 <?php
-namespace Modular\Relationships;
+namespace Modular\Fields;
 
 use Modular\Fields\Field;
 use Modular\Interfaces\Imagery;

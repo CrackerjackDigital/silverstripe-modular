@@ -5,7 +5,6 @@ use DateField;
 use DatetimeField;
 use DisplayLogicWrapper;
 use FieldList;
-use File;
 use FormField;
 use GridField;
 use GridFieldOrderableRows;

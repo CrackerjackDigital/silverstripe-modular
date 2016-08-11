@@ -13,7 +13,7 @@ use Modular\Fields\Media;
 /**
  * Link type field and logic for a model which has an EmbedCode, InternalLink and ExternalLink fields.
  */
-class MediaLinkTypeBehaviour extends Field {
+class MediaLinkType extends Field {
 	const MediaLinkTypeFieldName = 'MediaLinkType';
 
 	private static $enum_values = [
