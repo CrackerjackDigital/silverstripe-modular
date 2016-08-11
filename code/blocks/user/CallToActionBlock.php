@@ -1,20 +1,20 @@
 <?php
 namespace Modular\Blocks;
 
-use ArrayList;
-use Modular\InternalLinkField;
-use Modular\ExternalLinkField;
-
+use Modular\Behaviours\InternalOrExternalLink;
+use Modular\Fields\InternalLink;
+use Modular\Fields\ExternalLink;
+use Modular\Fields\DisplayLocation;
 
 class CallToAction extends Block {
 	public function ResolvedLink() {
-		if ($this->{InternalOrExternalLinkBehaviour::LinkTypeFieldName} == InternalLinkField::InternalLinkOption) {
+		if ($this->{InternalOrExternalLink::LinkTypeFieldName} == InternalLink::InternalLinkOption) {
 
-			if ($target = $this->{InternalLinkField::RelationshipName}()) {
+			if ($target = $this->{InternalLink::RelationshipName}()) {
 				return $target->Link();
             }
-		} elseif ($this->{InternalOrExternalLinkBehaviour::LinkTypeFieldName} == ExternalLinkField::ExternalLinkOption) {
-			return $this->{ExternalLinkField::ExternalLinkFieldName};
+		} elseif ($this->{InternalOrExternalLink::LinkTypeFieldName} == ExternalLink::ExternalLinkOption) {
+			return $this->{ExternalLink::ExternalLinkFieldName};
 		}
 	}
 
@@ -25,9 +25,9 @@ class CallToAction extends Block {
 	 */
 	public function DisplayInSidebar() {
 		return in_array(
-			$this->{HasDisplayLocationField::DisplayLocationFieldName}, [
-			HasDisplayLocationField::DisplayInBoth,
-			HasDisplayLocationField::DisplayInSidebar
+			$this->{DisplayLocation::DisplayLocationFieldName}, [
+			DisplayLocation::DisplayInBoth,
+			DisplayLocation::DisplayInSidebar
 		]);
 	}
 
@@ -38,9 +38,9 @@ class CallToAction extends Block {
 	 */
 	public function DisplayInContent() {
 		return in_array(
-			$this->{HasDisplayLocationField::DisplayLocationFieldName}, [
-			HasDisplayLocationField::DisplayInBoth,
-			HasDisplayLocationField::DisplayInContent
+			$this->{DisplayLocation::DisplayLocationFieldName}, [
+			DisplayLocation::DisplayInBoth,
+			DisplayLocation::DisplayInContent
 		]);
 	}
 }
