@@ -1,10 +1,9 @@
 <?php
 namespace Modular\Fields;
 
-use Modular\Fields\Field;
-use Modular\Interfaces\Imagery;
 use ArrayList;
 use FormField;
+use Modular\Interfaces\Imagery;
 
 class Image extends Field implements Imagery {
 	const RelationshipName = 'Image';

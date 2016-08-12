@@ -2,7 +2,6 @@
 namespace Modular\Fields;
 
 use ArrayList;
-use Image;
 use FormField;
 
 /**
