@@ -1,7 +1,6 @@
 <?php
 namespace Modular\GridField;
 
-use GridFieldConfig;
 /**
  * Alters the config to be suitable for adding/removing links from a block
  */

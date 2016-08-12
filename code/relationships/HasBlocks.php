@@ -14,20 +14,28 @@ class HasBlocks extends Field {
 	const BlockClassName = 'Modular\Blocks\Block';
 	const GridFieldConfigName = 'Modular\GridField\HasBlocksGridFieldConfig';
 
-	private static $many_many = [
-		self::RelationshipName => self::BlockClassName
-	];
-	private static $many_many_extraFields = [
-		self::RelationshipName => [
-			self::GridFieldOrderableRowsFieldName => 'Int',
-		],
-	];
-
 	private static $cms_tab_name = 'Root.ContentBlocks';
+
+	public function extraStatics($class = null, $extension = null) {
+		$parent = parent::extraStatics($class, $extension) ?: [];
+		return array_merge_recursive(
+			$parent,
+			[
+				'many_many' => [
+					static::RelationshipName => static::BlockClassName
+				],
+			    'many_many_extraFields' => [
+				    self::RelationshipName => [
+					    self::GridFieldOrderableRowsFieldName => 'Int',
+				    ],
+			    ]
+		    ]
+		);
+	}
 
 	public function cmsFields() {
 		return $this()->isInDB()
-		? [$this->gridField(self::RelationshipName)]
+		? [$this->gridField(static::RelationshipName)]
 		: [$this->saveMasterHint()];
 	}
 
