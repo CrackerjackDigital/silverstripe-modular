@@ -48,6 +48,10 @@ en:
   Modular\Fields\Synopsis:
       Guide: "Write a brief introduction or overview to the {singular}. This will be displayed above the content and styled differently to body copy, this will also be what shows in search results on the website."
       Length: "{label} needs to be between {minlength} and {maxlength} characters long"
+  Modular\Fields\Tags:
+    Tags:
+      Label: 'Tags'
+      Guide: 'Free form tags'
   Modular\Fields\Title:
     Title:
       Label: 'Title'
