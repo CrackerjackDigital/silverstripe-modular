@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Blocks;
 
-class Download extends FileBlock {
+class Download extends File {
 	private static $allowed_files = 'download';
 
 	private static $upload_folder = 'downloads';

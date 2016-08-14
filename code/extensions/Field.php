@@ -5,7 +5,6 @@ use DateField;
 use DatetimeField;
 use DisplayLogicWrapper;
 use FieldList;
-use File;
 use FormField;
 use GridField;
 use GridFieldOrderableRows;
@@ -436,7 +435,7 @@ abstract class Field extends ModelExtension {
 
 		if (!is_array($allowedFiles)) {
 			// get extensions from category so we always get a list of extensions for the CMS right title
-			$allCategoryExtensions = File::config()->get('app_categories') ?: [];
+			$allCategoryExtensions = \File::config()->get('app_categories') ?: [];
 			if (isset($allCategoryExtensions[ $allowedFiles ])) {
 				$extensions = $allCategoryExtensions[ $allowedFiles ];
 			} else {

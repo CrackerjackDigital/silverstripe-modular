@@ -1,14 +1,14 @@
 en:
-  Has:
+  Modular\Fields\Image:
     ImageID:
       Label: "Image"
       Guide: "Upload image to appear on timeline"
     AssociatedRecordsPrompt:
       Label: '<p>{plural} can only be associated to Content or Image events</p>'
-  HasBlocks:
+  Modular\Relationships\HasBlocks:
     Blocks:
       Label: 'Content Blocks'
-  HasCodeField:
+  Modular\Fields\Code:
     Code:
       Label: "Unique code"
       Guide: "A unique code of 5 capital letters and/or numbers e.g. 'GU1DE' "
@@ -17,29 +17,22 @@ en:
       Format: "{label} should be 5 capital letters and/or numbers e.g. '3RFMT' "
       Length: "{label} should be 5 capital letters and/or numbers e.g. 'ERL3N' "
       Duplicate: "{label} should be unique, the {singular} '{title}' already uses '{code}'"
-  HasDurationField:
+  Modular\Fields\Duration:
     Duration:
       Label: 'Duration (hh:mm:ss)'
       Guide: 'Max 10 mins.'
-  HasEventDateField:
+  Modular\Fields\EventDate:
     EventDate:
       Label: 'Narrative Date'
-  HasImageField:
-    Image:
-      Label: 'Image'
-      Guide: 'Upload a full-width image'
-  HasImagesField:
+  Modular\Fields\Images:
     Images:
       Label: 'Images'
       Guide: "Upload images (up to {maxlength} images allowed). The first image will be used as the 'cover' image"
-  HasInternalLinkField:
+  Modular\Fields\InternalLink:
     InternalLinkID:
       Label: 'Page on this site'
       Guide: 'Choose a page on this site to link to'
-  HasKeywordsField:
-    Keywords:
-      Guide: "Enter any keywords that are relevant to this {singular} but fall outside of the above views"
-  HasMediaFields:
+  Modular\Fields\Media:
     EmbedCode:
       Label: "External link"
       Guide: "Link to another site, e.g. vimeo"
@@ -47,15 +40,15 @@ en:
     UploadedFile:
       Label: "Uploaded file"
       Guide: "File upload directly to the website. Allowed extensions are ({extensions})"
-  HasMediaLinkTypeField:
+  Modular\Fields\MediaLinkType:
     LinkType:
       EmbedCode: "Embedded Code"
       UploadedFile: "Uploaded File"
       ExternalLink: "External Link"
-  HasSynopsisField:
+  Modular\Fields\Synopsis:
       Guide: "Write a brief introduction or overview to the {singular}. This will be displayed above the content and styled differently to body copy, this will also be what shows in search results on the website."
       Length: "{label} needs to be between {minlength} and {maxlength} characters long"
-  HasTitleField:
+  Modular\Fields\Title:
     Title:
       Label: 'Title'
       Placeholder: "Short descriptive title for this {singular}"

@@ -1,0 +1,7 @@
+---
+Name: modular-models-config
+---
+Modular\Models\GridListFilter:
+  extensions:
+    - Modular\Fields\Title
+    - Modular\Fields\ModelTag('FilterTag', 'Title')

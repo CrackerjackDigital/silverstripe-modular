@@ -1,6 +1,7 @@
 <?php
 namespace Modular\Relationships;
 
+use Modular\Blocks\Block;
 use ValidationException;
 use Modular\Model;
 use DropdownField;
@@ -14,6 +15,7 @@ use Controller;
 
 class HasBlock extends Field {
 	const RelationshipName = 'Block';
+	const BlockClassName = 'Modular\Blocks\Block';
 	const RelationshipFieldName = 'BlockID';
 
 	// not in database, just UI selector for the class of the related block which could be
@@ -21,9 +23,17 @@ class HasBlock extends Field {
 	// creation of the associated block
 	const BlockTypeFieldName = 'BlockType';
 
-	private static $has_one = [
-		self::RelationshipName => 'BlockModel'
-	];
+	public function extraStatics($class = null, $extension = null) {
+		$parent = parent::extraStatics($class, $extension) ?: [];
+		return array_merge_recursive(
+			$parent,
+			[
+				'has_one' => [
+					static::RelationshipName => static::BlockClassName
+				]
+			]
+		);
+	}
 
 	/**
 	 * Return the value from passed BlockType field or the class name of the current associated block
@@ -100,7 +110,7 @@ class HasBlock extends Field {
 		} else {
 
 			if ($block->ClassName != $blockType) {
-				/** @var BlockModel $newBlock */
+				/** @var Block $newBlock */
 				$block = $blockType::create($blockData);
 				// force insert
 				$this()->BlockID = $block->write(false, true);
@@ -118,7 +128,7 @@ class HasBlock extends Field {
 	public function onAfterWrite() {
 		parent::onAfterWrite();
 
-		/** @var BlockModel $block */
+		/** @var Block $block */
 		if ($block = $this()->Block()) {
 
 			$request = Controller::curr()->getRequest();

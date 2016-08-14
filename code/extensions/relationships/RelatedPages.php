@@ -18,14 +18,16 @@ class RelatedPages extends Field {
 	private static $cms_tab_name = 'Root.Relationships';
 
 	public function extraStatics($class = null, $extension = null) {
-		$relatedClassName = static::RelatedClassName;
-		$relationshipName = static::RelationshipName;
+		$parent = parent::extraStatics($class, $extension) ?: [];
 
-		return [
-			'many_many'        => [
-				$relationshipName => $relatedClassName
+		return array_merge_recursive(
+			$parent,
+			[
+				'many_many' => [
+					static::RelationshipName => static::RelatedClassName
+				]
 			]
-		];
+		);
 	}
 
 	public function cmsFields() {
