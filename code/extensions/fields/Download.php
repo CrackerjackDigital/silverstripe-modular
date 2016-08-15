@@ -1,9 +1,8 @@
 <?php
 namespace Modular\Fields;
 
-use Modular\Fields\Field;
-use UploadField;
 use FormField;
+use UploadField;
 
 class Download extends Field {
 	const RelationshipName = 'Download';

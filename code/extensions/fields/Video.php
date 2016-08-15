@@ -3,6 +3,7 @@ namespace Modular\Fields;
 
 use ArrayList;
 use FormField;
+use File;
 
 /**
  * HasVideoField

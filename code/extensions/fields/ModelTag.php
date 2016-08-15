@@ -166,6 +166,7 @@ class ModelTag extends Field {
 		if ($this->parentIDFieldName && $this()->hasField($this->parentIDFieldName)) {
 			return $this()->{$this->parentIDFieldName};
 		}
+		return null;
 	}
 
 	/**

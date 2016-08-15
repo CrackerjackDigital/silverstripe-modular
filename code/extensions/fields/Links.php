@@ -2,6 +2,7 @@
 namespace Modular\Fields;
 
 use SS_List;
+use Modular\Model;
 
 /**
  * @method SS_List Links
