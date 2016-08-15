@@ -1,4 +1,9 @@
 en:
+# models
+  Modular\Models\Slide:
+    SINGULARNAME: 'Carousel Slide'
+    PLURALNAME: 'Carousel Slides'
+# fields
   Modular\Fields\Image:
     ImageID:
       Label: "Image"
@@ -93,6 +98,10 @@ en:
     DESCRIPTION: 'Text'
     SINGULARNAME: 'Text block'
     PLURALNAME: 'Text blocks'
+  Modular\Blocks\ContentWithImage:
+    DESCRIPTION: 'Content with Image'
+    SINGULARNAME: 'Content with Image block'
+    PLURALNAME: 'Content with Image blocks'
   Modular\Blocks\Download:
     DESCRIPTION: 'Download'
     SINGULARNAME: 'Download'
