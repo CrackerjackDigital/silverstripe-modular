@@ -88,12 +88,12 @@ en:
     PLURALNAME: 'Call to Action blocks'
     Content:
       Label: 'Content'
-  Modular\Blocks\Checklist:
-    DESCRIPTION: 'A checklist which contains other blocks'
-    SINGULARNAME: 'Checklist'
-    PLURALNAME: 'Checklists'
+  Modular\Blocks\SubBlocks:
+    DESCRIPTION: 'A block which contains other blocks'
+    SINGULARNAME: 'Blocks within block'
+    PLURALNAME: 'Blocks withing blocks'
     Title:
-      Guide: 'This title of the checklist will be displayed on the website above your checklist items'
+      Guide: 'Memorable name'
   Modular\Blocks\Content:
     DESCRIPTION: 'Text'
     SINGULARNAME: 'Text block'
