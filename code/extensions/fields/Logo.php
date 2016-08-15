@@ -9,10 +9,10 @@ class Logo extends Field {
 	const UploadFolderName = 'logos';
 
 	private static $has_one = [
-		self::RelationshipName => 'Logo'
+		self::RelationshipName => 'Image'
 	];
 
-	private static $allowed_files = 'image';
+	private static $allowed_logo_files = 'image';
 
 	/**
 	 * Return the single related image, shouldn't really get here as the extended model's field accessor should be called first.
@@ -39,7 +39,7 @@ class Logo extends Field {
 		$fieldName = $field->getName();
 
 		if ($fieldName == self::RelationshipName) {
-			$this->configureUploadField($field);
+			$this->configureUploadField($field, 'allowed_logo_files');
 		}
 	}
 }

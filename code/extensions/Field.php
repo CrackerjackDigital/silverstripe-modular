@@ -37,7 +37,7 @@ use ValidationResult;
  */
 abstract class Field extends ModelExtension {
 	use lang;
-	
+
 	const UploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';
@@ -434,7 +434,9 @@ abstract class Field extends ModelExtension {
 
 		// could be string for category or an array of extensions
 		// try model first then extension
-		$extensions = $allowedFiles = $this()->allowedFileTypes($configVarName) ?: $this->config()->get($configVarName);
+
+		$extensions = $allowedFiles = $this()->config()->get($configVarName)
+			?: $this->config()->get($configVarName);
 
 		if (!is_array($allowedFiles)) {
 			// get extensions from category so we always get a list of extensions for the CMS right title
