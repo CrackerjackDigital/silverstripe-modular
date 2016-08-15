@@ -1,6 +1,7 @@
 <?php
 namespace Modular\Fields;
 
+use Modular\Model;
 use ReadonlyField;
 use HiddenField;
 use TextField;
