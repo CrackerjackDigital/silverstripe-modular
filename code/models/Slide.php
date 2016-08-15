@@ -4,10 +4,19 @@ namespace Modular\Models;
 use \Modular\Model;
 
 class Slide extends Model {
+	const SortFieldName = 'Sort';
+	const RelationshipName = 'CarouselBlock';
+	const RelatedClassName = 'Modular\Blocks\Block'
 	private static $db = [
-		'Sort' => 'Int'
+		self::SortFieldName => 'Int'
 	];
 	private static $has_one = [
-		'CarouselBlock' => 'Modular\Blocks\Block'
+		self::RelationshipName => self::RelatedClassName
 	];
+
+	public function getCMSFields() {
+		$fields = parent::getCMSFields();
+		$fields->replaceField(self::SortFieldName, new \HiddenField(self::SortFieldName));
+		return $fields;
+	}
 }
