@@ -4,8 +4,8 @@ Name: modular-models-config
 Modular\Models\GridListFilter:
   extensions:
     - Modular\Fields\Title
-    - Modular\Fields\ModelTag('Title', 'Title')
+    - Modular\Fields\ModelTag('Title')
 Modular\Models\Tag:
   extensions:
     - Modular\Fields\Title
-    - Modular\Fields\ModelTag('Title', 'Title')
+    - Modular\Fields\ModelTag('Title')

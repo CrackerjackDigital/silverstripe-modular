@@ -2,6 +2,10 @@
 namespace Modular\Relationships;
 
 use Modular\Fields\Field;
+use Modular\Fields\ModelTag;
+use Modular\Model;
+use Modular\Models\GridListFilter;
+use Modular\Module;
 
 /**
  * RelatedPages
@@ -24,29 +28,54 @@ class RelatedPages extends Field {
 			$parent,
 			[
 				'many_many' => [
-					static::RelationshipName => static::RelatedClassName
-				]
+					static::RelationshipName => static::RelatedClassName,
+				],
 			]
 		);
 	}
 
+	/**
+	 * Add tag field for this relationship's pages
+	 * @return array
+	 */
 	public function cmsFields() {
 		$multipleSelect = (bool) $this->config()->get('multiple_select');
+		$relatedClassName = static::RelatedClassName;
 
 		return [
 			(new \TagField(
 				static::RelationshipName,
 				null,
-				$this->otherPages()
-			))->setIsMultiple($multipleSelect)
+				$relatedClassName::get()
+			))->setIsMultiple($multipleSelect)->setCanCreate(false),
 		];
 	}
+
 	/**
-	 * @return \SS_List
+	 * Add this relationships related pages to the grid list items in the corresponding filter group as a data list.
+	 * ie $groupedItems will be built so:
+	 * [
+	 *      'people' => DataList of related pages with the 'people' filter tag,
+	 *      'news' => DataList of related pages with the 'news' filter tag
+	 * ]
+	 *
+	 * @param array $groupedItems
 	 */
-	public function otherPages() {
-		$relatedClassName = static::RelatedClassName;
-		return $relatedClassName::get();
+	public function provideGridListItems(array &$groupedItems) {
+		$filters = GridListFilter::get();
+		/** @var ModelTag|Model $filter */
+		$items = $this->$this()->{static::RelationshipName}();
+
+		foreach ($filters as $filter) {
+			$filtered = $items->filter([
+				'GridListFilters.ID' => $filter->ID
+			]);
+			if (isset($groupedItems[ $filter->ModelTag() ])) {
+				$groupedItems[ $filter->ModelTag() ]->merge($filtered);
+			} else {
+				$groupedItems[ $filter->ModelTag() ] = $filtered;
+			}
+		}
 	}
 
 }

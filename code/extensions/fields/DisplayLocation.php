@@ -35,9 +35,9 @@ class DisplayLocation extends Field {
 	public function cmsFields() {
 		return [
 			new OptionsetField(self::DisplayLocationFieldName, 'Shows in', [
-				self::DisplayInContent => $this->translatedMessage(self::DisplayLocationFieldName, self::DisplayInContent . ".Label", 'Page content'),
-				self::DisplayInSidebar => $this->translatedMessage(self::DisplayLocationFieldName, self::DisplayInSidebar . ".Label", 'Side bar'),
-				self::DisplayInBoth    => $this->translatedMessage(self::DisplayLocationFieldName, self::DisplayInBoth . ".Label", 'Page content and Sidebar'),
+				self::DisplayInContent => $this->fieldDecoration(self::DisplayLocationFieldName, self::DisplayInContent . ".Label", 'Page content'),
+				self::DisplayInSidebar => $this->fieldDecoration(self::DisplayLocationFieldName, self::DisplayInSidebar . ".Label", 'Side bar'),
+				self::DisplayInBoth    => $this->fieldDecoration(self::DisplayLocationFieldName, self::DisplayInBoth . ".Label", 'Page content and Sidebar'),
 			]),
 		];
 	}

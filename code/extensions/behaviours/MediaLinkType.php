@@ -69,9 +69,9 @@ class MediaLinkType extends Field {
 	public function cmsFields() {
 		return [
 			new DropdownField(self::MediaLinkTypeFieldName, 'Link type', [
-				EmbedCode::EmbedCodeOption       => $this->translatedMessage(EmbedCode::EmbedCodeOption, 'Label', 'Embed Code'),
-				Media::UploadedFileOption        => $this->translatedMessage(Media::UploadedFileOption, 'Label', 'Uploaded File'),
-				ExternalLink::ExternalLinkOption => $this->translatedMessage(ExternalLink::ExternalLinkFieldName, 'Label', 'External Link'),
+				EmbedCode::EmbedCodeOption       => $this->fieldDecoration(EmbedCode::EmbedCodeOption, 'Label', 'Embed Code'),
+				Media::UploadedFileOption        => $this->fieldDecoration(Media::UploadedFileOption, 'Label', 'Uploaded File'),
+				ExternalLink::ExternalLinkOption => $this->fieldDecoration(ExternalLink::ExternalLinkFieldName, 'Label', 'External Link'),
 			]),
 		];
 	}

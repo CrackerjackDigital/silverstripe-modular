@@ -6,6 +6,8 @@ use TextField;
 class Title extends Field {
 	const TitleFieldName = 'Title';
 
+	private static $sort = 'Title';
+
 	private static $db = [
 		self::TitleFieldName => 'Varchar(255)'
 	];
@@ -15,7 +17,7 @@ class Title extends Field {
 	];
 
 	public function updateSummaryFields(&$fields) {
-		$fields[self::TitleFieldName] = $this->translatedMessage(self::TitleFieldName, 'Label', 'Title');
+		$fields[self::TitleFieldName] = $this->fieldDecoration(self::TitleFieldName, 'Label', 'Title');
 	}
 
 	public function cmsFields() {

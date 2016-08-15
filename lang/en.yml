@@ -24,6 +24,10 @@ en:
   Modular\Fields\EventDate:
     EventDate:
       Label: 'Narrative Date'
+  Modular\Fields\GridListFilters:
+    GridListFilters:
+      Label: 'Applied filters'
+      Guide: 'Add filters here to show the item when In-Page Filtering is applied'
   Modular\Fields\Images:
     Images:
       Label: 'Images'

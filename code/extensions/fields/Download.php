@@ -24,7 +24,7 @@ class Download extends Field {
 		return [
 			new UploadField(
 				self::RelationshipName,
-				$this->translatedMessage(
+				$this->fieldDecoration(
 					self::RelationshipName,
 					'Label',
 					'Download'

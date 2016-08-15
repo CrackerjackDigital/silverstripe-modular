@@ -67,7 +67,7 @@ class Code extends Field {
 				->first();
 		}
 		if ($existing) {
-			$message = $this->translatedMessage(
+			$message = $this->fieldDecoration(
 				self::CodeFieldName,
 				'Duplicate',
 				"Code must be unique, the {singular} '{title}' already uses '{code}'", [

@@ -11,6 +11,7 @@ use GridFieldOrderableRows;
 use LiteralField;
 use Modular\Exception;
 use Modular\GridField\GridFieldConfig;
+use Modular\lang;
 use Modular\Model;
 use Modular\ModelExtension;
 use SS_List;
@@ -35,6 +36,8 @@ use ValidationResult;
  * @property \Modular\Model $owner
  */
 abstract class Field extends ModelExtension {
+	use lang;
+	
 	const UploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';
@@ -157,8 +160,8 @@ abstract class Field extends ModelExtension {
 	protected function setFieldDecorations(FormField $field) {
 		$fieldName = $field->getName();
 
-		$label = $this->translatedMessage($fieldName, "Label", $field->Title(), [], $field);
-		$guide = $this->translatedMessage($fieldName, "Guide", '', [], $field);
+		$label = $this->fieldDecoration($fieldName, "Label", $field->Title(), [], $field);
+		$guide = $this->fieldDecoration($fieldName, "Guide", '', [], $field);
 
 		$field->setTitle($label);
 		$field->setRightTitle($guide);
@@ -172,7 +175,7 @@ abstract class Field extends ModelExtension {
 	protected function addHTMLAttributes(FormField $field) {
 		$fieldName = $field->getName();
 
-		$field->setAttribute('placeholder', $this->translatedMessage($fieldName, "Placeholder", '', [], $field));
+		$field->setAttribute('placeholder', $this->fieldDecoration($fieldName, "Placeholder", '', [], $field));
 
 		if (isset($allFieldsConstraints[ $fieldName ])) {
 			// add html5 validation attributes
@@ -287,7 +290,7 @@ abstract class Field extends ModelExtension {
 
 				if (false === preg_match($pattern, $value)) {
 					// add pattern error message to $messages
-					$messages[] = $this->translatedMessage(
+					$messages[] = $this->fieldDecoration(
 						$fieldName,
 						"Format", "be in format {pattern}",
 						[
@@ -321,7 +324,7 @@ abstract class Field extends ModelExtension {
 				}
 			}
 			if ($lengthMessage) {
-				$messages[] = $this->translatedMessage(
+				$messages[] = $this->fieldDecoration(
 					$fieldName, "Length", $lengthMessage,
 					[
 						'minlength' => $minlength,
@@ -334,7 +337,7 @@ abstract class Field extends ModelExtension {
 
 			//if there were any error messages, set the error result and throw exception
 			if ($messages) {
-				$message = $this->translatedMessage(
+				$message = $this->fieldDecoration(
 					$fieldName,
 					"Label",
 					"{label} should " . implode(' and ', $messages),
@@ -451,7 +454,7 @@ abstract class Field extends ModelExtension {
 			throw new Exception("No $configVarName configuration set");
 		}
 
-		$field->setRightTitle($this->translatedMessage(
+		$field->setRightTitle($this->fieldDecoration(
 			$fieldName, 'Label', $field->Title(), [
 				'extensions' => implode(', ', $extensions),
 			]
@@ -537,62 +540,10 @@ abstract class Field extends ModelExtension {
 		return $constraints;
 	}
 
-	/**
-	 * Load message from lang.yml for the extension class (e.g. ImageField) and then the extended class (e.g. FullWidthImageBlock) which may override.
-	 *
-	 * If not found in lang file use the default.
-	 *
-	 * Replaces tokens in message as usual merging in some default tokens, such as singular and plural names
-	 * and the field Title as 'label'.
-	 *
-	 * @param string $fieldName  - name of field as it is on the form, e.g. 'Title', 'ImageID'
-	 * @param string $decoration - what decoration for the field, e.g. 'Title', 'Placeholder', 'Guide'
-	 * @param string $default
-	 * @param array  $tokens
-	 * @param null   $field
-	 * @return string
-	 */
-	protected function translatedMessage($fieldName, $decoration, $default = '', array $tokens = [], $field = null) {
-		// merge in some defaults, passed tokens will override
-		$tokens = array_merge(
-			[
-				'singular' => $this()->i18n_singular_name() ?: $this()->singular_name(),
-				'plural'   => $this()->i18n_plural_name() ?: $this()->plural_name(),
-			],
-			($field instanceof FormField)
-				? ['label' => $field->Title()]
-				: [],
-			$tokens
-		);
-		// strip ID suffix if there
-		$fieldName = substr($fieldName, -2, 2) == 'ID'
-			? substr($fieldName, 0, -2)
-			: $fieldName;
-
-		$extensionClass = $this->class;
-		$modelClass = $this()->class;
-
-		// we want a model supplied value in preference to an extension supplied value in preference to the default.
-		// for has-ones the field name may have an 'ID' appended.
-		if (!$value = _t("$modelClass.$fieldName.$decoration", '', $tokens)) {
-			// try again with 'ID'
-			if (!$value = _t("$modelClass.$fieldName.{$decoration}ID", '', $tokens)) {
-				// now try the extension
-				if (!$value = _t("$extensionClass.$fieldName.$decoration", '', $tokens)) {
-					// try again extension with 'ID'
-					if (!$value = _t("$extensionClass.$fieldName.{$decoration}ID", '', $tokens)) {
-						$value = _t('IntentionallyGoingToFail', $default, $tokens);
-					}
-				}
-			}
-		}
-		return $value;
-	}
-
 	protected function saveMasterHint() {
 		return new LiteralField(
 			static::RelationshipName . 'Hint',
-			$this->translatedMessage(
+			$this->fieldDecoration(
 				static::RelationshipName,
 				'SaveMasterHint',
 				"<b>Please save the master first</b>"

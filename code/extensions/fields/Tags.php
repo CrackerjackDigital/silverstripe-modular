@@ -10,7 +10,7 @@ use Modular\Models\Tag;
 
 class Tags extends Field {
 	const RelationshipName      = 'Tags';
-	const RelationshipClassName = 'Modular\Models\Tag';
+	const RelatedClassName = 'Modular\Models\Tag';
 
 	private static $multiple_tags = true;
 	private static $can_create_tags = true;
@@ -21,7 +21,7 @@ class Tags extends Field {
 			$parent,
 			[
 				'many_many' => [
-					static::RelationshipName => static::RelationshipClassName
+					static::RelationshipName => static::RelatedClassName
 				]
 			]
 		);

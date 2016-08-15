@@ -10,8 +10,8 @@ use Modular\Fields\Field;
  * @method \DataList Blocks
  */
 class HasBlocks extends Field {
-	const RelationshipName = 'Blocks';
-	const BlockClassName = 'Modular\Blocks\Block';
+	const RelationshipName    = 'Blocks';
+	const BlockClassName      = 'Modular\Blocks\Block';
 	const GridFieldConfigName = 'Modular\GridField\HasBlocksGridFieldConfig';
 
 	private static $cms_tab_name = 'Root.ContentBlocks';
@@ -21,22 +21,22 @@ class HasBlocks extends Field {
 		return array_merge_recursive(
 			$parent,
 			[
-				'many_many' => [
-					static::RelationshipName => static::BlockClassName
+				'many_many'             => [
+					static::RelationshipName => static::BlockClassName,
 				],
-			    'many_many_extraFields' => [
-				    self::RelationshipName => [
-					    self::GridFieldOrderableRowsFieldName => 'Int',
-				    ],
-			    ]
-		    ]
+				'many_many_extraFields' => [
+					self::RelationshipName => [
+						self::GridFieldOrderableRowsFieldName => 'Int',
+					],
+				],
+			]
 		);
 	}
 
 	public function cmsFields() {
 		return $this()->isInDB()
-		? [$this->gridField(static::RelationshipName)]
-		: [$this->saveMasterHint()];
+			? [$this->gridField(static::RelationshipName)]
+			: [$this->saveMasterHint()];
 	}
 
 	/**

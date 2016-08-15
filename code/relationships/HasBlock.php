@@ -71,7 +71,7 @@ class HasBlock extends Field {
 		parent::validate($validationResult);
 		if (!$blockType = $this->getBlockType()) {
 			$validationResult->error(
-				$this->translatedMessage(
+				$this->fieldDecoration(
 					self::BlockTypeFieldName,
 					'missing',
 					'{model} requires a block type',

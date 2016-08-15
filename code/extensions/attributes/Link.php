@@ -41,8 +41,8 @@ class LinkAttributeField extends Field {
 
 	public function cmsFields() {
 		$types = [
-			self::ExternalLinkValue => $this->translatedMessage('LinkType', 'ExternalLink', 'External Link'),
-			self::InternalLinkValue => $this->translatedMessage('LinkType', 'InternalLink', 'Internal Link'),
+			self::ExternalLinkValue => $this->fieldDecoration('LinkType', 'ExternalLink', 'External Link'),
+			self::InternalLinkValue => $this->fieldDecoration('LinkType', 'InternalLink', 'Internal Link'),
 		];
 
 		return [
@@ -107,7 +107,7 @@ class LinkAttributeField extends Field {
 
 		return $this()->InternalLink()
 			? $this()->InternalLink()->Link()
-			: $this->translatedMessage(
+			: $this->fieldDecoration(
 				'InternalLink',
 				'MissingTarget',
 				'[linked page not found or not set]'

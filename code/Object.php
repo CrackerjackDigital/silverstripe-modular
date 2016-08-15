@@ -23,5 +23,12 @@ class Object extends \Object {
 	use config;
 	use debugging;
 
+	/**
+	 * Invoking an Object returns itself.
+	 * @return $this
+	 */
+	public function __invoke() {
+		return $this;
+	}
 
 }

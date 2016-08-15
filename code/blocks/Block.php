@@ -1,6 +1,7 @@
 <?php
 namespace Modular\Blocks;
 
+use Modular\lang;
 use Modular\Model;
 
 /**
@@ -17,6 +18,7 @@ use Modular\Model;
  * 'Pull Quote'
  */
 class Block extends Model {
+	use lang;
 
 	private static $template = '';
 

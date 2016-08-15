@@ -46,8 +46,8 @@ class InternalOrExternalLink extends Field {
 	public function cmsFields() {
 		return [
 			new DropdownField(self::LinkTypeFieldName, 'Link type', [
-				InternalLink::InternalLinkOption => $this->translatedMessage(InternalLink::InternalLinkFieldName, 'Label', 'Internal link'),
-				ExternalLink::ExternalLinkOption => $this->translatedMessage(ExternalLink::ExternalLinkFieldName, 'Label', 'External link'),
+				InternalLink::InternalLinkOption => $this->fieldDecoration(InternalLink::InternalLinkFieldName, 'Label', 'Internal link'),
+				ExternalLink::ExternalLinkOption => $this->fieldDecoration(ExternalLink::ExternalLinkFieldName, 'Label', 'External link'),
 			])
 		];
 	}
