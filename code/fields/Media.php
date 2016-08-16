@@ -1,12 +1,19 @@
 <?php
 namespace Modular\Fields;
 
-abstract class Media extends File {
-	const MediaLinkOption = 'Media';
-	const UploadFieldName = 'MediaID';
+abstract class Media extends UploadedFile {
+	const RelationshipName = 'Media';
+	const UploadFieldName  = 'MediaID';      // keep in sync with RelationshipName
+	// override in concrete class e.g. 'audio' or 'video'
+	const UploadFolderName = 'media';
+	const UploadedFileOption = 'UploadedFile';
 
-	private static $base_upload_folder = 'media';
+	private static $has_one = [
+		self::RelationshipName => 'File'
+	];
 
-	private static $allowed_files = 'audio,video';
+	public static function field_option() {
+		return [static::UploadFieldName=> self::UploadedFileOption];
+	}
 
 }

@@ -4,19 +4,21 @@ namespace Modular\Fields;
 use ArrayList;
 use FormField;
 use Modular\Behaviours\MediaLinkType;
-use Modular\upload;
 
 /**
  * HasTranscriptField
  *
  * @method Transcript
  */
-class Transcript extends File {
-	use upload;
 
-	const RelationshipName        = 'Transcript';
-	const RelatedClassName        = 'File';      // keep in sync with RelationshipName
-	const DefaultUploadFolderName = 'transcripts';
+class Transcript extends Field {
+	const RelationshipName = 'Transcript';
+	const UploadFieldName  = 'TranscriptID';      // keep in sync with RelationshipName
+	const UploadFolderName = 'transcripts';
+
+	private static $has_one = [
+		self::RelationshipName => 'File'
+	];
 
 	private static $allowed_transcript_files = 'doc';
 
@@ -27,5 +29,35 @@ class Transcript extends File {
 	 */
 	public function Transcripts() {
 		return new ArrayList(array_filter([$this->Transcript()]));
+	}
+
+
+	/**
+	 * Adds a single Transcript single-selection UploadField
+	 *
+	 * @return array
+	 */
+	public function cmsFields() {
+		return [
+			$this->makeUploadField(static::RelationshipName)
+		];
+	}
+
+	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
+		parent::customFieldConstraints($field, $allFieldConstraints);
+		$fieldName = $field->getName();
+
+		if ($fieldName == self::RelationshipName) {
+			$this->configureUploadField($field, 'allowed_transcript_files');
+			$field->hideUnless(MediaLinkType::MediaLinkTypeFieldName)->isEqualTo('EmbedCode');
+		}
+	}
+
+	public function onAfterPublish() {
+		if ($transcript = $this->Transcript()) {
+			if ($transcript->hasExtension('Versioned')) {
+				$transcript->publish('Stage', 'Live', false);
+			}
+		}
 	}
 }
