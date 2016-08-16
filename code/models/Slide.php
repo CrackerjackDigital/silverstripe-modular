@@ -6,7 +6,8 @@ use \Modular\Model;
 class Slide extends Model {
 	const SortFieldName = 'Sort';
 	const RelationshipName = 'CarouselBlock';
-	const RelatedClassName = 'Modular\Blocks\Block'
+	const RelatedClassName = 'Modular\Blocks\Block';
+	
 	private static $db = [
 		self::SortFieldName => 'Int'
 	];
