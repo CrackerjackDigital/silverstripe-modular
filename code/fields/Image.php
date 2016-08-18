@@ -6,7 +6,8 @@ use FormField;
 use Modular\Interfaces\Imagery;
 
 class Image extends File implements Imagery {
-	const RelationshipName        = 'Image';
+	const RelationshipName = 'Image';
+	const RelatedClassName = 'Image';
 
 	private static $base_upload_folder = 'images';
 
@@ -14,14 +15,16 @@ class Image extends File implements Imagery {
 
 	/**
 	 * Return a list with only item being the single related image.
+	 *
 	 * @return \ArrayList
 	 */
 	public function Images() {
-		return new ArrayList(array_filter([$this()->{self::RelationshipName}()]));
+		return new ArrayList(array_filter([$this->Image()]));
 	}
 
 	/**
 	 * Return the single related image, shouldn't really get here as the extended model's field accessor should be called first.
+	 *
 	 * @return Image|null
 	 */
 	public function Image() {
