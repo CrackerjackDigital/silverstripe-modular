@@ -27,10 +27,13 @@ trait lang {
 	 */
 	protected function fieldDecoration($fieldName, $decoration = 'Label', $default = '', array $tokens = [], $field = null) {
 		// merge in some defaults, passed tokens will override
+		$extensionClass = $this->class;
+		$modelClass = $this()->class;
+
 		$tokens = array_merge(
 			[
-				'singular' => $this()->i18n_singular_name() ?: $this()->singular_name(),
-				'plural'   => $this()->i18n_plural_name() ?: $this()->plural_name(),
+				'singular' => _t("$modelClass.SINGULARNAME"),
+				'plural'   => _t("$modelClass.PLURALNAME")
 			],
 			($field instanceof \FormField)
 				? ['label' => $field->Title()]
@@ -41,9 +44,6 @@ trait lang {
 		$fieldName = substr($fieldName, -2, 2) == 'ID'
 			? substr($fieldName, 0, -2)
 			: $fieldName;
-
-		$extensionClass = $this->class;
-		$modelClass = $this()->class;
 
 		// we want a model supplied value in preference to an extension supplied value in preference to the default.
 		// for has-ones the field name may have an 'ID' appended.

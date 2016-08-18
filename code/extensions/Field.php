@@ -59,6 +59,18 @@ abstract class Field extends ModelExtension {
 	// Zend_Locale_Format compatible format string, if blank then default for locale is used
 	private static $time_field_format = '';
 
+	private static $gridfield_orderable = true;
+
+	private static $gridfield_addable = true;
+
+	protected function orderable() {
+		return $this->config()->get('gridfield_orderable');
+	}
+
+	protected function addable() {
+		return $this->config()->get('gridfield_addable');
+	}
+
 	/**
 	 * If we use invocation we can type-cast the result to a ModularModel
 	 *
@@ -205,6 +217,26 @@ abstract class Field extends ModelExtension {
 		$relationshipName = $relationshipName
 			?: static::RelationshipName;
 
+		$config = $this->gridFieldConfig($relationshipName, $configClassName);
+
+		/** @var GridField $gridField */
+		$gridField = GridField::create(
+			$relationshipName,
+			$relationshipName,
+			$this()->$relationshipName(),
+			$config
+		);
+		return $gridField;
+	}
+
+	/**
+	 * Returns a custom gridfield config, or the generated class name for this field.
+	 * Override if you need something more specific.
+	 *
+	 * @param string $configClassName specific class name if required.
+	 * @return GridFieldConfig
+	 */
+	protected function gridFieldConfig($relationshipName, $configClassName) {
 		$configClassName = $configClassName
 			?: static::GridFieldConfigName
 				?: get_class($this) . 'GridFieldConfig';
@@ -212,22 +244,25 @@ abstract class Field extends ModelExtension {
 		/** @var GridFieldConfig $config */
 		$config = $configClassName::create();
 
-		/** @var GridField $gridField */
-		$gridField = GridField::create(
-			$relationshipName,
-			$relationshipName,
-			$this->owner->$relationshipName(),
-			$config
-		);
+		/** @var Model $model */
+		$model = $this();
 
-		if ($this()->isInDB()) {
-			// only add if this record is already saved
-			$config->addComponent(
-				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
-			);
+		if ($model->isInDB() && $this->orderable()) {
+			// check we have a sort field in model or the relationship extraFields.
+			$sortFieldExists = $model->hasField(static::GridFieldOrderableRowsFieldName)
+				|| in_array(
+					static::GridFieldOrderableRowsFieldName,
+					$model->manyManyExtraFieldsForComponent($relationshipName) ?: []
+				);
+
+			if ($sortFieldExists) {
+				$config->addComponent(
+					new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+				);
+
+			}
 		}
-
-		return $gridField;
+		return $config;
 	}
 
 	/**
