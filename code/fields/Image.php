@@ -5,15 +5,10 @@ use ArrayList;
 use FormField;
 use Modular\Interfaces\Imagery;
 
-class Image extends Field implements Imagery {
-	const RelationshipName = 'Image';
-	const UploadFieldName = 'ImageID';      // keep in sync with RelationshipName
-	const UploadFolderName = 'images';
+class Image extends File implements Imagery {
+	const RelationshipName        = 'Image';
 
-
-	private static $has_one = [
-		self::RelationshipName => 'Image'
-	];
+	private static $base_upload_folder = 'images';
 
 	private static $allowed_files = 'image';
 
@@ -33,22 +28,4 @@ class Image extends Field implements Imagery {
 		return $this()->{self::RelationshipName}();
 	}
 
-	/**
-	 * Adds a single Image single-selection UploadField
-	 * @return array
-	 */
-	public function cmsFields() {
-		return [
-			$this->makeUploadField(static::RelationshipName)
-		];
-	}
-
-	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
-		parent::customFieldConstraints($field, $allFieldConstraints);
-		$fieldName = $field->getName();
-
-		if ($fieldName == self::RelationshipName) {
-			$this->configureUploadField($field);
-		}
-	}
 }

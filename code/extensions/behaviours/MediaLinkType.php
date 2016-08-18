@@ -96,7 +96,7 @@ class MediaLinkType extends Field {
 				// hide embed code link field unless MediaLinkType field is that option
 				$field->hideUnless(self::MediaLinkTypeFieldName)->isEqualTo(EmbedCode::EmbedCodeOption);
 
-			} elseif ($fieldName == Media::UploadFieldName) {
+			} elseif ($fieldName == Media::field_name()) {
 				// hide upload field unless MediaLinkType field is that option
 				$field->hideUnless(self::MediaLinkTypeFieldName)->isEqualTo(Media::MediaLinkOption);
 			}

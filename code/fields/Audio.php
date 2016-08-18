@@ -2,7 +2,6 @@
 namespace Modular\Fields;
 
 use ArrayList;
-use FormField;
 
 /**
  * HasAudioField
@@ -10,10 +9,11 @@ use FormField;
  * @method Media
  */
 class Audio extends Media {
+	const DefaultUploadFolderName = 'audio';
 
 	private static $allowed_audio_files = 'audio';
 
-	private static $upload_folder = 'audio';
+	private static $upload_folder = self::DefaultUploadFolderName;
 
 	/**
 	 * Return a list with only item being the single related image.
