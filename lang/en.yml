@@ -13,6 +13,9 @@ en:
   Modular\Relationships\HasBlocks:
     Blocks:
       Label: 'Content Blocks'
+  Modular\Relationships\HasGridList:
+    GridListBlocks:
+      Label: 'Grid Blocks'
   Modular\Fields\Code:
     Code:
       Label: "Unique code"
@@ -133,6 +136,11 @@ en:
       Label: 'Link to external image'
     UploadedFile:
       Label: 'Uploaded image'
+  Modular\Blocks\GridList:
+    SINGULARNAME: 'In-Page Grid block'
+    PLURALNAME: 'In-Page Grid blocks'
+    Title:
+      Label: 'In-Page Grid Blocks'
   Modular\Blocks\ImageGallery:
     DESCRIPTION: 'Image gallery images'
     SINGULARNAME: "Images (image gallery)"

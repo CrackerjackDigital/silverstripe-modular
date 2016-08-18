@@ -16,9 +16,9 @@ class GridFieldAddNewMultiClassSorted extends GridFieldAddNewMultiClass {
 
 	const DescendantsOnly = true;
 
+
 	private static $exclude_classes = [
-		'Modular*',
-		'ChecklistBlock',
+		'Modular*'          // only include classes which have been 'brought through' to the application via inheritance
 	];
 
 	/**

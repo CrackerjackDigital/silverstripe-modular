@@ -26,11 +26,10 @@ trait lang {
 	 * @return string
 	 */
 	protected function fieldDecoration($fieldName, $decoration = 'Label', $default = '', array $tokens = [], $field = null) {
-		// merge in some defaults, passed tokens will override
 		$tokens = array_merge(
 			[
-				'singular' => $this()->i18n_singular_name() ?: $this()->singular_name(),
-				'plural'   => $this()->i18n_plural_name() ?: $this()->plural_name(),
+				'singular' => $this->singularName(),
+				'plural'   => $this->pluralName()
 			],
 			($field instanceof \FormField)
 				? ['label' => $field->Title()]
@@ -60,6 +59,24 @@ trait lang {
 			}
 		}
 		return $value;
+	}
+
+	protected function singularName() {
+		if ($this() instanceof \DataObject) {
+			$singular = $this()->i18n_singular_name() ?: $this()->singular_name();
+		} else {
+			$singular = $this->i18n_singular_name() ?: $this->singular_name();
+		}
+		return $singular;
+	}
+
+	protected function pluralName() {
+		if ($this() instanceof \DataObject) {
+			$plural = $this()->i18n_plural_name() ?: $this()->plural_name();
+		} else {
+			$plural = $this->i18n_plural_name() ?: $this->plural_name();
+		}
+		return $plural;
 	}
 
 	/**

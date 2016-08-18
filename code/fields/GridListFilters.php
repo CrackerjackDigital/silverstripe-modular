@@ -1,6 +1,10 @@
 <?php
 namespace Modular\Fields;
-
+/**
+ * Provides editable filters and extension via provideGridListFilters mechanism that in-page gridlist can use.
+ *
+ * @package Modular\Fields
+ */
 class GridListFilters extends Field {
 	const RelationshipName = 'GridListFilters';
 	const RelatedClassName = 'Modular\Models\GridListFilter';
@@ -11,8 +15,8 @@ class GridListFilters extends Field {
 			$parent,
 			[
 				'many_many' => [
-					static::RelationshipName => static::RelatedClassName
-				]
+					static::RelationshipName => static::RelatedClassName,
+				],
 			]
 		);
 	}

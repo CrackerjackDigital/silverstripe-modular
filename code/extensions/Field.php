@@ -205,12 +205,7 @@ abstract class Field extends ModelExtension {
 		$relationshipName = $relationshipName
 			?: static::RelationshipName;
 
-		$configClassName = $configClassName
-			?: static::GridFieldConfigName
-				?: get_class($this) . 'GridFieldConfig';
-
-		/** @var GridFieldConfig $config */
-		$config = $configClassName::create();
+		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
 		/** @var GridField $gridField */
 		$gridField = GridField::create(
@@ -228,6 +223,21 @@ abstract class Field extends ModelExtension {
 		}
 
 		return $gridField;
+	}
+
+	/**
+	 * Allow override of grid field config
+	 * @param $relationshipName
+	 * @param $configClassName
+	 * @return GridFieldConfig
+	 */
+	protected function gridFieldConfig($relationshipName, $configClassName) {
+		$configClassName = $configClassName
+			?: static::GridFieldConfigName
+				?: get_class($this) . 'GridFieldConfig';
+
+		/** @var GridFieldConfig $config */
+		return $configClassName::create();
 	}
 
 	/**

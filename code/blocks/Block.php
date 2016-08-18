@@ -3,7 +3,6 @@ namespace Modular\Blocks;
 
 use Modular\lang;
 use Modular\Model;
-use Modular\Relationships\HasBlocks;
 
 /**
  * Class which represents a block which can be added to an Article, of types ( in display order ). The types in the grid dropdown are determined by
@@ -20,10 +19,6 @@ use Modular\Relationships\HasBlocks;
  */
 class Block extends Model {
 	use lang;
-
-	private static $belongs_many_many = [
-		HasBlocks::RelationshipName => 'Page'
-	];
 
 	private static $template = '';
 
