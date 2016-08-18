@@ -20,8 +20,4 @@ class InternalLink extends Field {
 			))->setName(self::InternalLinkFieldName)->setID(self::InternalLinkFieldName),
 		];
 	}
-
-	public static function field_option() {
-		return [self::InternalLinkFieldName => self::InternalLinkOption];
-	}
 }

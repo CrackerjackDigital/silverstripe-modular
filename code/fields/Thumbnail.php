@@ -3,16 +3,13 @@ namespace Modular\Fields;
 
 use FormField;
 
-class Thumbnail extends Field {
-	const RelationshipName = 'Thumbnail';
-	const UploadFieldName  = 'ThumbnailID';      // keep in sync with RelationshipName
-	const UploadFolderName = 'thumbnails';
-
-	private static $has_one = [
-		self::RelationshipName => 'Image'
-	];
+class Thumbnail extends Image {
+	const RelationshipName        = 'Thumbnail';
+	const DefaultUploadFolderName = 'thumbnails';
 
 	private static $allowed_thumbnail_files = 'image';
+
+	private static $upload_folder = 'thumbnails';
 
 	/**
 	 * Return the single related image, shouldn't really get here as the extended model's field accessor should be called first.
@@ -30,7 +27,7 @@ class Thumbnail extends Field {
 	 */
 	public function cmsFields() {
 		return [
-			$this->makeUploadField(static::RelationshipName)
+			$this->makeUploadField(static::RelationshipName),
 		];
 	}
 

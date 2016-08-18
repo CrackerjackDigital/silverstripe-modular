@@ -16,62 +16,35 @@ use FormField;
 class InternalOrExternalLink extends Field {
 	const LinkTypeFieldName = 'LinkType';
 
-	/**
-	 * Add enum definition to config.db for LinkTypeFieldName with field names from Internal and External link fields as options. These are taken via
-	 * config.enum_values so could be overridden.
-	 *
-	 * @param null $class
-	 * @param null $extension
-	 * @return array
-	 */
-	public function extraStatics($class = null, $extension = null) {
-		$parent = parent::extraStatics($class, $extension) ?: [];
-		$values = implode(',',
-			[
-				\Modular\Fields\InternalLink::InternalLinkOption,
-				\Modular\Fields\ExternalLink::ExternalLinkOption,
-			]
-		);
-
-		return array_merge_recursive(
-			$parent,
-			[
-				'db' => [
-					static::LinkTypeFieldName => 'enum("' . $values . '")'
-				],
-			]
-		);
-	}
-
-	public function cmsFields() {
-		return [
-			new DropdownField(self::LinkTypeFieldName, 'Link type', [
-				InternalLink::InternalLinkOption => $this->fieldDecoration(InternalLink::InternalLinkFieldName, 'Label', 'Internal link'),
-				ExternalLink::ExternalLinkOption => $this->fieldDecoration(ExternalLink::ExternalLinkFieldName, 'Label', 'External link'),
-			])
-		];
-	}
+	private static $enum_values = [
+		\Modular\Fields\InternalLink::InternalLinkOption,
+		\Modular\Fields\ExternalLink::ExternalLinkOption,
+	];
 
 	/**
-	 * Show/hide fields using display_logic depending on the LinkType field added by this extension.
+	 * Returns text of link, either as entered for External or generated from Internal. If Internal an target page
+	 * isn't found then returns LinkAttributeExtension.InternalLink.MissingTarget message e.g. '[linked page not found]' type message
 	 *
-	 * @param \FormField $field
-	 * @param array      $allFieldConstraints
+	 * @return string
 	 */
-	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
-		if (ClassInfo::exists('DisplayLogicCriteria')) {
-			$fieldName = $field->getName();
-
-			if ($fieldName == InternalLink::InternalLinkFieldName) {
-
-				$field->hideUnless(self::LinkTypeFieldName)->isEqualTo(InternalLink::InternalLinkOption);
-
-			} elseif ($fieldName == ExternalLink::ExternalLinkFieldName) {
-
-				$field->hideUnless(self::LinkTypeFieldName)->isEqualTo(ExternalLink::ExternalLinkOption);
-
+	public function ResolvedLink() {
+		if ($this->IsExternal()) {
+			$externalLink = $this()->ExternalLink;
+			if (!\Director::is_absolute_url($externalLink)) {
+				$link = 'http://' . $externalLink;
+			} else {
+				$link = $externalLink;
 			}
+		} elseif ($this()->InternalLink()) {
+			$link = $this()->InternalLink()->Link();
+		} else {
+			$link = $this->fieldDecoration(
+				'InternalLink',
+				'Missing',
+				'[linked page not found or not set]'
+			);
 		}
+		return $link;
 	}
 
 	/**
@@ -93,29 +66,62 @@ class InternalOrExternalLink extends Field {
 	}
 
 	/**
-	 * Returns text of link, either as entered for External or generated from Internal. If Internal an target page
-	 * isn't found then returns LinkAttributeExtension.InternalLink.MissingTarget message e.g. '[linked page not found]' type message
+	 * Add enum definition to config.db for LinkTypeFieldName with field names from Internal and External link fields as options. These are taken via
+	 * config.enum_values so could be overridden.
 	 *
-	 * @return string
+	 * @param null $class
+	 * @param null $extension
+	 * @return array
 	 */
-	public function ResolvedLink() {
-		if ($this->IsExternal()) {
-			$externalLink = $this()->ExternalLink;
-			if (!\Director::is_absolute_url($externalLink)) {
-				$link = 'http://' . $externalLink;
-			} else {
-				$link = $externalLink;
-			}
-		} elseif ($this()->InternalLink()) {
-			$link = $this()->InternalLink()->Link();
-		} else {
-			$link = $this->fieldDecoration(
-				'InternalLink',
-				'MissingTarget',
-				'[linked page not found or not set]'
-			);
-		}
-		return $link;
+	public function extraStatics($class = null, $extension = null) {
+		$parent = parent::extraStatics($class, $extension) ?: [];
+
+		$values = implode(',', $this->config()->get('enum_values'));
+
+		return array_merge_recursive(
+			$parent,
+			[
+				'db' => [
+					static::LinkTypeFieldName => 'enum("' . $values . '")'
+				],
+			]
+		);
 	}
 
+	public function cmsFields() {
+		return [
+			new DropdownField(self::LinkTypeFieldName, 'Link type', $this->linkOptions())
+		];
+	}
+
+	protected function linkOptions() {
+		return [
+			InternalLink::InternalLinkOption => $this->fieldDecoration(InternalLink::InternalLinkFieldName, 'Label', 'Internal link'),
+			ExternalLink::ExternalLinkOption => $this->fieldDecoration(ExternalLink::ExternalLinkFieldName, 'Label', 'External link'),
+		];
+	}
+
+	/**
+	 * Show/hide fields using display_logic depending on the LinkType field added by this extension.
+	 *
+	 * @param \FormField $field
+	 * @param array      $allFieldConstraints
+	 */
+	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
+		if (ClassInfo::exists('DisplayLogicCriteria')) {
+			$fieldName = $field->getName();
+
+			if ($fieldName == InternalLink::InternalLinkFieldName) {
+
+				$field->hideUnless(self::LinkTypeFieldName)
+					->isEqualTo(InternalLink::InternalLinkOption);
+
+			} elseif ($fieldName == ExternalLink::ExternalLinkFieldName) {
+
+				$field->hideUnless(self::LinkTypeFieldName)
+					->isEqualTo(ExternalLink::ExternalLinkOption);
+
+			}
+		}
+	}
 }

@@ -71,6 +71,12 @@ en:
       Guide: 'Title of this {singular}'
       Length: "{label} needs to be between {minlength} and {maxlength} characters long"
 # block types
+  Modular\Blocks\Block:
+    SINGULARNAME: 'Block'
+    PLURALNAME: 'Blocks'
+    Title:
+      Label: 'Title'
+      Guide: 'Title can be used to locate blocks to re-use them, it may also appear on pages of the website'
   Modular\Blocks\Audio:
     DESCRIPTION: 'Media - Audio'
     SINGULARNAME: 'Audio (podcast etc)'
@@ -115,6 +121,12 @@ en:
       Label: 'Embed code'
     UploadedFile:
       Label: 'Uploaded file'
+  Modular\Blocks\Files:
+    DISCRIPTION: 'A set of files'
+    SINGULARNAME: 'Files'
+    PLURALNAME: 'Files'
+    Title:
+      Guide: 'This title is for CMS use only and not displayed on the website (each file has its own title)'
   Modular\Blocks\Footnotes:
     SINGULARNAME: 'Footnote'
     PLURALNAME: 'Footnotes'

@@ -12,9 +12,11 @@ require_once 'traits/debugging.php';
 require_once 'traits/enabler.php';
 require_once 'traits/json.php';
 require_once 'traits/lang.php';
-require_once 'traits/owned.php';
 require_once 'traits/options.php';
+require_once 'traits/owned.php';
+require_once 'traits/requirements.php';
 require_once 'traits/tokens.php';
+require_once 'traits/upload.php';
 
 class Object extends \Object {
 	use cache;

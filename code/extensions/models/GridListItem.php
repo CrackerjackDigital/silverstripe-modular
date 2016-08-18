@@ -1,9 +1,11 @@
 <?php
 namespace Modular\Extensions\Model;
+use Modular\ModelExtension;
+
 /**
- * Render the extended model as an item in a gridlist using the associated template
+ * Render the extended model (e.g. Block)/view (e.g. Page) as an item in a gridlist using the associated template
  */
-class GridListItem extends \Modular\ModelExtension {
+class GridListItem extends ModelExtension {
 	/**
 	 * Renders with selected template passing through parameters
 	 * GridListItem constructor.

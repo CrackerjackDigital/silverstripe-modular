@@ -18,7 +18,7 @@ class MediaLinkType extends Field {
 
 	private static $enum_values = [
 		\Modular\Fields\EmbedCode::EmbedCodeOption,
-		\Modular\Fields\Media::UploadedFileOption,
+		\Modular\Fields\Media::MediaLinkOption,
 		\Modular\Fields\ExternalLink::ExternalLinkOption,
 	];
 
@@ -44,6 +44,8 @@ class MediaLinkType extends Field {
 			return $this()->{ExternalLink::ExternalLinkFieldName};
 		} elseif ($this->IsInternalLink()) {
 			return $this()->{InternalLink::InternalLinkFieldName};
+		} elseif ($this->IsEmbedCode()) {
+			return $this()->{EmbedCode::EmbedCodeFieldName};
 		}
 	}
 
@@ -70,8 +72,8 @@ class MediaLinkType extends Field {
 		return [
 			new DropdownField(self::MediaLinkTypeFieldName, 'Link type', [
 				EmbedCode::EmbedCodeOption       => $this->fieldDecoration(EmbedCode::EmbedCodeOption, 'Label', 'Embed Code'),
-				Media::UploadedFileOption        => $this->fieldDecoration(Media::UploadedFileOption, 'Label', 'Uploaded File'),
-				ExternalLink::ExternalLinkOption => $this->fieldDecoration(ExternalLink::ExternalLinkFieldName, 'Label', 'External Link'),
+				Media::MediaLinkOption           => $this->fieldDecoration(Media::MediaLinkOption, 'Label', 'Uploaded Media'),
+				ExternalLink::ExternalLinkOption => $this->fieldDecoration(ExternalLink::ExternalLinkOption, 'Label', 'External Link'),
 			]),
 		];
 	}
@@ -96,7 +98,7 @@ class MediaLinkType extends Field {
 
 			} elseif ($fieldName == Media::UploadFieldName) {
 				// hide upload field unless MediaLinkType field is that option
-				$field->hideUnless(self::MediaLinkTypeFieldName)->isEqualTo(Media::UploadedFileOption);
+				$field->hideUnless(self::MediaLinkTypeFieldName)->isEqualTo(Media::MediaLinkOption);
 			}
 		}
 	}

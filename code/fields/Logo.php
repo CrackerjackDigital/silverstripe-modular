@@ -4,9 +4,9 @@ namespace Modular\Fields;
 use FormField;
 
 class Logo extends Field {
-	const RelationshipName = 'Logo';
-	const UploadFieldName  = 'LogoID';      // keep in sync with RelationshipName
-	const UploadFolderName = 'logos';
+	const RelationshipName        = 'Logo';
+	const UploadFieldName         = 'LogoID';      // keep in sync with RelationshipName
+	const DefaultUploadFolderName = 'logos';
 
 	private static $has_one = [
 		self::RelationshipName => 'Image'

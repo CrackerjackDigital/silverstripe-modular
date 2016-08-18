@@ -17,9 +17,4 @@ class ExternalLink extends Field {
 			new TextField(self::ExternalLinkFieldName),
 		];
 	}
-
-	public static function field_option() {
-		return [self::ExternalLinkFieldName => self::ExternalLinkOption];
-	}
-
 }

@@ -38,7 +38,7 @@ use ValidationResult;
 abstract class Field extends ModelExtension {
 	use lang;
 
-	const UploadFolderName = 'incoming';
+	const DefaultUploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';
 
@@ -193,52 +193,6 @@ abstract class Field extends ModelExtension {
 		}
 	}
 
-	/**
-	 * Return a GridField configured for editing attached MediaModels. If the master record is in the database
-	 * then also add GridFieldOrderableRows (otherwise complaint re UnsavedRelationList not being a DataList happens).
-	 *
-	 * @param string|null $relationshipName
-	 * @param string|null $configClassName name of grid field configuration class otherwise one is manufactured
-	 * @return \GridField
-	 */
-	protected function gridField($relationshipName = null, $configClassName = null) {
-		$relationshipName = $relationshipName
-			?: static::RelationshipName;
-
-		$config = $this->gridFieldConfig($relationshipName, $configClassName);
-
-		/** @var GridField $gridField */
-		$gridField = GridField::create(
-			$relationshipName,
-			$relationshipName,
-			$this->owner->$relationshipName(),
-			$config
-		);
-
-		if ($this()->isInDB()) {
-			// only add if this record is already saved
-			$config->addComponent(
-				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
-			);
-		}
-
-		return $gridField;
-	}
-
-	/**
-	 * Allow override of grid field config
-	 * @param $relationshipName
-	 * @param $configClassName
-	 * @return GridFieldConfig
-	 */
-	protected function gridFieldConfig($relationshipName, $configClassName) {
-		$configClassName = $configClassName
-			?: static::GridFieldConfigName
-				?: get_class($this) . 'GridFieldConfig';
-
-		/** @var GridFieldConfig $config */
-		return $configClassName::create();
-	}
 
 	/**
 	 * Validates fields according to their validation rules, specifically
@@ -407,81 +361,6 @@ abstract class Field extends ModelExtension {
 		return [];
 	}
 
-	/**
-	 * Return an upload field wrapped in a DisplayLogicWrapper as they all should be when using displaylogic.
-	 *
-	 * @param $fieldName
-	 * @return \DisplayLogicWrapper
-	 * @throws \Exception
-	 */
-	public function makeUploadField($fieldName) {
-		$wrapper = (new DisplayLogicWrapper(
-			$field = new UploadField(
-				$fieldName
-			)
-		))->setID($fieldName)->setName($fieldName);
-		return $wrapper;
-	}
-
-	/**
-	 * @param UploadField|DisplayLogicWrapper $field
-	 * @param string                          $configVarName - allow you to switch config to check e.g. 'allowed_video_files'
-	 * @throws \Exception
-	 */
-	protected function configureUploadField($field, $configVarName = 'allowed_files') {
-		$fieldName = $field->getName();
-		if ($field instanceof DisplayLogicWrapper) {
-			// drill down into wrapper to get actual UploadField
-			$field = $field->fieldByName($fieldName);
-		}
-
-		list($minlength, $maxlength, $pattern) = $this->fieldConstraints($fieldName, [0, 0, '']);
-
-		$field->setAllowedMaxFileNumber($maxlength ?: null);
-		// don't allow existing media to be re-attached it's a has_one so would be messy
-		$field->setCanAttachExisting(false);
-		$field->setFolderName($this->uploadFolderName());
-
-		// could be string for category or an array of extensions
-		// try model first then extension
-
-		$extensions = $allowedFiles = $this()->config()->get($configVarName)
-			?: $this->config()->get($configVarName);
-
-		if (!is_array($allowedFiles)) {
-			// get extensions from category so we always get a list of extensions for the CMS right title
-			$allCategoryExtensions = \File::config()->get('app_categories') ?: [];
-			if (isset($allCategoryExtensions[ $allowedFiles ])) {
-				$extensions = $allCategoryExtensions[ $allowedFiles ];
-			} else {
-				$extensions = [$allowedFiles];
-			}
-		}
-		if (is_array($allowedFiles)) {
-			$field->setAllowedExtensions($extensions);
-		} elseif ($allowedFiles) {
-			// not an array so a category e.g. 'video'
-			$field->setAllowedFileCategories($allowedFiles);
-		} else {
-			throw new Exception("No $configVarName configuration set");
-		}
-
-		$field->setRightTitle($this->fieldDecoration(
-			$fieldName, 'Label', $field->Title(), [
-				'extensions' => implode(', ', $extensions),
-			]
-		));
-
-	}
-
-	/**
-	 * Returns the path relative to assets/ for the particular media type, e.g 'videos', 'audio' etc.
-	 *
-	 * Uses config.allowed_files if not overriden by UploadFolderName const.
-	 */
-	public function uploadFolderName() {
-		return $this()->config()->get('upload_folder') ?: static::UploadFolderName;
-	}
 
 	/**
 	 * Configure date fields to be in various states as per parameter options.
@@ -531,7 +410,7 @@ abstract class Field extends ModelExtension {
 	 * @param array  $defaults to use if not found in config for that field = no validation performed
 	 * @return array
 	 */
-	protected function fieldConstraints($fieldName, array $defaults = [0, 0, '']) {
+	public function fieldConstraints($fieldName, array $defaults = [0, 0, '']) {
 		$allFieldsConstraints = array_merge(
 			$this->config()->get(static::ValidationRulesConfigVarName) ?: [],
 			$this()->config()->get(static::ValidationRulesConfigVarName) ?: []

@@ -3,17 +3,18 @@ namespace Modular\Fields;
 
 use FormField;
 use Modular\Interfaces\Imagery;
+use Modular\Relationships\ManyMany;
+use Modular\upload;
 
-class Images extends Field implements Imagery {
-	const RelationshipName = 'Images';
-	const UploadFieldName = 'Images';
-	const UploadFolderName = 'images';
+class Images extends ManyMany implements Imagery {
+	use upload;
 
-	private static $has_many = [
-		self::RelationshipName => 'Image'
-	];
+	const RelationshipName        = 'Images';
+	const RelatedClassName        = 'Image';
+	const UploadFieldName         = 'Images';
+	const DefaultUploadFolderName = 'images';
 
-	private static $allowed_files = 'image';
+	private static $allowed_image_files = 'image';
 
 	/**
 	 * Return the list of related images (may be empty), should be satisfied by the model before we get here.
@@ -26,6 +27,7 @@ class Images extends Field implements Imagery {
 
 	/**
 	 * Return the first of the related images (may be null).
+	 *
 	 * @return mixed
 	 */
 	public function Image() {
@@ -34,17 +36,19 @@ class Images extends Field implements Imagery {
 
 	/**
 	 * Adds a single Image single-selection UploadField
+	 *
 	 * @return array
 	 */
 	public function cmsFields() {
 		return [
-			$this->makeUploadField(static::RelationshipName)
+			$this->makeUploadField(static::RelationshipName),
 		];
 	}
+
 	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
 		parent::customFieldConstraints($field, $allFieldConstraints);
 		if ($field->getName() == self::RelationshipName) {
-			$this->configureUploadField($field);
+			$this->configureUploadField($field, 'allowed_image_files');
 		}
 	}
 }

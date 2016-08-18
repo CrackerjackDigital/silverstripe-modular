@@ -14,14 +14,12 @@ class GridFieldConfig extends GridFieldConfig_RelationEditor {
 
 	public function __construct($itemsPerPage = null) {
 		parent::__construct($itemsPerPage ?: static::config()->get('items_per_page'));
+	}
 
+	public function setSearchPlaceholder($placeholderText) {
 		/** @var \GridFieldAddExistingAutocompleter $component */
 		if ($component = $this->getComponentByType(static::ComponentAutoCompleter)) {
-			$component->setPlaceholderText(
-				$this->fieldDecoration(
-					static::ComponentAutoCompleter
-				)
-			);
+			$component->setPlaceholderText($placeholderText);
 		}
 	}
 

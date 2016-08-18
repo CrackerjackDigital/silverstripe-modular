@@ -1,44 +1,40 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\Field;
+use Modular\Fields\GridField;
 use Modular\Model;
 
-class ManyMany extends Field {
+class ManyMany extends GridField {
 	const RelationshipName    = '';
 	const RelatedClassName      = '';
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
-
-	private static $cms_tab_name = '';
 
 	private static $allowed_related_classes = [];
 
 	public function extraStatics($class = null, $extension = null) {
 		$parent = parent::extraStatics($class, $extension) ?: [];
 
-		return array_merge_recursive(
-			$parent,
-			[
-				'many_many'             => [
-					static::RelationshipName => static::RelatedClassName,
-				],
+		$extra = [];
+
+		if ($this->config()->get('sortable')) {
+			$extra = [
 				'many_many_extraFields' => [
 					static::RelationshipName => [
 						static::GridFieldOrderableRowsFieldName => 'Int',
 					],
 				],
+			];
+		}
+
+		return array_merge_recursive(
+			$parent,
+			$extra,
+			[
+				'many_many'             => [
+					static::RelationshipName => static::RelatedClassName,
+				],
 			]
 		);
-	}
-
-	/**
-	 * If model is saved then a gridfield, otherwise a 'save master first' hint.
-	 * @return array
-	 */
-	public function cmsFields() {
-		return $this()->isInDB()
-			? [$this->gridField()]
-			: [$this->saveMasterHint()];
 	}
 
 	/**
@@ -60,18 +56,6 @@ class ManyMany extends Field {
 			}
 		}
 		return $config;
-	}
-
-	/**
-	 * When a page with blocks is published we also need to publish blocks. Blocks should also publish their 'sub' blocks.
-	 */
-	public function onAfterPublish() {
-		/** @var Model|\Versioned $block */
-		foreach ($this()->{static::RelationshipName}() as $block) {
-			if ($block->hasExtension('Versioned')) {
-				$block->publish('Stage', 'Live', false);
-			}
-		}
 	}
 
 }

@@ -25,7 +25,7 @@ trait lang {
 	 * @param null   $field
 	 * @return string
 	 */
-	protected function fieldDecoration($fieldName, $decoration = 'Label', $default = '', array $tokens = [], $field = null) {
+	public function fieldDecoration($fieldName, $decoration = 'Label', $default = '', array $tokens = [], $field = null) {
 		$tokens = array_merge(
 			[
 				'singular' => $this->singularName(),
@@ -65,7 +65,7 @@ trait lang {
 		if ($this() instanceof \DataObject) {
 			$singular = $this()->i18n_singular_name() ?: $this()->singular_name();
 		} else {
-			$singular = $this->i18n_singular_name() ?: $this->singular_name();
+			$singular = $this->lang('SINGULARNAME');
 		}
 		return $singular;
 	}
@@ -74,7 +74,7 @@ trait lang {
 		if ($this() instanceof \DataObject) {
 			$plural = $this()->i18n_plural_name() ?: $this()->plural_name();
 		} else {
-			$plural = $this->i18n_plural_name() ?: $this->plural_name();
+			$plural = $this->lang('PLURALNAME');
 		}
 		return $plural;
 	}
