@@ -58,7 +58,7 @@ trait upload {
 			$categories = explode(',', $allowedFiles);
 			// get extensions from category so we always get a list of extensions for the CMS right title
 			$allCategoryExtensions = \File::config()->get('app_categories') ?: [];
-			
+
 			foreach ($categories as $category) {
 
 				if (isset($allCategoryExtensions[ $category ])) {
@@ -74,7 +74,7 @@ trait upload {
 			$field->setAllowedExtensions($extensions);
 		} elseif ($categories) {
 			// array of categories to apply to setAllowedFileCategories as parameters
-			call_user_func_array([$this, 'setAllowedFileCategories'], $categories);
+			call_user_func_array([$field, 'setAllowedFileCategories'], $categories);
 		} elseif ($allowedFiles) {
 			// not an array so a category e.g. 'video'
 			$field->setAllowedFileCategories($allowedFiles);

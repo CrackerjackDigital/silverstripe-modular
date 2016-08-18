@@ -11,7 +11,7 @@ class GridListItem extends ModelExtension {
 	 * GridListItem constructor.
 	 */
 	public function GridListItem() {
-		return $this()->render($this->template(), func_get_args());
+		return $this()->renderWith($this->template(), func_get_args());
 	}
 
 	/**
@@ -22,7 +22,7 @@ class GridListItem extends ModelExtension {
 	 */
 	protected function template() {
 		$className = $this()->config()->get('gridlist_template') ?: $this()->ClassName;
-		$mode = singleton('GridListService')->mode();
+		$mode = \Injector::inst()->get('GridListFilterService')->mode();
 
 		return "GridList/{$className}_{$mode}";
 	}

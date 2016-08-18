@@ -4,16 +4,15 @@ namespace Modular\GridList;
 use Modular\Object;
 
 class Service extends Object {
-	/** @var  Constraints */
-	protected $constraints;
+	const ConstraintsClassName = 'Modular\GridList\Constraints';
 
-	public function setConstraints($constraints) {
-		$this->constraints = $constraints;
-	}
 	public function mode() {
-		return $this->constraints->mode();
+		return $this->constraints()->mode();
 	}
 	public function sort() {
-		return $this->constraints->sort();
+		return $this->constraints()->sort();
+	}
+	protected function constraints() {
+		return \Injector::inst()->get(static::ConstraintsClassName);
 	}
 }

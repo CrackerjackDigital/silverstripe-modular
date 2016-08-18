@@ -46,10 +46,10 @@ class HasGridList extends ContentControllerExtension {
 	}
 
 	public function GridListSort() {
-		return singleton('GridListService')->sort();
+		return singleton('GridListFilterService')->sort();
 	}
 
 	public function GridListMode() {
-		return singleton('GridListService')->mode();
+		return singleton('GridListFilterService')->mode();
 	}
 }

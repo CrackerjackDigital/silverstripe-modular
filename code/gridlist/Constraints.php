@@ -2,14 +2,18 @@
 namespace Modular\GridList;
 
 use Modular\Object;
+use Modular\Exception;
 
-abstract class Constraints extends Object {
+class Constraints extends Object {
 	const ModeGetVar       = 'mode';
 	const SortGetVar       = 'sort';
 	const StartIndexGetVar = 'start';
 	const PageLengthGetVar = 'limit';
+	// this could be hardwired instead of using generated value
 	const SessionKeyPrefix = '';
-	// don't save to session at all
+	// session key is broken into tokens, mainly for debugging
+	const SessionPathSeperator = ':';
+	// don't save any incoming values to session at all
 	const SessionNone = 0;
 	// save for all pages
 	const SessionSaveGlobal = 1;
@@ -30,6 +34,10 @@ abstract class Constraints extends Object {
 		self::PageLengthGetVar,
 	];
 
+	private static $default_mode = 'grid';
+
+	private static $default_sort = 'a-z';
+
 	public function __construct() {
 		parent::__construct();
 		$this->request = \Controller::curr()->getRequest();
@@ -40,11 +48,11 @@ abstract class Constraints extends Object {
 	}
 
 	public function mode() {
-		return $this->getVar(static::ModeGetVar, self::SessionSaveAll);
+		return $this->getVar(static::ModeGetVar, self::SessionSaveAll) ?: $this->config()->get('default_mode');
 	}
 
 	public function sort() {
-		return $this->getVar(static::SortGetVar, self::SessionSaveAll);
+		return $this->getVar(static::SortGetVar, self::SessionSaveAll) ?: $this->config()->get('default_sort');
 	}
 
 	/**
@@ -92,7 +100,7 @@ abstract class Constraints extends Object {
 	 * @return \SS_HTTPRequest
 	 */
 	protected function request() {
-		return $this->request();
+		return $this->request;
 	}
 
 	/**
@@ -122,7 +130,11 @@ abstract class Constraints extends Object {
 		if ($includeGetVars) {
 			$url .= '?' . http_build_query($this->getVars());
 		}
-		return strtoupper(static::SessionKeyPrefix . ":$key:") . md5(strtolower($url));
+		return static::session_key_prefix() . $key . static::SessionPathSeperator . md5(strtolower($url));
+	}
+
+	public function session_key_prefix() {
+		return strtoupper(static::SessionKeyPrefix ?: basename(get_called_class())) . static::SessionPathSeperator;
 	}
 
 	/**
@@ -155,7 +167,7 @@ abstract class Constraints extends Object {
 				$cached[ $name ] = $this->urlParams()[ $name ];
 			}
 		}
-		return $this->persist($name, $cached, $sessionPersistance);
+		return $this->persisted($name, $cached, $sessionPersistance);
 	}
 
 	/**
@@ -190,7 +202,7 @@ abstract class Constraints extends Object {
 				$cached[ $name ] = $getVars[ $name ];
 			}
 		}
-		return $this->persist($name, $cached, $sessionPersistance);
+		return $this->persisted($name, $cached, $sessionPersistance);
 	}
 
 	/**
@@ -254,7 +266,16 @@ abstract class Constraints extends Object {
 		return $cached;
 	}
 
-	protected function persist($name, $cache, $sessionPersistance) {
+	/**
+	 * Lookup name in the provided cache key-value and save it to the session if required depending on seesionPersistance parameter.
+	 *
+	 * @param $name
+	 * @param $cache
+	 * @param $sessionPersistance
+	 * @return array|mixed|null|\Session
+	 * @throws Exception
+	 */
+	protected function persisted($name, $cache, $sessionPersistance) {
 		$key = null;
 		$value = null;
 
@@ -262,25 +283,27 @@ abstract class Constraints extends Object {
 
 			$value = $cache[ $name ];
 
-		} elseif ($sessionPersistance) {
+			if ($sessionPersistance) {
 
-			if (self::SessionSaveAll === ($sessionPersistance & self::SessionSaveAll)) {
+				if (self::SessionSaveAll === ($sessionPersistance & self::SessionSaveAll)) {
+					// key is for urlParams and getVars (so page and query string)
+					$key = $this->key($name, $this->url(), true);
 
-				$key = $this->key($name, $this->url(), true);
+				} elseif (self::SessionSaveURLParams === ($sessionPersistance & self::SessionSaveURLParams)) {
+					// key is for urlParams only, not getVars (so page path only)
+					$key = $this->key($name, $this->url(), false);
 
-			} elseif (self::SessionSaveURLParams === ($sessionPersistance & self::SessionSaveURLParams)) {
+				} elseif (self::SessionSaveGetVars === ($sessionPersistance & self::SessionSaveGetVars)) {
+					// key is for getVars only, not urlParams (so query string only)
+					$key = $this->key($name, '', true);
 
-				$key = $this->key($name, $this->url(), false);
-
-			} elseif (self::SessionSaveGetVars === ($sessionPersistance & self::SessionSaveGetVars)) {
-
-				$key = $this->key($name, '', true);
-
+				} else {
+					throw new Exception("Unknown persistance mode: $sessionPersistance");
+				}
+				\Session::set($key, $value);
 			}
-			$value = \Session::get($key);
-		}
-		if ($key) {
-			\Session::set($key, $value);
+		} else {
+			// TODO if not in the cache then should we do anything?
 		}
 		return $value;
 	}
