@@ -8,6 +8,7 @@ use Modular\Fields\EmbedCode;
 use Modular\Fields\ExternalLink;
 use Modular\Fields\Field;
 use Modular\Fields\Media;
+use Modular\Fields\Video;
 
 /**
  * Link type field and logic for a model which has an EmbedCode, Media and ExternalLink fields.
@@ -88,18 +89,37 @@ class MediaLinkType extends Field {
 	}
 
 	public function PlayerLink() {
-		// for now the player link is just the internal/external link with no decoration
+		// no playas
 		return $this->ResolvedLink();
 	}
 
+	/**
+	 * @return string
+	 */
 	public function ResolvedLink() {
 		if ($this->IsExternalLink()) {
 			return $this()->{ExternalLink::ExternalLinkFieldName};
 		} elseif ($this->IsMedia()) {
-			return $this()->{Media::field_name()}()->Link();
+			return $this->getMediaLink();
 		} elseif ($this->IsEmbedCode()) {
 			return $this()->{EmbedCode::EmbedCodeFieldName};
 		}
+	}
+
+	/**
+	 * @return string
+	 */
+	protected function getMediaLink() {
+		if ($media = $this->getMediaObject()) {
+			return $media->Link();
+		}
+	}
+
+	/**
+	 * @return \File
+	 */
+	protected function getMediaObject() {
+		return $this()->{Media::field_name()}();
 	}
 
 }
