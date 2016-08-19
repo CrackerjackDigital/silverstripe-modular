@@ -80,10 +80,11 @@ class InternalOrExternalLink extends Field {
 	 * @return string
 	 */
 	public function ResolvedLink() {
+		$link = '';
 		if ($this->IsExternal()) {
 			$externalLink = $this()->ExternalLink;
 			if (!\Director::is_absolute_url($externalLink)) {
-				$link = 'http://' . $externalLink;
+				$link = \Director::protocol() . $externalLink;
 			} else {
 				$link = $externalLink;
 			}
