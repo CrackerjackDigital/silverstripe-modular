@@ -9,5 +9,7 @@ use SS_List;
 class HasLinks extends ManyMany {
 	const RelationshipName = 'Links';
 	const RelatedClassName = 'Modular\Models\InternalOrExternalLink';
+	const GridFieldConfigName = 'Modular\GridField\HasLinksGridFieldConfig';
+
 
 }
