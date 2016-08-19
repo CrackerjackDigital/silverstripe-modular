@@ -7,11 +7,10 @@ use FormField;
 use Modular\Fields\EmbedCode;
 use Modular\Fields\ExternalLink;
 use Modular\Fields\Field;
-use Modular\Fields\InternalLink;
 use Modular\Fields\Media;
 
 /**
- * Link type field and logic for a model which has an EmbedCode, InternalLink and ExternalLink fields.
+ * Link type field and logic for a model which has an EmbedCode, Media and ExternalLink fields.
  */
 class MediaLinkType extends Field {
 	const MediaLinkTypeFieldName = 'MediaLinkType';
@@ -22,35 +21,8 @@ class MediaLinkType extends Field {
 		\Modular\Fields\ExternalLink::ExternalLinkOption,
 	];
 
-	public function IsExternalLink() {
-		return $this()->{self::MediaLinkTypeFieldName} == ExternalLink::ExternalLinkOption;
-	}
-
-	public function IsInternalLink() {
-		return $this()->{self::MediaLinkTypeFieldName} == InternalLink::InternalLinkOption;
-	}
-
-	public function IsEmbedCode() {
-		return $this()->{self::MediaLinkTypeFieldName} == EmbedCode::EmbedCodeOption;
-	}
-
-	public function PlayerLink() {
-		// for now the player link is just the internal/external link with no decoration
-		return $this->ResolvedLink();
-	}
-
-	public function ResolvedLink() {
-		if ($this->IsExternalLink()) {
-			return $this()->{ExternalLink::ExternalLinkFieldName};
-		} elseif ($this->IsInternalLink()) {
-			return $this()->{InternalLink::InternalLinkFieldName};
-		} elseif ($this->IsEmbedCode()) {
-			return $this()->{EmbedCode::EmbedCodeFieldName};
-		}
-	}
-
 	/**
-	 * Return static db enum schema definition for the InternalLink and ExternalLink Option constants.
+	 * Return static db enum schema definition for the Media and ExternalLink Option constants.
 	 *
 	 * @param null $class
 	 * @param null $extension
@@ -72,7 +44,7 @@ class MediaLinkType extends Field {
 		return [
 			new DropdownField(self::MediaLinkTypeFieldName, 'Link type', [
 				EmbedCode::EmbedCodeOption       => $this->fieldDecoration(EmbedCode::EmbedCodeOption, 'Label', 'Embed Code'),
-				Media::MediaLinkOption           => $this->fieldDecoration(Media::MediaLinkOption, 'Label', 'Uploaded Media'),
+				Media::MediaLinkOption => $this->fieldDecoration(Media::MediaLinkOption, 'Label', 'Uploaded Media'),
 				ExternalLink::ExternalLinkOption => $this->fieldDecoration(ExternalLink::ExternalLinkOption, 'Label', 'External Link'),
 			]),
 		];
@@ -102,4 +74,32 @@ class MediaLinkType extends Field {
 			}
 		}
 	}
+
+	public function IsExternalLink() {
+		return $this()->{self::MediaLinkTypeFieldName} == ExternalLink::ExternalLinkOption;
+	}
+
+	public function IsMedia() {
+		return $this()->{self::MediaLinkTypeFieldName} == Media::MediaLinkOption;
+	}
+
+	public function IsEmbedCode() {
+		return $this()->{self::MediaLinkTypeFieldName} == EmbedCode::EmbedCodeOption;
+	}
+
+	public function PlayerLink() {
+		// for now the player link is just the internal/external link with no decoration
+		return $this->ResolvedLink();
+	}
+
+	public function ResolvedLink() {
+		if ($this->IsExternalLink()) {
+			return $this()->{ExternalLink::ExternalLinkFieldName};
+		} elseif ($this->IsMedia()) {
+			return $this()->{Media::field_name()}()->Link();
+		} elseif ($this->IsEmbedCode()) {
+			return $this()->{EmbedCode::EmbedCodeFieldName};
+		}
+	}
+
 }
