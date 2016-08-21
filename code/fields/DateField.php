@@ -22,17 +22,34 @@ class DateTimeField extends Field {
 	const TimeRequired = false;
 
 	public function extraStatics($class = null, $extension = null) {
-		return array_merge(
+		return array_merge_recursive(
 			parent::extraStatics($class, $extension),
 			[
-				'db'         => [
-					static::SingleFieldName => static::SingleFieldSchema,
-				],
 				'validation' => [
 					static::SingleFieldName => static::DateRequired,
 				],
 			]
 		);
+	}
+
+	/**
+	 * Hack to get multiple year, month, day values into the models date field if present as an array in the post data.
+	 *
+	 * @param \ValidationResult $result
+	 * @return bool
+	 */
+	public function onBeforeValidate(\ValidationResult $result) {
+		$postVars = \Controller::curr()->getRequest()->postVars();
+		if (isset($postVars[static::SingleFieldName]) && is_array($postVars[static::SingleFieldName])) {
+			$date = $postVars[static::SingleFieldName];
+			if (count(array_filter($date)) == 3) {
+				$this()->{static::SingleFieldName} = implode('-', [$date['year'], $date['month'], $date['day']]);
+			} else {
+				$result->error("Invalid date, something is missing");
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public function updateSummaryFields(&$fields) {

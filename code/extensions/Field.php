@@ -38,6 +38,9 @@ use ValidationResult;
 abstract class Field extends ModelExtension {
 	use lang;
 
+	const SingleFieldName = '';
+	const SingleFieldSchema = '';
+
 	const DefaultUploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';
@@ -75,6 +78,21 @@ abstract class Field extends ModelExtension {
 	 */
 	public function cmsFields() {
 		return [];
+	}
+
+	/**
+	 * If static.SingleFieldName && static.SingleFieldSchema are set add them to db array.
+	 * @param null $class
+	 * @param null $extension
+	 * @return mixed
+	 */
+	public function extraStatics($class = null, $extension = null) {
+		return array_merge_recursive(
+			parent::extraStatics($class, $extension) ?: [],
+			(static::SingleFieldName && static::SingleFieldSchema)
+		        ? [ 'db' => [ static::SingleFieldName => static::SingleFieldSchema ] ]
+				: []
+		);
 	}
 
 	/**
@@ -202,6 +220,8 @@ abstract class Field extends ModelExtension {
 	 * @throws \ValidationException
 	 */
 	public function validate(ValidationResult $result) {
+		$this()->extend('onBeforeValidate', $result);
+		
 		$messages = [];
 		$cmsFields = $this->cmsFields();
 
