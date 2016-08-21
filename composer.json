@@ -19,9 +19,9 @@
         "php": ">=5.5",
         "composer/installers": "*",
         "silverstripe/framework": ">=3.1",
-		"stevie-mayhew/trait-loader": "dev-master",
+	"stevie-mayhew/trait-loader": "dev-master",
         "silverstripe/display-logic": "1.4.x",
-        "silverstripe-australia/gridfieldextensions": "1.4.x",
+        "silverstripe-australia/gridfieldextensions": "1.x",
         "unclecheese/betterbuttons": "1.3.x"
     },
     "extra": {

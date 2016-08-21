@@ -6,6 +6,7 @@ use Modular\Fields\Field;
 class HasOne extends Field {
 	const RelationshipName = '';
 	const RelatedClassName = '';
+	const UploadFieldName  = '';
 
 	private static $tab_name = 'Root.Main';
 
@@ -16,10 +17,14 @@ class HasOne extends Field {
 			$parent,
 			[
 				'has_one' => [
-					static::RelationshipName => static::RelatedClassName
-				]
+					static::RelationshipName => static::RelatedClassName,
+				],
 			]
 		);
+	}
+
+	public static function field_name() {
+		return static::UploadFieldName ?: (static::RelationshipName . 'ID');
 	}
 
 	public function onAfterPublish() {

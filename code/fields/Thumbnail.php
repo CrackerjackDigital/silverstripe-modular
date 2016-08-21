@@ -1,8 +1,6 @@
 <?php
 namespace Modular\Fields;
 
-use FormField;
-
 class Thumbnail extends Image {
 	const RelationshipName        = 'Thumbnail';
 	const DefaultUploadFolderName = 'thumbnails';
@@ -20,23 +18,8 @@ class Thumbnail extends Image {
 		return $this()->{self::RelationshipName}();
 	}
 
-	/**
-	 * Adds a single Image single-selection UploadField
-	 *
-	 * @return array
-	 */
-	public function cmsFields() {
-		return [
-			$this->makeUploadField(static::RelationshipName),
-		];
+	public function Thumbnails() {
+		return new \ArrayList(array_filter([$this->Thumbnail()]));
 	}
 
-	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
-		parent::customFieldConstraints($field, $allFieldConstraints);
-		$fieldName = $field->getName();
-
-		if ($fieldName == self::RelationshipName) {
-			$this->configureUploadField($field, 'allowed_thumbnail_files');
-		}
-	}
 }

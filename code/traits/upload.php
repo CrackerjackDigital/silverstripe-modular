@@ -11,6 +11,7 @@ use UploadField;
  */
 trait upload {
 	abstract public function __invoke();
+
 	/**
 	 * Return an upload field wrapped in a DisplayLogicWrapper as they all should be when using displaylogic.
 	 *
@@ -21,7 +22,7 @@ trait upload {
 	public function makeUploadField($relationshipName) {
 		$wrapper = (new \DisplayLogicWrapper(
 			$field = new \UploadField(
-				$relationshipName
+				static::field_name()
 			)
 		))->setID($relationshipName)->setName($relationshipName);
 		return $wrapper;

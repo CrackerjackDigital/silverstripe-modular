@@ -5,50 +5,30 @@ use ArrayList;
 use FormField;
 use Modular\Interfaces\Imagery;
 
-class Image extends Field implements Imagery {
+class Image extends File implements Imagery {
 	const RelationshipName = 'Image';
-	const UploadFieldName = 'ImageID';      // keep in sync with RelationshipName
-	const UploadFolderName = 'images';
+	const RelatedClassName = 'Image';
 
-
-	private static $has_one = [
-		self::RelationshipName => 'Image'
-	];
+	private static $base_upload_folder = 'images';
 
 	private static $allowed_files = 'image';
 
 	/**
 	 * Return a list with only item being the single related image.
+	 *
 	 * @return \ArrayList
 	 */
 	public function Images() {
-		return new ArrayList(array_filter([$this()->{self::RelationshipName}()]));
+		return new ArrayList(array_filter([$this->Image()]));
 	}
 
 	/**
 	 * Return the single related image, shouldn't really get here as the extended model's field accessor should be called first.
+	 *
 	 * @return Image|null
 	 */
 	public function Image() {
 		return $this()->{self::RelationshipName}();
 	}
 
-	/**
-	 * Adds a single Image single-selection UploadField
-	 * @return array
-	 */
-	public function cmsFields() {
-		return [
-			$this->makeUploadField(static::RelationshipName)
-		];
-	}
-
-	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
-		parent::customFieldConstraints($field, $allFieldConstraints);
-		$fieldName = $field->getName();
-
-		if ($fieldName == self::RelationshipName) {
-			$this->configureUploadField($field);
-		}
-	}
 }

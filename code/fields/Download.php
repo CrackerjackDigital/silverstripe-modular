@@ -1,9 +1,6 @@
 <?php
 namespace Modular\Fields;
 
-use FormField;
-use UploadField;
-
 class Download extends File {
 	const RelationshipName        = 'Download';
 	const RelatedClassName        = 'File';
@@ -11,26 +8,19 @@ class Download extends File {
 
 	// if an array then file extensions, if a string then a category e.g. 'video'
 
-	private static $allowed_files = 'download';
+	private static $allowed_download_files = 'download';
 
-	private static $tab_name = 'Root.Main';
+	private static $tab_name = 'Root.Downloads';
 
 	private static $upload_folder = self::DefaultUploadFolderName;
 
-	public function cmsFields() {
-		return [
-			new UploadField(
-				self::RelationshipName
-			)
-		];
+
+	public function Files() {
+		return new \ArrayList(array_filter($this->{static::RelationshipName}()));
 	}
 
-	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
-		$fieldName = $field->getName();
-		/** @var UploadField $field */
-		if ($fieldName == self::RelationshipName) {
-			$this->configureUploadField($field);
-		}
+	public static function allowed_files() {
+		return 'allowed_download_files';
 	}
 
 }

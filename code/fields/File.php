@@ -3,6 +3,7 @@ namespace Modular\Fields;
 
 use FormField;
 use Modular\Relationships\HasOne;
+use Modular\Relationships\ManyMany;
 use Modular\upload;
 use UploadField;
 
@@ -30,8 +31,12 @@ class File extends HasOne {
 		];
 	}
 
+	/**
+	 * Files are always without ID ?
+	 * @return string
+	 */
 	public static function field_name() {
-		return static::UploadFieldName ?: (static::RelationshipName . 'ID');
+		return static::UploadFieldName ?: static::RelationshipName;
 	}
 
 	public static function allowed_files() {

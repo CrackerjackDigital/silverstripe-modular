@@ -3,6 +3,7 @@ namespace Modular\Blocks;
 use Modular\Fields\ExternalLink;
 use Modular\Fields\InternalLink;
 use ArrayList;
+use Modular\Fields\Media;
 
 /**
  * VideoBlock
@@ -12,7 +13,11 @@ use ArrayList;
  * @method bool IsInternalLink provided by InternalOrExternalLink
  */
 class Video extends File {
+	const DefaultUploadFolderName = 'video';
+
 	private static $allowed_files = 'mov';
+
+	private static $upload_folder = self::DefaultUploadFolderName;
 
 	/**
 	 * Link which player should use (e.g. in iframe src attribute).
