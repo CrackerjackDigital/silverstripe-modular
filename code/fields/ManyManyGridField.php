@@ -2,16 +2,17 @@
 namespace Modular\Fields;
 
 use Modular\GridField\GridFieldConfig;
+use Modular\Relationships\ManyMany;
 use Quaff\Controllers\Model;
 
-class GridField extends Field {
-	const RelationshipName    = '';
-	const RelatedClassName    = '';
-	const GridFieldConfigName = 'Modular\GridField\HasManyGridFieldConfig';
+class ManyManyGridField extends ManyMany {
+	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
 	private static $cms_tab_name = '';
 
 	private static $sortable = true;
+
+	private static $allowed_related_classes = [];
 
 	/**
 	 * If model is saved then a gridfield, otherwise a 'save master first' hint.
@@ -38,7 +39,7 @@ class GridField extends Field {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
-		/** @var GridField $gridField */
+		/** @var ManyManyGridField $gridField */
 		$gridField = \GridField::create(
 			$relationshipName,
 			$relationshipName,
@@ -68,6 +69,7 @@ class GridField extends Field {
 			?: static::GridFieldConfigName
 				?: get_class($this) . 'GridFieldConfig';
 
+		/** @var GridFieldConfig $config */
 		$config = $configClassName::create();
 		$config->setSearchPlaceholder(
 
@@ -77,18 +79,15 @@ class GridField extends Field {
 				"Link existing {plural} by Title"
 			)
 		);
+		// if config.allowed_classes is set then limit available classes to those listed there
+		$allowedClasses = $this->config()->get('allowed_related_classes');
+		if ($allowedClasses) {
+			/** @var \GridFieldAddNewMultiClass $addNewMultiClass */
+			if ($addNewMultiClass = $config->getComponentByType('GridFieldAddNewMultiClass')) {
+				$addNewMultiClass->setClasses($this->config()->get('allowed_related_classes'));
+			}
+		}
 		return $config;
 	}
 
-	/**
-	 * When a page with blocks is published we also need to publish blocks. Blocks should also publish their 'sub' blocks.
-	 */
-	public function onAfterPublish() {
-		/** @var Model|\Versioned $block */
-		foreach ($this()->{static::RelationshipName}() as $block) {
-			if ($block->hasExtension('Versioned')) {
-				$block->publish('Stage', 'Live', false);
-			}
-		}
-	}
 }

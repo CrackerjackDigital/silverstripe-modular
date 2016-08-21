@@ -36,7 +36,7 @@ en:
     GridListFilters:
       Label: 'Applied filters'
       Guide: 'Add filters here to show the item when In-Page Filtering is applied'
-  Modular\Fields\Images:
+  Modular\Relationships\HasImages:
     Images:
       Label: 'Images'
       Guide: "Upload images (up to {maxlength} images allowed). The first image will be used as the 'cover' image"

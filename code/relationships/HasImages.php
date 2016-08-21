@@ -1,12 +1,11 @@
 <?php
-namespace Modular\Fields;
+namespace Modular\Relationships;
 
 use FormField;
 use Modular\Interfaces\Imagery;
-use Modular\Relationships\ManyMany;
 use Modular\upload;
 
-class Images extends ManyMany implements Imagery {
+class HasImages extends ManyMany implements Imagery {
 	use upload;
 
 	const RelationshipName        = 'Images';

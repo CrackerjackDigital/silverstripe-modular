@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Blocks;
 
-class SourceFile extends FileBlock {
+class SourceFile extends File {
 	private static $allowed_files = 'pdf';
 
 	private static $upload_folder = 'sources';

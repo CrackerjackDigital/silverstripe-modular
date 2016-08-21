@@ -1,15 +1,13 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\GridField;
+use Modular\Fields\Field;
+use Modular\Fields\ManyManyGridField;
 use Modular\Model;
 
-class ManyMany extends GridField {
-	const RelationshipName    = '';
-	const RelatedClassName      = '';
-	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
-
-	private static $allowed_related_classes = [];
+class ManyMany extends Field {
+	const RelationshipName = '';
+	const RelatedClassName = '';
 
 	public function extraStatics($class = null, $extension = null) {
 		$parent = parent::extraStatics($class, $extension) ?: [];
@@ -19,7 +17,7 @@ class ManyMany extends GridField {
 		if ($this->config()->get('sortable')) {
 			$extra = [
 				'many_many_extraFields' => [
-					static::RelationshipName => [
+					$this->relationshipName() => [
 						static::GridFieldOrderableRowsFieldName => 'Int',
 					],
 				],
@@ -30,32 +28,30 @@ class ManyMany extends GridField {
 			$parent,
 			$extra,
 			[
-				'many_many'             => [
-					static::RelationshipName => static::RelatedClassName,
+				'many_many' => [
+					$this->relationshipName() => $this->relatedClassName(),
 				],
 			]
 		);
 	}
 
-	/**
-	 * Allow override of the add new multiclass control to limit blocks to config.allowed_block_classes if set.
-	 *
-	 * @param $relationshipName
-	 * @param $configClassName
-	 * @return \Modular\GridField\GridFieldConfig
-	 */
-	protected function gridFieldConfig($relationshipName, $configClassName) {
-		$config = parent::gridFieldConfig($relationshipName, $configClassName);
-
-		// if config.allowed_classes is set then limit available classes to those listed there
-		$allowedClasses = $this->config()->get('allowed_related_classes');
-		if ($allowedClasses) {
-			/** @var \GridFieldAddNewMultiClass $addNewMultiClass */
-			if ($addNewMultiClass = $config->getComponentByType('GridFieldAddNewMultiClass')) {
-				$addNewMultiClass->setClasses($this->config()->get('allowed_related_classes'));
-			}
-		}
-		return $config;
+	protected function relationshipName() {
+		return static::RelationshipName;
 	}
 
+	protected function relatedClassName() {
+		return static::RelatedClassName;
+	}
+
+	/**
+	 * When a page with blocks is published we also need to publish blocks. Blocks should also publish their 'sub' blocks.
+	 */
+	public function onAfterPublish() {
+		/** @var Model|\Versioned $block */
+		foreach ($this()->{$this->relationshipName()}() as $block) {
+			if ($block->hasExtension('Versioned')) {
+				$block->publish('Stage', 'Live', false);
+			}
+		}
+	}
 }
