@@ -6,7 +6,7 @@ class Download extends File {
 	const RelatedClassName        = 'File';
 	const DefaultUploadFolderName = 'downloads';
 
-	// if an array then file extensions, if a string then a category e.g. 'video'
+	// if an array then file extensions, if a string then a category e.g. 'video', if a csv
 
 	private static $allowed_download_files = 'download';
 

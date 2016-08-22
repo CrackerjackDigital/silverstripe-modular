@@ -13,7 +13,7 @@ class HasFiles extends ManyMany {
 	const RelationshipName = 'Files';
 	const RelatedClassName = 'File';
 
-	private static $allowed_files = 'documents';
+	private static $allowed_files = 'download';
 
 	public function cmsFields() {
 		return [
