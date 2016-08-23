@@ -1,21 +1,18 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\Field;
+use Modular\GridField\GridField;
 use Modular\Model;
 
-class HasMany extends Field {
-	const RelationshipName = '';
-	const RelatedClassName = '';
+class HasMany extends GridField {
+	const GridFieldConfigName = 'Modular\GridField\HasManyGridFieldConfig';
 
 	public function extraStatics($class = null, $extension = null) {
-		$parent = parent::extraStatics($class, $extension) ?: [];
-
 		return array_merge_recursive(
-			$parent,
+			parent::extraStatics($class, $extension) ?: [],
 			[
 				'has_many' => [
-					$this->relationshipName() => $this->relatedClassName()
+					static::RelationshipName => static::RelatedClassName
 				]
 			]
 		);
@@ -26,19 +23,11 @@ class HasMany extends Field {
 	 */
 	public function onAfterPublish() {
 		/** @var Model|\Versioned $block */
-		foreach ($this()->{$this->relationshipName()}() as $block) {
+		foreach ($this()->{static::RelationshipName}() as $block) {
 			if ($block->hasExtension('Versioned')) {
 				$block->publish('Stage', 'Live', false);
 			}
 		}
-	}
-
-	protected function relationshipName() {
-		return static::RelationshipName;
-	}
-
-	protected function relatedClassName() {
-		return static::RelatedClassName;
 	}
 
 }

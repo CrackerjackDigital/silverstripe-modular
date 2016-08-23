@@ -2,6 +2,7 @@
 namespace Modular;
 
 class Model extends \DataObject {
+	use lang;
 	/**
 	 * Invoking a model returns itself.
 	 * @return $this

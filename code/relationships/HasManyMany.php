@@ -4,8 +4,6 @@ namespace Modular\Relationships;
 use Modular\GridField\GridField;
 
 class HasManyMany extends GridField {
-	const RelationshipName    = '';
-	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
 	private static $allowed_related_classes = [];

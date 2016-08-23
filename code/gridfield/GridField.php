@@ -6,9 +6,7 @@ use Modular\Fields\Field;
 class GridField extends Field {
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
-	const GridFieldConfigName = 'Modular\GridField\HasManyGridFieldConfig';
-
-	private static $cms_tab_name = '';
+	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
 	private static $sortable = true;
 
