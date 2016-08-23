@@ -78,6 +78,11 @@ abstract class Field extends ModelExtension {
 		return [];
 	}
 
+	public function cmsTab() {
+		return $this->config()->get('cms_tab')
+			?: static:: DefaultTabName;
+	}
+
 	/**
 	 * If static.SingleFieldName && static.SingleFieldSchema are set add them to db array.
 	 * @param null $class
