@@ -18,8 +18,6 @@ use Modular\Model;
  * 'Pull Quote'
  */
 class Block extends Model {
-	use lang;
-
 	private static $template = '';
 
 	private static $summary_fields = [
