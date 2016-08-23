@@ -2,10 +2,9 @@
 namespace Modular\Relationships;
 
 use Modular\Fields\Field;
-use Modular\Fields\ManyManyGridField;
 use Modular\Model;
 
-class ManyMany extends Field {
+class HasManyMany extends Field {
 	const RelationshipName = '';
 	const RelatedClassName = '';
 

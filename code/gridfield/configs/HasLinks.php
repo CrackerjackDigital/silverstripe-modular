@@ -1,6 +1,6 @@
 <?php
 namespace Modular\GridField;
-use Modular\Relationships\ManyMany;
+use Modular\Relationships\HasManyMany;
 
 /**
  * Alters the config to be suitable for adding/removing links from a block

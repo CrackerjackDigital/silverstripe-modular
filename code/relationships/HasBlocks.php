@@ -6,10 +6,10 @@ namespace Modular\Relationships;
  *
  * @method \DataList Blocks
  */
-class HasBlocks extends ManyMany {
+class HasBlocks extends HasManyMany {
 	const RelationshipName    = 'Blocks';
 	const RelatedClassName    = 'Modular\Blocks\Block';
-	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
+	const GridFieldConfigName = 'Modular\GridField\HasBlocksGridFieldConfig';
 
 	private static $cms_tab_name = 'Root.ContentBlocks';
 }

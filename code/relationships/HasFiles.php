@@ -7,7 +7,7 @@ use SS_List;
 /**
  * @method SS_List Links
  */
-class HasFiles extends ManyMany {
+class HasFiles extends HasManyMany {
 	use upload;
 
 	const RelationshipName = 'Files';

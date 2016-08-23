@@ -1,6 +1,6 @@
 <?php
 namespace Modular\Relationships;
-use Modular\Fields\ManyManyTagField;
+use Modular\Fields\HasManyManyTagField;
 
 /**
  * Adds a multiple free text Tags relationship TagField to Tag model to extended model.
@@ -8,7 +8,7 @@ use Modular\Fields\ManyManyTagField;
  * @package Modular\Fields
  */
 
-class HasTags extends ManyManyTagField {
+class HasTags extends HasManyManyTagField {
 	const RelationshipName = 'Tags';
 	const RelatedClassName = 'Modular\Models\Tag';
 

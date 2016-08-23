@@ -1,14 +1,14 @@
 <?php
 namespace Modular\Fields;
-use Modular\Relationships\ManyMany;
+use Modular\Relationships\HasManyMany;
 
 /**
- * Adds a tag field representation of a ManyMany relationship
+ * Adds a tag field representation of a HasManyMany relationship
  *
  * @package Modular\Fields
  */
 
-class ManyManyTagField extends ManyMany {
+class HasManyManyTagField extends HasManyMany {
 	private static $multiple_tags = true;
 	private static $can_create_tags = true;
 

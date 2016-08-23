@@ -19,6 +19,8 @@ Modular\Models\Tag:
     - Modular\Fields\ModelTag('Title')
 Modular\Models\InternalOrExternalLink:
   extension:
+    - Modular\Fields\Title
     - Modular\Behaviours\InternalOrExternalLink
     - Modular\Fields\InternalLink
     - Modular\Fields\ExternalLink
+    - Modular\Fields\ModelTag('Title')

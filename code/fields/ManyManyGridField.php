@@ -2,10 +2,10 @@
 namespace Modular\Fields;
 
 use Modular\GridField\GridFieldConfig;
-use Modular\Relationships\ManyMany;
+use Modular\Relationships\HasManyMany;
 use Quaff\Controllers\Model;
 
-class ManyManyGridField extends ManyMany {
+class HasManyManyGridField extends HasManyMany {
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
 	private static $cms_tab_name = '';
@@ -39,7 +39,7 @@ class ManyManyGridField extends ManyMany {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
-		/** @var ManyManyGridField $gridField */
+		/** @var HasManyManyGridField $gridField */
 		$gridField = \GridField::create(
 			$relationshipName,
 			$relationshipName,

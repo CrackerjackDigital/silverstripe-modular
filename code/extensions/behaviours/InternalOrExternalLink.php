@@ -30,12 +30,10 @@ class InternalOrExternalLink extends Field {
 	 * @return array
 	 */
 	public function extraStatics($class = null, $extension = null) {
-		$parent = parent::extraStatics($class, $extension) ?: [];
-
 		$values = implode(',', $this->config()->get('enum_values'));
 
 		return array_merge_recursive(
-			$parent,
+			parent::extraStatics($class, $extension) ?: [],
 			[
 				'db' => [
 					static::LinkTypeFieldName => 'enum("' . $values . '")'

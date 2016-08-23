@@ -5,7 +5,7 @@ use FormField;
 use Modular\Interfaces\Imagery;
 use Modular\upload;
 
-class HasImages extends ManyMany implements Imagery {
+class HasImages extends HasManyMany implements Imagery {
 	use upload;
 
 	const RelationshipName        = 'Images';
