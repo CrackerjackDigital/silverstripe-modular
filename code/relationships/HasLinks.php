@@ -11,5 +11,4 @@ class HasLinks extends HasMany {
 	const RelatedClassName = 'Modular\Models\InternalOrExternalLink';
 	const GridFieldConfigName = 'Modular\GridField\HasLinksGridFieldConfig';
 
-
 }
