@@ -7,7 +7,7 @@
  *
  * HasGridListLinks
  */
-class HasGridListLinksControllerExtension extends CERAControllerExtension {
+class HasGridListLinksControllerExtension extends \Modular\ContentControllerExtension {
 
 	/**
 	 * Provide a link back to the template for the current 'page' augmented

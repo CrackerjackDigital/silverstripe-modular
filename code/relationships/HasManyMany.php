@@ -1,19 +1,14 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\GridField;
-use Modular\Model;
+use Modular\GridField\GridField;
 
-class ManyMany extends GridField {
-	const RelationshipName    = '';
-	const RelatedClassName      = '';
+class HasManyMany extends GridField {
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
 	private static $allowed_related_classes = [];
 
 	public function extraStatics($class = null, $extension = null) {
-		$parent = parent::extraStatics($class, $extension) ?: [];
-
 		$extra = [];
 
 		if ($this->config()->get('sortable')) {
@@ -27,10 +22,10 @@ class ManyMany extends GridField {
 		}
 
 		return array_merge_recursive(
-			$parent,
+			parent::extraStatics($class, $extension),
 			$extra,
 			[
-				'many_many'             => [
+				'many_many' => [
 					static::RelationshipName => static::RelatedClassName,
 				],
 			]

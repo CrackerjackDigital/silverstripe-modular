@@ -3,7 +3,7 @@ namespace Modular\Fields;
 
 use FormField;
 use Modular\Relationships\HasOne;
-use Modular\Relationships\ManyMany;
+use Modular\Relationships\HasManyMany;
 use Modular\upload;
 use UploadField;
 

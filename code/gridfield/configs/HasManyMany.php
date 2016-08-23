@@ -2,14 +2,14 @@
 namespace Modular\GridField;
 
 /**
- * Alters the config to be suitable for adding/removing blocks from an article.
+ * Alters the config to be suitable for adding/removing many_many related models to the extended model, configurably using 'Add New MultClass' support.
  *
  * Adds an 'AddNewMultiClass' selector
  */
 class HasManyManyGridFieldConfig extends GridFieldConfig {
 	private static $allowed_related_classes = [];
 
-	private static $add_new_multi_class = true;
+	private static $add_new_multi_class = false;
 
 	public function __construct($itemsPerPage = null) {
 		parent::__construct($itemsPerPage);

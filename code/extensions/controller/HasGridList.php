@@ -2,7 +2,7 @@
 namespace Modular\Extensions\Controller;
 
 use Modular\ContentControllerExtension;
-use Modular\GridList\FilterConstraints;
+use Modular\GridList\Constraints;
 
 class HasGridList extends ContentControllerExtension {
 
@@ -19,7 +19,7 @@ class HasGridList extends ContentControllerExtension {
 		$items = [];
 		$this()->extend('provideGridListItems', $items);
 
-		/** @var FilterConstraints $constraints */
+		/** @var Constraints $constraints */
 		$constraints = \Injector::inst()->get('GridListFilterConstraints');
 
 		if ($filter = $constraints->constraint('flt')) {

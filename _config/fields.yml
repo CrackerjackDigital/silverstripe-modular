@@ -23,4 +23,5 @@ Modular\Models\InternalOrExternalLink:
     - Modular\Behaviours\InternalOrExternalLink
     - Modular\Fields\InternalLink
     - Modular\Fields\ExternalLink
+    - Modular\Fields\ModelTag('Title')
     - Modular\Fields\Thumbnail

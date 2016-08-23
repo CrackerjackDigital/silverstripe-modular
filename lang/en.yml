@@ -3,19 +3,22 @@ en:
   Modular\Models\Slide:
     SINGULARNAME: 'Carousel Slide'
     PLURALNAME: 'Carousel Slides'
-# fields
-  Modular\Fields\Image:
-    ImageID:
-      Label: "Image"
-      Guide: "Upload image to appear on timeline"
-    AssociatedRecordsPrompt:
-      Label: '<p>{plural} can only be associated to Content or Image events</p>'
+# relationships
   Modular\Relationships\HasBlocks:
     Blocks:
       Label: 'Content Blocks'
   Modular\Relationships\HasGridList:
     GridListBlocks:
       Label: 'Grid Blocks'
+  Modular\Relationships\HasImages:
+    Images:
+      Label: 'Images'
+      Guide: "Upload images (up to {maxlength} images allowed). The first image will be used as the 'cover' image"
+  Modular\Relationships\HasTags:
+    Tags:
+      Label: 'Tags'
+      Guide: 'Free form tags'
+# fields
   Modular\Fields\Code:
     Code:
       Label: "Unique code"
@@ -36,10 +39,12 @@ en:
     GridListFilters:
       Label: 'Applied filters'
       Guide: 'Add filters here to show the item when In-Page Filtering is applied'
-  Modular\Fields\Images:
-    Images:
-      Label: 'Images'
-      Guide: "Upload images (up to {maxlength} images allowed). The first image will be used as the 'cover' image"
+  Modular\Fields\Image:
+    ImageID:
+      Label: "Image"
+      Guide: "Upload image to appear on timeline"
+    AssociatedRecordsPrompt:
+      Label: '<p>{plural} can only be associated to Content or Image events</p>'
   Modular\Fields\InternalLink:
     InternalLinkID:
       Label: 'Page on this site'
@@ -60,10 +65,6 @@ en:
   Modular\Fields\Synopsis:
       Guide: "Write a brief introduction or overview to the {singular}. This will be displayed above the content and styled differently to body copy, this will also be what shows in search results on the website."
       Length: "{label} needs to be between {minlength} and {maxlength} characters long"
-  Modular\Fields\Tags:
-    Tags:
-      Label: 'Tags'
-      Guide: 'Free form tags'
   Modular\Fields\Title:
     Title:
       Label: 'Title'

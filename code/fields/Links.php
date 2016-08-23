@@ -1,13 +1,13 @@
 <?php
 namespace Modular\Fields;
 
-use Modular\Relationships\ManyMany;
+use Modular\Relationships\HasManyMany;
 use SS_List;
 
 /**
  * @method SS_List Links
  */
-class Links extends ManyMany {
+class Links extends HasManyMany {
 	const RelationshipName = 'Links';
 	const RelatedClassName = 'Modular\Models\Link';
 

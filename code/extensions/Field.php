@@ -3,20 +3,14 @@ namespace Modular\Fields;
 
 use DateField;
 use DatetimeField;
-use DisplayLogicWrapper;
 use FieldList;
 use FormField;
-use GridField;
-use GridFieldOrderableRows;
 use LiteralField;
-use Modular\Exception;
-use Modular\GridField\GridFieldConfig;
 use Modular\lang;
 use Modular\Model;
 use Modular\ModelExtension;
 use SS_List;
 use TimeField;
-use UploadField;
 use ValidationException;
 use ValidationResult;
 
@@ -53,6 +47,8 @@ abstract class Field extends ModelExtension {
 	// override in concrete e.g. 'Blocks' or 'AssociatedRecords'
 	const RelationshipName = '';
 
+	const DefaultTabName = 'Root.Main';
+
 	// TODO remove not used?
 	private static $num_grid_rows = 5;
 
@@ -61,6 +57,8 @@ abstract class Field extends ModelExtension {
 
 	// Zend_Locale_Format compatible format string, if blank then default for locale is used
 	private static $time_field_format = '';
+
+	private static $cms_tab_name = '';
 
 	/**
 	 * If we use invocation we can type-cast the result to a ModularModel

@@ -122,10 +122,6 @@ class Form extends \Form {
 		$html = '';
 		$baseLink = '';
 
-		if ($profiledPage = ProfiledPage::get()->first()) {
-			$baseLink = $profiledPage->Link();
-		}
-
 		if ($tabs) {
 			$current = 'current';
 
@@ -195,7 +191,7 @@ class Form extends \Form {
 							}
 						}
 					}
-					if ($tabFields) {
+/*					if ($tabFields) {
 						$tab = new ProfiledTabField($tabFields);
 
 						$tab->addExtraClass("profiled-tab-body $current");
@@ -205,7 +201,7 @@ class Form extends \Form {
 
 						$current = '';
 					}
-				}
+*/				}
 			}
 			Requirements::javascript('profiled/js/profiled-tabs.js');
 		}

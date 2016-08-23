@@ -15,8 +15,8 @@ class InternalOrExternalLink extends Model {
 		self::RelationshipName => self::RelatedClassName,
 	];
 	private static $summary_fields = [
-		'Title' => 'Title',
-		'ResolvedLink'  => 'Link',
+		'Title'        => 'Title',
+		'ResolvedLink' => 'Link',
 	];
 
 	public function getCMSFields() {
@@ -24,5 +24,4 @@ class InternalOrExternalLink extends Model {
 		$fields->replaceField(self::SortFieldName, new \HiddenField(self::SortFieldName));
 		return $fields;
 	}
-
 }

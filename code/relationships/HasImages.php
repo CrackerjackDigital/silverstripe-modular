@@ -1,12 +1,11 @@
 <?php
-namespace Modular\Fields;
+namespace Modular\Relationships;
 
 use FormField;
 use Modular\Interfaces\Imagery;
-use Modular\Relationships\ManyMany;
 use Modular\upload;
 
-class Images extends ManyMany implements Imagery {
+class HasImages extends HasManyMany implements Imagery {
 	use upload;
 
 	const RelationshipName        = 'Images';
@@ -15,6 +14,17 @@ class Images extends ManyMany implements Imagery {
 	const DefaultUploadFolderName = 'images';
 
 	private static $allowed_image_files = 'image';
+
+	/**
+	 * Adds a single Image single-selection UploadField
+	 *
+	 * @return array
+	 */
+	public function cmsFields() {
+		return [
+			$this->makeUploadField(static::RelationshipName),
+		];
+	}
 
 	/**
 	 * Return the list of related images (may be empty), should be satisfied by the model before we get here.
@@ -34,16 +44,6 @@ class Images extends ManyMany implements Imagery {
 		return $this->Images()->first();
 	}
 
-	/**
-	 * Adds a single Image single-selection UploadField
-	 *
-	 * @return array
-	 */
-	public function cmsFields() {
-		return [
-			$this->makeUploadField(static::RelationshipName),
-		];
-	}
 
 	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
 		parent::customFieldConstraints($field, $allFieldConstraints);

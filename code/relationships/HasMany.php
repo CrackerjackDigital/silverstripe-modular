@@ -1,16 +1,15 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\GridField;
+use Modular\GridField\GridField;
 use Modular\Model;
 
 class HasMany extends GridField {
+	const GridFieldConfigName = 'Modular\GridField\HasManyGridFieldConfig';
 
 	public function extraStatics($class = null, $extension = null) {
-		$parent = parent::extraStatics($class, $extension);
-
 		return array_merge_recursive(
-			$parent,
+			parent::extraStatics($class, $extension) ?: [],
 			[
 				'has_many' => [
 					static::RelationshipName => static::RelatedClassName

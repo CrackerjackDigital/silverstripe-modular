@@ -1,5 +1,5 @@
 <?php
-namespace Modular\Fields;
+namespace Modular\Relationships;
 
 /**
  * Adds a multiple free text Tags relationship TagField to Tag model to extended model.
@@ -9,24 +9,15 @@ namespace Modular\Fields;
 
 use Modular\Models\Tag;
 
-class Tags extends Field {
+class HasTags extends HasManyMany {
 	const RelationshipName = 'Tags';
 	const RelatedClassName = 'Modular\Models\Tag';
 
 	private static $multiple_tags = true;
+	
 	private static $can_create_tags = true;
 
-	public function extraStatics($class = null, $extension = null) {
-		$parent = parent::extraStatics($class, $extension) ?: [];
-		return array_merge_recursive(
-			$parent,
-			[
-				'many_many' => [
-					static::RelationshipName => static::RelatedClassName,
-				],
-			]
-		);
-	}
+	private static $sortable = false;
 
 	public function cmsFields() {
 		return [

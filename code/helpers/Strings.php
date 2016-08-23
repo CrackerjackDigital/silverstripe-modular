@@ -2,6 +2,7 @@
 
 namespace Modular\Helpers;
 
+use Modular\Debugger;
 use Modular\Object;
 
 class Strings extends Object {
