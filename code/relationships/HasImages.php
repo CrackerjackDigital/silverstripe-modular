@@ -16,6 +16,17 @@ class HasImages extends HasManyMany implements Imagery {
 	private static $allowed_image_files = 'image';
 
 	/**
+	 * Adds a single Image single-selection UploadField
+	 *
+	 * @return array
+	 */
+	public function cmsFields() {
+		return [
+			$this->makeUploadField(static::RelationshipName),
+		];
+	}
+
+	/**
 	 * Return the list of related images (may be empty), should be satisfied by the model before we get here.
 	 *
 	 * @return \ArrayList
@@ -33,16 +44,6 @@ class HasImages extends HasManyMany implements Imagery {
 		return $this->Images()->first();
 	}
 
-	/**
-	 * Adds a single Image single-selection UploadField
-	 *
-	 * @return array
-	 */
-	public function cmsFields() {
-		return [
-			$this->makeUploadField(static::RelationshipName),
-		];
-	}
 
 	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
 		parent::customFieldConstraints($field, $allFieldConstraints);
