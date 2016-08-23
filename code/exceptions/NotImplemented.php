@@ -1,5 +1,5 @@
 <?php
-namespace Modular;
+namespace Modular\Exceptions;
 
-class NotImplementedException extends Exception {
+class NotImplemented extends Exception {
 }

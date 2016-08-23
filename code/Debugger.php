@@ -54,7 +54,8 @@ class Debugger extends Object {
 	}
 
 	public static function debugger($level = self::DefaultDebugLevel, $prefix = '') {
-		return new Debugger($level, $prefix);
+		$class = get_called_class();
+		return new $class($level, $prefix);
 	}
 
 	public function level($level = null) {
@@ -73,7 +74,7 @@ class Debugger extends Object {
 
 		if ($this->bitfieldTest($level, self::DebugFile)) {
 			$logFile = static::config()->get('log_file_name');
-			static::log_to_file($logFile, $level, $prefix);
+			static::toFile($logFile, $level, $prefix);
 
 			if ($this->bitfieldTest($level, self::DebugPerClass)) {
 				// TODO Implement per-class debug logging, could handle by prefix for now
@@ -82,7 +83,7 @@ class Debugger extends Object {
 		}
 		if ($this->bitfieldTest($level, self::DebugEmail)) {
 			if ($email = $this->config()->get('email')) {
-				static::log_to_email($email, $level);
+				static::toEmail($email, $level);
 			}
 		}
 		return $this;
@@ -115,42 +116,54 @@ class Debugger extends Object {
 		return $this;
 	}
 
+	public function info($message, $source = '') {
+		$message = $this->formatMessage($message, 'INF', $source);
+		$this->log($message, self::DebugInfo, $source);
+		return $this;
+	}
+
 	public function trace($message, $source = '') {
-		$message = $this->formatMessage($message, 'TRACE', $source);
+		$message = $this->formatMessage($message, 'TRC', $source);
 		$this->log($message, self::DebugTrace, $source);
 		return $this;
 	}
 
 	public function notice($message, $source = '') {
-		$message = $this->formatMessage($message, 'WARN ', $source);
+		$message = $this->formatMessage($message, 'NTC ', $source);
 		$this->log($message, self::DebugNotice, $source);
 		return $this;
 	}
 
 	public function warn($message, $source = '') {
-		$message = $this->formatMessage($message, 'WARN ', $source);
+		$message = $this->formatMessage($message, 'WRN ', $source);
 		$this->log($message, self::DebugWarn, $source);
 		return $this;
 	}
 
 	public function error($message, $source = '') {
-		$message = $this->formatMessage($message, 'ERROR', $source);
+		$message = $this->formatMessage($message, 'ERR', $source);
 		$this->log($message, self::DebugErr, $source);
 		return $this;
 	}
 
-	public static function log_to_email($address, $level) {
-		SS_Log::add_writer(
-			new SS_LogEmailWriter($address),
-			$level
-		);
+	public function toEmail($address, $level) {
+		if ($address) {
+			SS_Log::add_writer(
+				new SS_LogEmailWriter($address),
+				$level
+			);
+		};
+		return $this;
 	}
 
-	public static function log_to_file($path = null, $level, $source = '') {
-		SS_Log::add_writer(
-			new SS_LogFileWriter($path ?: static::log_file_name($source)),
-			$level
-		);
+	public function toFile($path, $level, $source = '') {
+		if ($path) {
+			SS_Log::add_writer(
+				new SS_LogFileWriter($path ?: static::log_file_name($source)),
+				$level
+			);
+		}
+		return $this;
 	}
 
 	/**

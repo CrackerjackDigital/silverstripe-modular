@@ -1,5 +1,5 @@
 <?php
-namespace Modular;
+namespace Modular\Exceptions;
 
 /**
  * Assist in determining where problems arose.
