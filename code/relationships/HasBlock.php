@@ -53,7 +53,7 @@ class HasBlock extends Field {
 			new DropdownField(
 				self::BlockTypeFieldName,
 				'Event type',
-				$this()->allowed_block_classes(),
+				$this()->allowed_related_classes(),
 				$blockType
 			)
 		];

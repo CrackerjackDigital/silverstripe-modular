@@ -4,21 +4,62 @@ namespace Modular\GridField;
 use Modular\Fields\Field;
 
 class GridField extends Field {
+	const ShowAsGridField = 'grid';
+	
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
+	const GridFieldOrderableRowsFieldName = 'Sort';
+
+	// wether to show the field as a GridField or a TagField
+	private static $show_as = self::ShowAsGridField;
+
+	// can related models be in an order so a GridFieldOrderableRows component is added?
 	private static $sortable = true;
 
+	// allow new related models to be created
+	private static $allow_add_new = true;
+
+	// show autocomplete existing filter
+	private static $autocomplete = true;
+
 	/**
-	 * If model is saved then a gridfield, otherwise a 'save master first' hint.
+	 * Return a gridfield
 	 *
 	 * @return array
 	 */
 	public function cmsFields() {
-		return $this()->isInDB()
-			? [$this->gridField()]
-			: [$this->saveMasterHint()];
+		return $this->gridFields();
+	}
+
+	/**
+	 * Return field(s) to show a gridfield in the CMS, or a 'please save...' prompt if the model hasn't been saved
+	 *
+	 * @return array
+	 */
+	protected function gridFields() {
+		return [
+			$this()->isInDB()
+				? $this->gridField()
+				: $this->saveMasterHint(),
+		];
+	}
+
+	public static function sortable() {
+		return static::config()->get('sortable');
+	}
+
+	public static function field_name() {
+		return static::RelationshipName;
+	}
+
+	public static function related_class_name() {
+		return static::RelatedClassName;
+	}
+
+	public static function relationship_name() {
+		return static::RelationshipName;
 	}
 
 	public static function field_name() {
@@ -47,13 +88,6 @@ class GridField extends Field {
 			$config
 		);
 
-		if ($this()->isInDB()) {
-			// only add if this record is already saved
-			$config->addComponent(
-				new \GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
-			);
-		}
-
 		return $gridField;
 	}
 
@@ -78,6 +112,21 @@ class GridField extends Field {
 				"Link existing {plural} by Title"
 			)
 		);
+
+		if ($this()->isInDB()) {
+			// only add if this record is already saved
+			$config->addComponent(
+				new \GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+			);
+		}
+
+		if (!$this->config()->get('allow_add_new')) {
+			$config->removeComponentsByType(GridFieldConfig::ComponentAddNewButton);
+		}
+		if (!$this->config()->get('autocomplete')) {
+			$config->removeComponentsByType(GridFieldConfig::ComponentAutoCompleter);
+		}
+
 		return $config;
 	}
 

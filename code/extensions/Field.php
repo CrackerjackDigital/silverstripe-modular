@@ -32,6 +32,8 @@ use ValidationResult;
 abstract class Field extends ModelExtension {
 	use lang;
 
+	// if SingleFieldName and SingleFieldSchema are provided then they will be added to the
+	// config.db array by extraStatics
 	const SingleFieldName = '';
 	const SingleFieldSchema = '';
 
@@ -39,21 +41,7 @@ abstract class Field extends ModelExtension {
 
 	const ValidationRulesConfigVarName = 'validation';
 
-	// override in derived classes to use a specialised config not manufactured from extension name
-	const GridFieldConfigName = '';
-
-	const GridFieldOrderableRowsFieldName = 'Sort';
-
-	// override in concrete e.g. 'Blocks' or 'AssociatedRecords'
-	const RelationshipName = '';
-
 	const DefaultTabName = 'Root.Main';
-
-	// TODO remove not used?
-	private static $num_grid_rows = 5;
-
-	// TODO remove not used?
-	private static $gridfield_config_class = '';
 
 	// Zend_Locale_Format compatible format string, if blank then default for locale is used
 	private static $time_field_format = '';
@@ -70,12 +58,24 @@ abstract class Field extends ModelExtension {
 	}
 
 	/**
-	 * Should override in concrete classes to provide an array of fields which this extension adds.
+	 * Override in concrete classes to provide an array of fields which this extension adds.
+	 *
+	 * If SingleFieldName and SingleFieldSchema constants are set then will scaffold a suitable
+	 * for field for them, however complex fields requiring drop-down lists etc won't be populated.
 	 *
 	 * @return array
 	 */
 	public function cmsFields() {
-		return [];
+		$fields = [];
+
+		if (static::SingleFieldName && static::SingleFieldSchema) {
+			if ($dbField = $this->owner->dbObject(static::SingleFieldName)) {
+				if ($formField = $dbField->scaffoldFormField()) {
+					$fields[static::SingleFieldName] = $formField;
+				}
+			}
+		}
+		return $fields;
 	}
 
 	/**

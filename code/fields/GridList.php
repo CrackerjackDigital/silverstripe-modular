@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Fields;
 /**
- * Provides fields for customisation of a GridList block or in-page GridList if added directly.
+ * Provides CMS fields for customisation of a GridList block or in-page GridList if added directly.
  *
  * @package Modular\Fields
  */
