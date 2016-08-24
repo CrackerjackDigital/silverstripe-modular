@@ -78,9 +78,19 @@ abstract class Field extends ModelExtension {
 		return [];
 	}
 
-	public function cmsTab() {
-		return $this->config()->get('cms_tab')
-			?: static:: DefaultTabName;
+	/**
+	 * Return the name (path) of the tab in the cms this model's fields should show under from
+	 * config.cms_tab_name in:
+	 *
+	 * this extension or if not set from
+	 * the extended model or if not set
+	 * then self.DefaultTabName.
+	 *
+	 * @return string
+	 */
+	protected function cmsTab() {
+		return $this->config()->get('cms_tab_name')
+			?: static::DefaultTabName;
 	}
 
 	/**
@@ -96,21 +106,6 @@ abstract class Field extends ModelExtension {
 		        ? [ 'db' => [ static::SingleFieldName => static::SingleFieldSchema ] ]
 				: []
 		);
-	}
-
-	/**
-	 * Return the name (path) of the tab in the cms this model's fields should show under from
-	 * config.cms_tab_name in:
-	 *
-	 * this extension or if not set from
-	 * the extended model or if not set
-	 * then self.DefaultTabName.
-	 *
-	 * @return string
-	 */
-	protected function cmsTab() {
-		return $this->config()->get('cms_tab_name')
-			?: static::DefaultTabName;
 	}
 
 	/**

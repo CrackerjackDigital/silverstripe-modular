@@ -4,7 +4,7 @@ Name: modular-models-config
 Modular\Models\GridListFilter:
   extensions:
     - Modular\Fields\Title
-    - Modular\Fields\ModelTag('Title')
+    - Modular\Fields\ModelTag
 Modular\Models\Slide:
   extensions:
     - Modular\Fields\Title
@@ -16,12 +16,12 @@ Modular\Models\Slide:
 Modular\Models\Tag:
   extensions:
     - Modular\Fields\Title
-    - Modular\Fields\ModelTag('Title')
+    - Modular\Fields\ModelTag
 Modular\Models\InternalOrExternalLink:
   extensions:
     - Modular\Fields\Title
     - Modular\Behaviours\InternalOrExternalLink
     - Modular\Fields\InternalLink
     - Modular\Fields\ExternalLink
-    - Modular\Fields\ModelTag('Title')
+    - Modular\Fields\ModelTag
     - Modular\Fields\Thumbnail
