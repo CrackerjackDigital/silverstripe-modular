@@ -1,4 +1,9 @@
 <?php
+namespace Modular\Extensions\Controller;
+
+use Controller;
+use GridListService;
+use Injector;
 
 /**
  * Provides links to a GridList either for filtering or as an action such as 'clear'. This is removed from
@@ -7,7 +12,7 @@
  *
  * HasGridListLinks
  */
-class HasGridListLinksControllerExtension extends \Modular\ContentControllerExtension {
+class HasGridListLinks extends \Modular\ContentControllerExtension {
 
 	/**
 	 * Provide a link back to the template for the current 'page' augmented

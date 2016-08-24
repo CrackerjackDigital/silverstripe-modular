@@ -1,25 +1,15 @@
 <?php
-namespace Modular\Fields;
+namespace Modular\Relationships;
 /**
- * Provides editable filters and extension via provideGridListFilters mechanism that in-page gridlist can use.
+ * Provides a tag field where filters can be added.
  *
  * @package Modular\Fields
  */
-class GridListFilters extends Field {
+class HasGridListFilters extends HasManyMany {
 	const RelationshipName = 'GridListFilters';
 	const RelatedClassName = 'Modular\Models\GridListFilter';
 
-	public function extraStatics($class = null, $extension = null) {
-		$parent = parent::extraStatics($class, $extension) ?: [];
-		return array_merge_recursive(
-			$parent,
-			[
-				'many_many' => [
-					static::RelationshipName => static::RelatedClassName,
-				],
-			]
-		);
-	}
+	private static $sortable = false;
 
 	public function cmsFields() {
 		return [

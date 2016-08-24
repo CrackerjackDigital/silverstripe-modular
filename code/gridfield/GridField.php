@@ -8,6 +8,9 @@ class GridField extends Field {
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
+	const GridFieldOrderableRowsFieldName = 'Sort';
+
+	// can related models be in an order so a GridFieldOrderableRows component is added?
 	private static $sortable = true;
 
 	/**
@@ -19,6 +22,22 @@ class GridField extends Field {
 		return $this()->isInDB()
 			? [$this->gridField()]
 			: [$this->saveMasterHint()];
+	}
+
+	public static function sortable() {
+		return static::config()->get('sortable');
+	}
+
+	public static function field_name() {
+		return static::RelationshipName;
+	}
+
+	public static function related_class_name() {
+		return static::RelatedClassName;
+	}
+
+	public static function relationship_name() {
+		return static::RelationshipName;
 	}
 
 	/**

@@ -1,10 +1,12 @@
 <?php
-namespace Modular\Extensions\Controller;
 
-use Modular\ContentControllerExtension;
+namespace Modular\Extensions;
+
 use Modular\GridList\Constraints;
+use Modular\owned;
 
-class HasGridList extends ContentControllerExtension {
+class HasGridList extends \Extension {
+	use owned;
 
 	public function GridList() {
 		return new \ArrayData([
