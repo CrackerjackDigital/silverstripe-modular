@@ -21,6 +21,10 @@ class GridField extends Field {
 			: [$this->saveMasterHint()];
 	}
 
+	public static function field_name() {
+		return static::RelationshipName;
+	}
+
 	/**
 	 * Return a GridField configured for editing attached MediaModels. If the master record is in the database
 	 * then also add GridFieldOrderableRows (otherwise complaint re UnsavedRelationList not being a DataList happens).

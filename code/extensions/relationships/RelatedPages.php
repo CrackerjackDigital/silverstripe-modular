@@ -19,7 +19,7 @@ class RelatedPages extends Field {
 
 	private static $multiple_select = true;
 
-	private static $cms_tab_name = 'Root.Relationships';
+	private static $cms_tab_name = 'Root.RelatedPages';
 
 	public function extraStatics($class = null, $extension = null) {
 		$parent = parent::extraStatics($class, $extension) ?: [];
