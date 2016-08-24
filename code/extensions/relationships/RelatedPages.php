@@ -21,23 +21,6 @@ abstract class RelatedPages extends HasManyMany {
 	private static $sortable = false;
 
 	/**
-	 * Add tag field for this relationship's pages
-	 * @return array
-	 */
-	public function cmsFields() {
-		$multipleSelect = (bool) $this->config()->get('multiple_select');
-		$relatedClassName = static::RelatedClassName;
-
-		return [
-			(new \TagField(
-				static::RelationshipName,
-				null,
-				$relatedClassName::get()
-			))->setIsMultiple($multipleSelect)->setCanCreate(false),
-		];
-	}
-
-	/**
 	 * Add this exensions related pages to items, keyed by the Relationship Name
 	 * @param array $items
 	 */
