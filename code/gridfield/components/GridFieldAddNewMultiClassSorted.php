@@ -26,7 +26,7 @@ class GridFieldAddNewMultiClassSorted extends GridFieldAddNewMultiClass {
 	 * @param GridField $grid
 	 * @return array a map of class name to title
 	 */
-	public function getClasses(GridField $grid) {
+	public function getClasses(\GridField $grid) {
 		$classes = parent::getClasses($grid);
 
 		$excludeClasses = $this->config()->get('exclude_classes');
