@@ -2,14 +2,14 @@
 namespace Modular\Relationships;
 
 /**
- * Add Blocks to a GridList and the GridList data methods to the page.
+ * Add Blocks to a GridList and the GridList data methods to the extended model (Page or Block).
  *
  * @method \DataList Blocks
  */
 class HasGridList extends HasBlocks {
 	const RelationshipName    = 'GridListBlocks';
 
-	private static $cms_tab_name = 'Root.GridBlocks';
+	private static $cms_tab_name = 'Root.Main';
 
 	public function GridList() {
 		return new \ArrayData([
