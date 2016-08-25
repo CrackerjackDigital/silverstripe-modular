@@ -23,7 +23,7 @@ class GridFieldAddNewMultiClassSorted extends GridFieldAddNewMultiClass {
 	/**
 	 * Overrides the parent method so that we can sort the classes by their value
 	 *
-	 * @param GridField $grid
+	 * @param \GridField $grid
 	 * @return array a map of class name to title
 	 */
 	public function getClasses(\GridField $grid) {
