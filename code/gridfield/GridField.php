@@ -5,7 +5,6 @@ use Modular\Fields\Field;
 
 class GridField extends Field {
 	const ShowAsGridField = 'grid';
-	
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
@@ -59,10 +58,6 @@ class GridField extends Field {
 	}
 
 	public static function relationship_name() {
-		return static::RelationshipName;
-	}
-
-	public static function field_name() {
 		return static::RelationshipName;
 	}
 
