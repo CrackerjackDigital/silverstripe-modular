@@ -21,45 +21,18 @@ abstract class RelatedPages extends HasManyMany {
 	private static $sortable = false;
 
 	/**
-	 * Add this exensions related pages to items, keyed by the Relationship Name
-	 * @param array $items
+	 * Return related pages for this site, optionally filtered by the associated filter passed as a getVar
+	 * @param boolean $filter
 	 */
-	public function provideGridListItems(array &$items) {
-		$key = static::relationship_name();
+	public function provideGridListItems($filter = false) {
+		$relationship = static::relationship_name();
 
-		$items = $this()->{static::relationship_name()}();
+		$pages = $this()->$relationship();
 
-		$items[$key] = array_merge(
-			isset($items[$key]) ? $items[$key] : [],
-			$items
-		);
-	}
-
-	/**
-	 * Add this relationships related pages to the grid list items in the corresponding filter group as a data list.
-	 * ie $groupedItems will be built so:
-	 * [
-	 *      'people' => DataList of related pages with the 'people' filter tag,
-	 *      'news' => DataList of related pages with the 'news' filter tag
-	 * ]
-	 *
-	 * @param array $groupedItems
-	 */
-	public function provideFilteredGridListItems(array &$groupedItems) {
-		$filters = GridListFilter::get();
-		/** @var ModelTag|Model $filter */
-		$allItems = $this()->{static::RelationshipName}();
-
-		foreach ($filters as $filter) {
-			$filtered = $allItems->filter([
-				'GridListFilters.ID' => $filter->ID
-			]);
-			if (isset($groupedItems[ $filter->ModelTag() ])) {
-				$groupedItems[ $filter->ModelTag() ]->merge($filtered);
-			} else {
-				$groupedItems[ $filter->ModelTag() ] = $filtered;
-			}
+		if ($this->sortable()) {
+			$pages->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
 		}
-	}
 
+		return $pages->toArray();
+	}
 }

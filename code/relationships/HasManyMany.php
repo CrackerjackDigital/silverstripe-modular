@@ -75,8 +75,9 @@ class HasManyMany extends GridField {
 		$config = parent::gridFieldConfig($relationshipName, $configClassName);
 
 		// if config.allowed_classes is set then limit available classes to those listed there
-		$allowedClasses = $this()->config()->get('allowed_related_classes')
-			?: $this->config()->get('allowed_related_classes');
+		// check this extension first, then the extended model.
+		$allowedClasses = $this->config()->get('allowed_related_classes')
+			?: $this()->config()->get('allowed_related_classes');
 
 		if ($allowedClasses) {
 			/** @var \GridFieldAddNewMultiClass $addNewMultiClass */

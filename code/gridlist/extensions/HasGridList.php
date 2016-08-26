@@ -18,25 +18,14 @@ class HasGridList extends \Extension {
 	}
 
 	public function GridListItems() {
-		$items = [];
-		$this()->extend('provideGridListItems', $items);
-
-		/** @var Constraints $constraints */
-		$constraints = \Injector::inst()->get('GridListFilterConstraints');
-
-		if ($filter = $constraints->constraint('flt')) {
-			if (isset($items[ $filter ])) {
-				// if we have a filter requested then just use that filters items to merge in
-				$items = [$filter => $items [ $filter ]];
-			} else {
-				// no items (bad filter?)
-				$items = [];
-			}
-		}
 		$out = new \ArrayList();
-
-		foreach ($items as $filter => $list) {
-			$out->merge($list);
+		
+		if ($allItems = $this()->invokeWithExtensions('provideGridListItems')) {
+			foreach ($allItems as $extensionItems) {
+				foreach ($extensionItems as $model) {
+					$out->merge($model);
+				}
+			}
 		}
 		return $out;
 	}

@@ -50,16 +50,16 @@ class GridField extends Field {
 		return static::config()->get('sortable');
 	}
 
-	public static function field_name() {
-		return static::RelationshipName;
+	public static function field_name($append = '') {
+		return static::RelationshipName . $append;
 	}
 
 	public static function related_class_name() {
 		return static::RelatedClassName;
 	}
 
-	public static function relationship_name() {
-		return static::RelationshipName;
+	public static function relationship_name($append = '') {
+		return static::RelationshipName . $append;
 	}
 
 	/**
