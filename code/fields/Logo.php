@@ -5,7 +5,6 @@ use FormField;
 
 class Logo extends Image {
 	const RelationshipName        = 'Logo';
-	const UploadFieldName         = 'LogoID';      // keep in sync with RelationshipName
 	const DefaultUploadFolderName = 'logos';
 
 	/**
