@@ -6,6 +6,7 @@ use DatetimeField;
 use FieldList;
 use FormField;
 use LiteralField;
+use Modular\Exception;
 use Modular\lang;
 use Modular\Model;
 use Modular\ModelExtension;
@@ -55,6 +56,26 @@ abstract class Field extends ModelExtension {
 	 */
 	public function __invoke() {
 		return $this->owner;
+	}
+	
+	/**
+	 * @param mixed|null $set if provided sets the value on the model for SingleFieldValue and return this, otherwise
+	 *                        returns the models SingleFieldValue.
+	 * @return $this
+	 * @throws Exception if SingleFieldName constant is not set via late static binding
+	 * @getter-setter
+	 * @fluent-setter
+	 */
+	public function singleFieldValue($set = null) {
+		if (!static::SingleFieldName) {
+			throw new Exception("Called singleFieldValue() with no SingleFieldName set")
+		}
+		if (func_num_args()) {
+			$this()->{static::SingleFieldName} = $set;
+			return $this;
+		} else {
+			return $this()->{static::SingleFieldName};
+		}
 	}
 
 	/**
