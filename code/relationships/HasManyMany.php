@@ -24,6 +24,14 @@ class HasManyMany extends GridField {
 	}
 
 	/**
+	 * Return all related items.
+	 * @return \SS_List
+	 */
+	public function related() {
+		return $this()->{static::relationship_name()}();
+	}
+
+	/**
 	 * Returns a field array using a tag field which can be used in derived classes instead of a GridField which is the default returned by cmsFields().
 	 * @return array
 	 */

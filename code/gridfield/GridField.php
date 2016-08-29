@@ -58,7 +58,7 @@ class GridField extends Field {
 	}
 
 	public static function relationship_name($fieldName = '') {
-		return static::RelationshipName . ".$fieldName";
+		return static::RelationshipName . ($fieldName ? ".$fieldName" : '');
 	}
 
 	/**

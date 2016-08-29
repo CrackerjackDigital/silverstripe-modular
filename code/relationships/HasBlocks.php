@@ -35,6 +35,10 @@ class HasBlocks extends HasManyMany {
 	#    ]
 	];
 
+	public function provideGridListItems() {
+		return $this->related();
+	}
+
 	/**
 	 * REturns Blocks for a particular zone on the page, e.g. 'Content', 'Sidebar' filtered
 	 * by Block class name from config.blocks_for_zone.

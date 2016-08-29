@@ -22,17 +22,24 @@ class HasGridList extends \Extension {
 	}
 
 	public function GridListItems() {
-		// first we get any related items, e.g. from GridListBlocks
-		// this will return an array of SS_Lists
-		$items = $this()->extend('provideGridListItems');
+		$out = new \ArrayList();
 
+		// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
+		// this will return an array of SS_Lists
+		$lists = $this()->extend('provideGridListItems');
+		foreach ($lists as $list) {
+			$out->merge($list);
+		}
 
 		// then we get related items from the current page via relationships
 		// such as HasRelatedPages, HasTags etc
 		$page = \Director::get_current_page();
-		$items = $page->extend('provideGridListItems');
+		$lists = $page->extend('provideGridListItems');
+		foreach ($lists as $list) {
+			$out->merge($list);
+		}
+		return $out;
 
-		return $items;
 	}
 
 	public function GridListFilters() {
