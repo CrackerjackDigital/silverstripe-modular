@@ -3,7 +3,7 @@ namespace Modular\Extensions\Model;
 use Modular\ModelExtension;
 
 /**
- * Render the extended model (e.g. Block)/view (e.g. Page) as an item in a gridlist using the associated template
+ * Render the extended model (e.g. Block) or view (e.g. Page) as an item in a gridlist using the associated template
  */
 class GridListItem extends ModelExtension {
 	/**

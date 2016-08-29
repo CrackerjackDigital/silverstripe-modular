@@ -15,8 +15,8 @@ class DateTimeField extends Field {
 	const SingleFieldSchema = 'SS_DateTime';
 	// show time field or just the date field?
 	const ShowTimeField = false;
-	// show Year, Month, Day, Hours, Minutes as seperated fields, one per unit
-	const ShowSeperateFields = true;
+	// show Year, Month, Day, Hours, Minutes as separated fields, one per unit
+	const ShowSeparateFields = true;
 
 	const DateRequired = true;
 	const TimeRequired = false;
@@ -104,9 +104,9 @@ class DateTimeField extends Field {
 		/** @var DField $field */
 		if ($field->getName() == static::SingleFieldName) {
 			if ($field instanceof DTField) {
-				$this->configureDateTimeField($field, static::ShowSeperateFields);
+				$this->configureDateTimeField($field, static::ShowSeparateFields);
 			} else {
-				$this->configureDateField($field, static::ShowSeperateFields);
+				$this->configureDateField($field, static::ShowSeparateFields);
 			}
 		}
 	}

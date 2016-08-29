@@ -1,10 +1,14 @@
 <?php
 
-namespace Modular\Extensions;
+namespace Modular\GridList;
 
-use Modular\GridList\Constraints;
 use Modular\owned;
 
+/**
+ * Add extensions to models which provide items, filters and other control to a GridList.
+ *
+ * @package Modular\Extensions
+ */
 class HasGridList extends \Extension {
 	use owned;
 
@@ -18,27 +22,17 @@ class HasGridList extends \Extension {
 	}
 
 	public function GridListItems() {
-		$items = [];
-		$this()->extend('provideGridListItems', $items);
+		// first we get any related items, e.g. from GridListBlocks
+		// this will return an array of SS_Lists
+		$items = $this()->extend('provideGridListItems');
 
-		/** @var Constraints $constraints */
-		$constraints = \Injector::inst()->get('GridListFilterConstraints');
 
-		if ($filter = $constraints->constraint('flt')) {
-			if (isset($items[ $filter ])) {
-				// if we have a filter requested then just use that filters items to merge in
-				$items = [$filter => $items [ $filter ]];
-			} else {
-				// no items (bad filter?)
-				$items = [];
-			}
-		}
-		$out = new \ArrayList();
+		// then we get related items from the current page via relationships
+		// such as HasRelatedPages, HasTags etc
+		$page = \Director::get_current_page();
+		$items = $page->extend('provideGridListItems');
 
-		foreach ($items as $filter => $list) {
-			$out->merge($list);
-		}
-		return $out;
+		return $items;
 	}
 
 	public function GridListFilters() {
@@ -48,10 +42,10 @@ class HasGridList extends \Extension {
 	}
 
 	public function GridListSort() {
-		return singleton('GridListFilterService')->sort();
+//		return singleton('GridListFilterService')->sort();
 	}
 
 	public function GridListMode() {
-		return singleton('GridListFilterService')->mode();
+//		return singleton('GridListFilterService')->mode();
 	}
 }

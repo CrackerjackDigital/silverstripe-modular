@@ -7,9 +7,6 @@ en:
   Modular\Relationships\HasBlocks:
     Blocks:
       Label: 'Content Blocks'
-  Modular\Relationships\HasGridList:
-    GridListBlocks:
-      Label: 'Grid Blocks'
   Modular\Relationships\HasGridListFilters:
     GridListFilters:
       Label: 'Associated filters'

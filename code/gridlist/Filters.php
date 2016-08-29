@@ -4,7 +4,12 @@ namespace Modular\GridList;
 use Modular\Object;
 use Modular\Exception;
 
-class Constraints extends Object {
+/**
+ * Filters limit what models are displayed on page depending on user selection, they can further restrict models after Constraints are applied.
+ *
+ * @package Modular\GridList
+ */
+class Filters extends Object {
 	const ModeGetVar       = 'mode';
 	const SortGetVar       = 'sort';
 	const StartIndexGetVar = 'start';
@@ -12,7 +17,7 @@ class Constraints extends Object {
 	// this could be hardwired instead of using generated value
 	const SessionKeyPrefix = '';
 	// session key is broken into tokens, mainly for debugging
-	const SessionPathSeperator = ':';
+	const SessionPathSeparator = ':';
 	// don't save any incoming values to session at all
 	const SessionNone = 0;
 	// save for all pages
@@ -104,7 +109,7 @@ class Constraints extends Object {
 	}
 
 	/**
-	 * Returns map of parameters (getVars and urlParams) this Constraints derived class handles. Merges in
+	 * Returns map of parameters (getVars and urlParams) this Filters derived class handles. Merges in
 	 * with preference passed params if provided.
 	 */
 	protected function params($params = []) {
@@ -130,11 +135,11 @@ class Constraints extends Object {
 		if ($includeGetVars) {
 			$url .= '?' . http_build_query($this->getVars());
 		}
-		return static::session_key_prefix() . $key . static::SessionPathSeperator . md5(strtolower($url));
+		return static::session_key_prefix() . $key . static::SessionPathSeparator . md5(strtolower($url));
 	}
 
 	public function session_key_prefix() {
-		return strtoupper(static::SessionKeyPrefix ?: basename(get_called_class())) . static::SessionPathSeperator;
+		return strtoupper(static::SessionKeyPrefix ?: basename(get_called_class())) . static::SessionPathSeparator;
 	}
 
 	/**

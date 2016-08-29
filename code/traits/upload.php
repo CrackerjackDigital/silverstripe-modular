@@ -3,6 +3,7 @@
 namespace Modular;
 
 use UploadField;
+use Modular\Exceptions\Exception;
 
 /**
  * Trait adds functionality for dealing with upload fields
@@ -55,7 +56,7 @@ trait upload {
 
 		$categories = [];
 		if (!is_array($allowedFiles)) {
-			// could be comma seperated list of categories
+			// could be comma separated list of categories
 			$categories = explode(',', $allowedFiles);
 			// get extensions from category so we always get a list of extensions for the CMS right title
 			$allCategoryExtensions = \File::config()->get('app_categories') ?: [];

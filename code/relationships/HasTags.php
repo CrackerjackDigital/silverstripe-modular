@@ -14,7 +14,7 @@ class HasTags extends HasManyMany {
 	const RelatedClassName = 'Modular\Models\Tag';
 
 	private static $multiple_tags = true;
-	
+
 	private static $can_create_tags = true;
 
 	private static $sortable = false;
