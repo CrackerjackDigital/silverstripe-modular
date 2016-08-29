@@ -14,7 +14,8 @@ class HasBlocks extends HasManyMany {
 	private static $cms_tab_name = 'Root.ContentBlocks';
 
 	// add block class names for each 'zone' in templates here, then include in template with
-	// ZoneBlocks('Top')
+	// ZoneBlocks('Top'). Can be consfigured on extended class (e.g. Page) which will take precedence over
+	// those declared in here the extension.
 	private static $blocks_for_zone = [
 	# example:
 	#   'HomePageTop' => [
@@ -43,7 +44,8 @@ class HasBlocks extends HasManyMany {
 	 * @return \DataList
 	 */
 	public function ZoneBlocks($zone = 'Content') {
-		$map = $this->config()->get('blocks_for_zone');
+		$map = $this()->config()->get('blocks_for_zone')
+			?: $this->config()->get('blocks_for_zone');
 
 		$filters = [];
 
