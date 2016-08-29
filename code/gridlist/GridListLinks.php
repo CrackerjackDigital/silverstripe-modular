@@ -7,12 +7,12 @@ use Injector;
 
 /**
  * Provides links to a GridList either for filtering or as an action such as 'clear'. This is removed from
- * HasGridList as it may go on pages which link to the gridlist but do not themselves have a GridList. The GridList
+ * GridList as it may go on pages which link to the gridlist but do not themselves have a GridList. The GridList
  * maintains state so cannot be added to all pages which need these links.
  *
- * HasGridListLinks
+ * GridListLinks
  */
-class HasGridListLinks extends \Modular\ContentControllerExtension {
+class GridListLinks extends \Modular\ContentControllerExtension {
 
 	/**
 	 * Provide a link back to the template for the current 'page' augmented

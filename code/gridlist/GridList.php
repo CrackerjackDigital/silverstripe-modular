@@ -1,18 +1,15 @@
 <?php
-
 namespace Modular\GridList;
 
+use Modular\ContentControllerExtension;
 use Modular\owned;
-use Modular\Relationships\HasBlocks;
 
 /**
  * Add extensions to models which provide items, filters and other control to a GridList.
  *
  * @package Modular\Extensions
  */
-class HasGridList extends HasBlocks {
-	const RelationshipName = 'GridListBlocks';
-	
+class GridList extends ContentControllerExtension {
 	use owned;
 
 	public function GridList() {
@@ -34,10 +31,10 @@ class HasGridList extends HasBlocks {
 			$out->merge($list);
 		}
 
-		// then we get related items from the current page via relationships
+		// then we get items from the current page via relationships
 		// such as HasRelatedPages, HasTags etc
 		$page = \Director::get_current_page();
-		$lists = $page->extend('provideGridListItems');
+		$lists = $page->invokeWithExtensions('provideGridListItems');
 		foreach ($lists as $list) {
 			$out->merge($list);
 		}

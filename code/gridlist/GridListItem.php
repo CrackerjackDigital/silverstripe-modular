@@ -1,5 +1,6 @@
 <?php
-namespace Modular\Extensions\Model;
+namespace Modular\GridList;
+
 use Modular\ModelExtension;
 
 /**
@@ -21,9 +22,9 @@ class GridListItem extends ModelExtension {
 	 * @return string
 	 */
 	protected function template() {
-		$className = $this()->config()->get('gridlist_template') ?: $this()->ClassName;
-		$mode = \Injector::inst()->get('GridListFilterService')->mode();
-
-		return "GridList/{$className}_{$mode}";
+		if (!$template = $this()->config()->get('gridlist_template')) {
+			$template = "GridList/" . $this()->ClassName;
+		}
+		return "$template" . '_' . \Injector::inst()->get('GridListFilterService')->mode();
 	}
 }
