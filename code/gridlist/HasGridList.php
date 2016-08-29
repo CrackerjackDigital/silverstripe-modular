@@ -3,13 +3,16 @@
 namespace Modular\GridList;
 
 use Modular\owned;
+use Modular\Relationships\HasBlocks;
 
 /**
  * Add extensions to models which provide items, filters and other control to a GridList.
  *
  * @package Modular\Extensions
  */
-class HasGridList extends \Extension {
+class HasGridList extends HasBlocks {
+	const RelationshipName = 'GridListBlocks';
+	
 	use owned;
 
 	public function GridList() {
