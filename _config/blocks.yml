@@ -1,0 +1,6 @@
+---
+Name: modular-blocks
+---
+Modular\Blocks\Download:
+  extensions:
+    - Modular\Fields\Download
