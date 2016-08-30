@@ -5,6 +5,8 @@ use Modular\GridField\GridFieldConfig;
 use Modular\Relationships\HasManyMany;
 use Quaff\Controllers\Model;
 
+use Modular\GridField\GridFieldOrderableRows;
+
 class HasManyManyGridField extends HasManyMany {
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
@@ -50,7 +52,7 @@ class HasManyManyGridField extends HasManyMany {
 		if ($this()->isInDB()) {
 			// only add if this record is already saved
 			$config->addComponent(
-				new \GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
 			);
 		}
 
