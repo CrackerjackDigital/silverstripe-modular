@@ -37,8 +37,10 @@ class HasBlocks extends HasManyMany {
 	];
 
 	/**
-	 * REturns Blocks for a particular zone on the page, e.g. 'Content', 'Sidebar' filtered
-	 * by Block class name from config.blocks_for_zone.
+	 * Returns Blocks for a particular zone on the page, e.g. 'Content', 'Sidebar' filtered
+	 * by Block class name from config.blocks_for_zone on the extended model first, then on this extension if not
+	 * no config.blocks_for_zone at all is set on there (does not allow mixing of blocks from the model and this extension
+	 * at the moment).
 	 *
 	 * @param string $zone
 	 * @return \DataList
