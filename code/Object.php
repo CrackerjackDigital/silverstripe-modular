@@ -18,6 +18,7 @@ require_once 'traits/requirements.php';
 require_once 'traits/tokens.php';
 require_once 'traits/upload.php';
 require_once 'gridlist/providers/children.php';
+require_once 'gridlist/providers/related.php';
 
 class Object extends \Object {
 	use cache;
