@@ -2,6 +2,7 @@
 namespace Modular\GridList;
 
 use Modular\ContentControllerExtension;
+use Modular\Models\GridListFilter;
 use Modular\owned;
 
 /**
@@ -64,6 +65,13 @@ class GridList extends ContentControllerExtension {
 		foreach ($lists as $list) {
 			$out->merge($list);
 		}
+		// now we add the default filter on to fill in any space
+
+		$defaults = GridListFilter::get()->sort('Sort');
+		foreach ($defaults as $default) {
+			$out->push($default);
+		}
+
 		$out->removeDuplicates();
 		return $out;
 	}

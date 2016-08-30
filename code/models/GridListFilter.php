@@ -6,6 +6,9 @@ namespace Modular\Models;
 use Modular\Model;
 
 class GridListFilter extends Model {
+	private static $db = [
+		'Sort' => 'Int'
+	];
 	/**
 	 * GridListFilter should have ModelTag extension so use that as the Filter value in page etc.
 	 * @return string
