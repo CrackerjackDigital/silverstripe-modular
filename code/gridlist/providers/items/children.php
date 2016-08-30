@@ -1,5 +1,5 @@
 <?php
-namespace Modular\GridList\Providers;
+namespace Modular\GridList\Providers\Items;
 /**
  * Trait provides children to the gridlist
  */

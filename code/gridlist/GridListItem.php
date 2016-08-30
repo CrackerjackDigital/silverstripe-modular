@@ -12,7 +12,15 @@ class GridListItem extends ModelExtension {
 	 * GridListItem constructor.
 	 */
 	public function GridListItem() {
-		return $this()->renderWith($this->template(), func_get_args());
+		$lists = $this()->invokeWithExtensions('provideGridListFilters');
+		$filters = new \ArrayList();
+		foreach ($lists as $list) {
+			$filters->merge($list);
+		}
+		$filters->removeDuplicates();
+		return $this()->renderWith($this->template(), [
+			'Filters' => $filters
+		]);
 	}
 
 	/**

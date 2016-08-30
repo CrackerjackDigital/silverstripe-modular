@@ -1,5 +1,5 @@
 <?php
-namespace Modular\GridList\Providers;
+namespace Modular\GridList\Providers\Items;
 /**
  * Trait provides related models to the gridlist, e.g. via a RelatedPages derived class where this trait has been added.
  */
@@ -7,7 +7,7 @@ namespace Modular\GridList\Providers;
 trait related {
 	abstract public function __invoke();
 
-	abstract public function related();
+	abstract public function related($relationshipName = '');
 
 	/**
 	 * Use the 'related' method to return related pages.

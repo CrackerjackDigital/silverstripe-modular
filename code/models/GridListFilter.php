@@ -13,4 +13,8 @@ class GridListFilter extends Model {
 	public function Filter() {
 		return $this->ModelTag;
 	}
+
+	public function FilterLink() {
+		return \Director::get_current_page()->Link() . '?filter=' . $this->Filter();
+	}
 }

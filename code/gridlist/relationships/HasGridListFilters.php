@@ -22,13 +22,11 @@ class HasGridListFilters extends HasManyMany {
 	}
 
 	/**
-	 * Add filters from this fields RelatedClassName
+	 * Return filters related to the extended model
 	 *
-	 * @param \ArrayList $filters
+	 * #return \SS_List
 	 */
-	public function provideGridListFilters(\ArrayList $filters) {
-		$filters->merge(
-			\DataObject::get(static::RelatedClassName)->sort('Title')
-		);
+	public function provideGridListFilters() {
+		return $this->related();
 	}
 }

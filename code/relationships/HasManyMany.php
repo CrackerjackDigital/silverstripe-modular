@@ -24,11 +24,15 @@ class HasManyMany extends GridField {
 	}
 
 	/**
-	 * Return all related items.
+	 * Return all related items. Optionally (for convenience more than anything) provide a relationship name to dereference otherwise this classes
+	 * late static binding relationship_name() will be used.
+	 *
+	 * @param string $relationshipName if supplied use this relationship instead of static relationship_name
 	 * @return \SS_List
 	 */
-	public function related() {
-		return $this()->{static::relationship_name()}();
+	public function related($relationshipName = '') {
+		$relationshipName = $relationshipName ?: static::relationship_name();
+		return $this()->$relationshipName();
 	}
 
 	/**
