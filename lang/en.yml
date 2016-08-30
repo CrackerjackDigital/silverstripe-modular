@@ -95,12 +95,6 @@ en:
     PLURALNAME: 'Call to Action blocks'
     Content:
       Label: 'Content'
-  Modular\Blocks\SubBlocks:
-    DESCRIPTION: 'A block which contains other blocks'
-    SINGULARNAME: 'Blocks within block'
-    PLURALNAME: 'Blocks withing blocks'
-    Title:
-      Guide: 'Memorable name'
   Modular\Blocks\Content:
     DESCRIPTION: 'Text'
     SINGULARNAME: 'Text block'
@@ -111,14 +105,11 @@ en:
     PLURALNAME: 'Content with Image blocks'
   Modular\Blocks\Download:
     DESCRIPTION: 'Download'
-    SINGULARNAME: 'Download'
-    PLURALNAME: 'Downloads'
-    LinkType:
-      Label: 'Link type'
-    EmbedCode:
-      Label: 'Embed code'
-    UploadedFile:
-      Label: 'Uploaded file'
+    SINGULARNAME: 'Download block'
+    PLURALNAME: 'Download blocks'
+    Download:
+      Label: 'Download'
+      Guide: 'Add a file to link to which will be available as a download'
   Modular\Blocks\Files:
     DISCRIPTION: 'A set of files'
     SINGULARNAME: 'Files'
@@ -178,6 +169,12 @@ en:
       Guide: 'This title of the pullquote is for CMS use only and not displayed on the website'
     Content:
       Guide: 'Add a pull quote for this {article.singular}'
+  Modular\Blocks\SubBlocks:
+    DESCRIPTION: 'A block which contains other blocks'
+    SINGULARNAME: 'Blocks within block'
+    PLURALNAME: 'Blocks withing blocks'
+    Title:
+      Guide: 'Memorable name'
   Modular\Blocks\Video:
     DESCRIPTION: 'Video'
     SINGULARNAME: 'Video'
