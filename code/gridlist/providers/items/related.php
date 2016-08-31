@@ -7,8 +7,6 @@ namespace Modular\GridList\Providers\Items;
 trait related {
 	abstract public function __invoke();
 
-	abstract public function related($relationshipName = '');
-
 	/**
 	 * Use the 'related' method to return related pages.
 	 * @return mixed
