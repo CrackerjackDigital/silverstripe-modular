@@ -14,8 +14,6 @@ class HasManyManyGridField extends HasManyMany {
 
 	private static $sortable = true;
 
-	private static $allowed_related_classes = [];
-
 	/**
 	 * If model is saved then a gridfield, otherwise a 'save master first' hint.
 	 *
@@ -81,14 +79,6 @@ class HasManyManyGridField extends HasManyMany {
 				"Link existing {plural} by Title"
 			)
 		);
-		// if config.allowed_classes is set then limit available classes to those listed there
-		$allowedClasses = $this->config()->get('allowed_related_classes');
-		if ($allowedClasses) {
-			/** @var \GridFieldAddNewMultiClass $addNewMultiClass */
-			if ($addNewMultiClass = $config->getComponentByType('GridFieldAddNewMultiClass')) {
-				$addNewMultiClass->setClasses($this->config()->get('allowed_related_classes'));
-			}
-		}
 		return $config;
 	}
 

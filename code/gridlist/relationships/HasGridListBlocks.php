@@ -1,8 +1,6 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Relationships\HasBlocks;
-
 /**
  * Add manually curated blocks to a grid list.
  *
@@ -10,6 +8,7 @@ use Modular\Relationships\HasBlocks;
  */
 class HasGridListBlocks extends HasBlocks {
 	const RelationshipName = 'GridListBlocks';
+	const GridFieldConfigName = 'Modular\GridField\HasGridListBlocksGridFieldConfig';
 
 	/**
 	 * Provides Blocks for the GridList via GridListBlocks relationship
@@ -19,5 +18,4 @@ class HasGridListBlocks extends HasBlocks {
 	public function provideGridListItems() {
 		return $this->related();
 	}
-
 }

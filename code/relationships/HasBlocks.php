@@ -13,27 +13,29 @@ class HasBlocks extends HasManyMany {
 
 	private static $cms_tab_name = 'Root.ContentBlocks';
 
+	private static $allow_new_multi_class = true;
+
 	// add block class names for each 'zone' in templates here, then include in template with
 	// ZoneBlocks('Top'). Can be consfigured on extended class (e.g. Page) which will take precedence over
 	// those declared in here the extension.
 	private static $blocks_for_zone = [
-	# example:
-	#   'HomePageTop' => [
-	#       'HomePageFeatureBlock'
-	#   ],
-	#	'Top' => [
-	#		'HeroBlock'
-	#	 ],
-	#    'Content' => [
-	#	    'ContentBlock',
-	#       'PromoBlock'
-	#    ],
-	#    'SideBar' => [
-	#       'PromoBlock'
-	#    ],
-	#    'Bottom' => [
-	#	    'FootnotesBlock'
-	#    ]
+		# example:
+		#   'HomePageTop' => [
+		#       'HomePageFeatureBlock'
+		#   ],
+		#	'Top' => [
+		#		'HeroBlock'
+		#	 ],
+		#    'Content' => [
+		#	    'ContentBlock',
+		#       'PromoBlock'
+		#    ],
+		#    'SideBar' => [
+		#       'PromoBlock'
+		#    ],
+		#    'Bottom' => [
+		#	    'FootnotesBlock'
+		#    ]
 	];
 
 	/**
@@ -57,4 +59,5 @@ class HasBlocks extends HasManyMany {
 			];
 		}
 		return $this()->Blocks()->filter($filters)->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
-	}}
+	}
+}

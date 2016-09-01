@@ -184,6 +184,15 @@ abstract class Field extends ModelExtension {
 	}
 
 	/**
+	 * A dummy helper so we can try to get field decorations from a relationship instead of just a field name.
+	 *
+	 * @return string
+	 */
+	public static function relationship_name() {
+		return '';
+	}
+
+	/**
 	 * Set field decorations, e.g. label, guide information etc
 	 *
 	 * @param \FormField $field
@@ -191,11 +200,12 @@ abstract class Field extends ModelExtension {
 	protected function setFieldDecorations(FormField $field) {
 		$fieldName = $field->getName();
 
-		$label = $this->fieldDecoration($fieldName, "Label", $field->Title(), [], $field);
-		$guide = $this->fieldDecoration($fieldName, "Guide", '', [], $field);
-
-		$field->setTitle($label);
-		$field->setRightTitle($guide);
+		$field->setTitle(
+			$this->fieldDecoration($fieldName, "Label", $field->Title(), [], $field)
+		);
+		$field->setRightTitle(
+			$this->fieldDecoration($fieldName, "Guide", '', [], $field)
+		);
 	}
 
 	/**

@@ -13,7 +13,6 @@ class File extends HasOne {
 	const RelationshipName        = 'File';
 	const RelatedClassName        = 'File';
 	const DefaultUploadFolderName = 'files';
-	const UploadFieldName         = '';
 
 	// if an array then file extensions, if a string then a category e.g. 'video'
 
@@ -32,11 +31,13 @@ class File extends HasOne {
 	}
 
 	/**
-	 * Files are always without ID ?
+	 * Files are always without ID as use UploadField which breaks convention.
+	 *
+	 * @param string $append
 	 * @return string
 	 */
-	public static function field_name() {
-		return static::UploadFieldName ?: static::RelationshipName;
+	public static function field_name($append = '') {
+		return static::RelationshipName . $append;
 	}
 
 	public static function allowed_files() {
@@ -48,6 +49,18 @@ class File extends HasOne {
 		/** @var UploadField $field */
 		if ($fieldName == static::field_name()) {
 			$this->configureUploadField($field, static::allowed_files());
+		}
+	}
+
+	/**
+	 * If file is versioned we need to publish it also.
+	 */
+	public function onAfterPublish() {
+		/** @var \File|\Versioned $file */
+		if ($file = $this()->{static::relationship_name()}()) {
+			if ($file->hasExtension('Versioned')) {
+				$file->publish('Stage', 'Live', false);
+			}
 		}
 	}
 
