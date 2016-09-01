@@ -1,3 +1,3 @@
-<% loop ZoneBlocks($zone) %>
+<% loop ZoneBlocks($zone, $rules) %>
 	$Me
 <% end_loop %>

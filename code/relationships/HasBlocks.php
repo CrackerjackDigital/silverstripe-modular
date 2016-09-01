@@ -11,6 +11,9 @@ class HasBlocks extends HasManyMany {
 	const RelatedClassName    = 'Modular\Blocks\Block';
 	const GridFieldConfigName = 'Modular\GridField\HasBlocksGridFieldConfig';
 
+	const RulesExcludePrefix = '!';
+	const RulesDelimeter     = ',';
+
 	private static $cms_tab_name = 'Root.ContentBlocks';
 
 	private static $allow_new_multi_class = true;
@@ -44,20 +47,62 @@ class HasBlocks extends HasManyMany {
 	 * no config.blocks_for_zone at all is set on there (does not allow mixing of blocks from the model and this extension
 	 * at the moment).
 	 *
+	 * Blocks can be added in addition to the zone by specifying block class names in the rules parameter (delimited by RulesDelimiter),
+	 * or excluded by adding them prefixed with a '!' (RulesExcludePrefix).
+	 *
 	 * @param string $zone
+	 * @param string $rules delimited block class names e.g. '!ExcludeThisBlockClass, AddThisBlockClass'
 	 * @return \DataList
 	 */
-	public function ZoneBlocks($zone = 'Content') {
+	public function ZoneBlocks($zone = 'Content', $rules = '') {
 		$map = $this()->config()->get('blocks_for_zone')
 			?: $this->config()->get('blocks_for_zone');
 
-		$filters = [];
+		$includes = [];
 
 		if (isset($map[ $zone ])) {
-			$filters = [
-				'ClassName' => $map[ $zone ],
-			];
+			$includes = $map[ $zone ];
 		}
-		return $this()->Blocks()->filter($filters)->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
+
+		list($excludes, $additionals) = $this->parseRules($rules);
+
+		// add additional blocks from rules and make sure they are unique
+		$includes = array_unique(
+			array_merge(
+				$includes,
+				$additionals
+			)
+		);
+
+		return $this()
+			->Blocks()
+			->filter('ClassName', $includes)
+			->exclude('ClassName', $excludes)
+			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
+	}
+
+	/**
+	 * Parse a string of rules such as '!NotBlockClass, AddBlockClass' int array of includes, excludes for filtering
+	 *
+	 * @param string|array $rules
+	 * @return array tuple of exclude, include arrays of class names e.g. [ [ 'NotBlockClass' ], [ 'AddBlockClass'] ]
+	 */
+	protected function parseRules($rules) {
+		$rules = is_array($rules) ? $rules : array_filter(explode(static::RulesDelimeter, $rules));
+
+		$excludes = [];
+		$includes = [];
+
+		foreach ($rules as $rule) {
+			if (substr($rule, 0, 1) == static::RulesExcludePrefix) {
+				$excludes[] = substr($rule, 1);
+			} else {
+				$includes[] = $rule;
+			}
+		}
+		return [
+			$excludes,
+		    $includes
+		];
 	}
 }
