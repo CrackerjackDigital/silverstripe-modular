@@ -59,5 +59,9 @@ class Block extends Model {
 	protected function templates() {
 		return [$this->template()];
 	}
+	
+	public function PageClassName() {
+		return \Director::get_current_page()->ClassName;
+	}
 
 }
