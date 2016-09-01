@@ -14,12 +14,32 @@ class GridList extends ContentControllerExtension {
 	use owned;
 
 	public function GridList() {
+		$items = $this->items();
+
+		// get the count before constraints have been applied, e.g for 'showing count of y' type message
+		$totalCount = $items->count();
+
+		// call the extended model to apply edditional constraints on the items
+		$constraints = $this->constrain($items);
+
 		return new \ArrayData([
-			'Items'   => $this->items(),
-			'Filters' => $this->filters(),
-			'Mode'    => $this->mode(),
-			'Sort'    => $this->sort(),
+			'Items'       => $items,
+			'Filters'     => $this->filters(),
+			'Constraints' => $constraints,
+			'TotalCount'  => $totalCount,
+			'Mode'        => $this->mode(),
+			'Sort'        => $this->sort(),
 		]);
+	}
+
+	/**
+	 * @param \SS_List $list
+	 * @return \ArrayList of constraints as returned from constraint application extension calls.
+	 */
+	public function constrain(\SS_List &$list) {
+		return new \ArrayList(
+			$this()->extend(\GridListFilterConstraints::ApplyMethodName, $list)
+		);
 	}
 
 	public function items() {
@@ -40,6 +60,7 @@ class GridList extends ContentControllerExtension {
 			$out->merge($list);
 		}
 		$out->removeDuplicates();
+
 		return $out;
 	}
 
@@ -71,6 +92,7 @@ class GridList extends ContentControllerExtension {
 
 	/**
 	 * Return current sort criteria which should be applied to the GridList items
+	 *
 	 * @return mixed
 	 */
 	public function sort() {
@@ -79,6 +101,7 @@ class GridList extends ContentControllerExtension {
 
 	/**
 	 * Return the current mode the GridList should show in.
+	 *
 	 * @return mixed
 	 */
 	public function mode() {

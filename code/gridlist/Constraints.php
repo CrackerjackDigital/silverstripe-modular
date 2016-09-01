@@ -5,11 +5,11 @@ use Modular\Object;
 use Modular\Exception;
 
 /**
- * Filters limit what models are displayed on page depending on user selection, they can further restrict models after Constraints are applied.
+ * Constraints limit what models are displayed on page depending on user selection or by context specific rules.
  *
  * @package Modular\GridList
  */
-class Filters extends Object {
+class Constraints extends Object {
 	const ModeGetVar       = 'mode';
 	const SortGetVar       = 'sort';
 	const StartIndexGetVar = 'start';
@@ -19,15 +19,20 @@ class Filters extends Object {
 	// session key is broken into tokens, mainly for debugging
 	const SessionPathSeparator = ':';
 	// don't save any incoming values to session at all
-	const SessionNone = 0;
+	const PersistNone = 0;
 	// save for all pages
-	const SessionSaveGlobal = 1;
+	const PersistGlobal = 1;
 	// save into session including url
-	const SessionSaveURLParams = 2;
+	const PersistPath = 2;
 	// save into session including query string get vars
-	const SessionSaveGetVars = 4;
+	const PersistQuery = 4;
 	// save both url and query string
-	const SessionSaveAll = 7;
+	const PersistPathAndQuery = 7;
+
+	// seperate multiple values passed as a single query string parameter with this
+	const MultiValueVarSeparator = '|';
+
+	const PersistDefault = self::PersistPath;
 
 	/** @var \NullHTTPRequest|\SS_HTTPRequest */
 	protected $request;
@@ -48,16 +53,16 @@ class Filters extends Object {
 		$this->request = \Controller::curr()->getRequest();
 	}
 
-	public function constraint($name, $sessionPersistance = self::SessionSaveAll) {
+	public function constraint($name, $sessionPersistance = self::PersistDefault) {
 		return $this->getVar($name, $sessionPersistance) ?: $this->urlParam($name, $sessionPersistance);
 	}
 
 	public function mode() {
-		return $this->getVar(static::ModeGetVar, self::SessionSaveAll) ?: $this->config()->get('default_mode');
+		return $this->getVar(static::ModeGetVar, self::PersistPathAndQuery) ?: $this->config()->get('default_mode');
 	}
 
 	public function sort() {
-		return $this->getVar(static::SortGetVar, self::SessionSaveAll) ?: $this->config()->get('default_sort');
+		return $this->getVar(static::SortGetVar, self::PersistPathAndQuery) ?: $this->config()->get('default_sort');
 	}
 
 	/**
@@ -66,7 +71,7 @@ class Filters extends Object {
 	 * @return int|null
 	 */
 	public function start() {
-		return $this->getVar(self::StartIndexGetVar, self::SessionSaveAll);
+		return $this->getVar(self::StartIndexGetVar, self::PersistPathAndQuery);
 	}
 
 	/**
@@ -75,7 +80,7 @@ class Filters extends Object {
 	 * @return int|null
 	 */
 	public function limit() {
-		return $this->getVar(self::PageLengthGetVar, self::SessionSaveAll);
+		return $this->getVar(self::PageLengthGetVar, self::PersistPathAndQuery);
 	}
 
 	/**
@@ -135,11 +140,15 @@ class Filters extends Object {
 		if ($includeGetVars) {
 			$url .= '?' . http_build_query($this->getVars());
 		}
-		return static::session_key_prefix() . $key . static::SessionPathSeparator . md5(strtolower($url));
+		return join(static::SessionPathSeparator, [
+			static::session_key_prefix(),
+			$key,
+			md5(strtolower($url)
+			);
 	}
 
 	public function session_key_prefix() {
-		return strtoupper(static::SessionKeyPrefix ?: basename(get_called_class())) . static::SessionPathSeparator;
+		return strtoupper(static::SessionKeyPrefix ?: basename(get_called_class()));
 	}
 
 	/**
@@ -194,10 +203,13 @@ class Filters extends Object {
 	 * Return a get var if it is one we are interested in, lookup is lowercased, return value is urldecoded.
 	 * Values are cached for both lower and uppercase (so get and urlParam) options.
 	 *
-	 * @param $name
+	 * @param                $name
+	 * @param                $sessionPersistance
+	 * @param string|boolean $multiValue attempt to split the returned value using this, set to false to leave whole
 	 * @return null|string
+	 * @throws \Modular\Exceptions\Exception
 	 */
-	protected function getVar($name, $sessionPersistance) {
+	protected function getVar($name, $sessionPersistance, $multiValue = self::MultiValueVarSeparator) {
 		static $cached = [];
 		$name = strtolower($name);
 
@@ -207,7 +219,10 @@ class Filters extends Object {
 				$cached[ $name ] = $getVars[ $name ];
 			}
 		}
-		return $this->persisted($name, $cached, $sessionPersistance);
+		$value = $this->persisted($name, $cached, $sessionPersistance);
+		return ($multiValue === false)
+			? explode($multiValue, $value)
+			: $value;
 	}
 
 	/**
@@ -290,15 +305,15 @@ class Filters extends Object {
 
 			if ($sessionPersistance) {
 
-				if (self::SessionSaveAll === ($sessionPersistance & self::SessionSaveAll)) {
+				if (self::PersistPathAndQuery === ($sessionPersistance & self::PersistPathAndQuery)) {
 					// key is for urlParams and getVars (so page and query string)
 					$key = $this->key($name, $this->url(), true);
 
-				} elseif (self::SessionSaveURLParams === ($sessionPersistance & self::SessionSaveURLParams)) {
+				} elseif (self::PersistPath === ($sessionPersistance & self::PersistPath)) {
 					// key is for urlParams only, not getVars (so page path only)
 					$key = $this->key($name, $this->url(), false);
 
-				} elseif (self::SessionSaveGetVars === ($sessionPersistance & self::SessionSaveGetVars)) {
+				} elseif (self::PersistQuery === ($sessionPersistance & self::PersistQuery)) {
 					// key is for getVars only, not urlParams (so query string only)
 					$key = $this->key($name, '', true);
 
