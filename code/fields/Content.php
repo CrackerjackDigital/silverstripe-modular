@@ -1,18 +1,8 @@
 <?php
 namespace Modular\Fields;
 
-use HtmlEditorField;
-
 class Content extends Field {
-	const ContentFieldName = 'Content';
+	const SingleFieldName = 'Content';
+	const SingleFieldSchema = 'HTMLText';
 
-	private static $db = [
-		self::ContentFieldName => 'HTMLText'
-	];
-
-	public function cmsFields() {
-		return [
-			new HtmlEditorField(self::ContentFieldName)
-		];
-	}
 }

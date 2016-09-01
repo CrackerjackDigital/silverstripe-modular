@@ -25,9 +25,9 @@ class Video extends File {
 	 */
 	public function PlayerLink() {
 		if ($this->IsExternalLink()) {
-			return $this->{ExternalLink::ExternalLinkFieldName};
+			return $this->{ExternalLink::SingleFieldName};
 		} elseif ($this->IsInternalLink()) {
-			if ($target = $this->{InternalLink::RelationshipName}()) {
+			if ($target = $this->{InternalLink::relationship_name()}()) {
 				return $target->Link();
 			}
 		}
@@ -44,13 +44,13 @@ class Video extends File {
 
 	public function IsVimeo() {
 		if ($this->IsExternalLink()) {
-			return false !== strpos($this->{ExternalLink::ExternalLinkFieldName}, 'vimeo');
+			return false !== strpos($this->{ExternalLink::SingleFieldName}, 'vimeo');
 		}
 	}
 
 	public function IsYouTube() {
 		if ($this->IsExternalLink()) {
-			return false !== strpos($this->{ExternalLink::ExternalLinkFieldName}, 'youtube');
+			return false !== strpos($this->{ExternalLink::SingleFieldName}, 'youtube');
 		}
 	}
 }

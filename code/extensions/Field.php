@@ -109,6 +109,20 @@ abstract class Field extends ModelExtension {
 	}
 
 	/**
+	 * Update summary fields to use Label from localisation yml if it exists.
+	 * @param array $fields
+	 */
+	public function updateSummaryFields(&$fields) {
+		$fields[ static::SingleFieldName ] = $this->fieldDecoration(
+			static::SingleFieldName,
+			'Label',
+			isset($fields[ static::SingleFieldName ])
+				? $fields[ static::SingleFieldName ]
+				: static::SingleFieldName
+		);
+	}
+
+	/**
 	 * Update form fields to have:
 	 *  label, guide and description from lang.yml
 	 *  minlength, maxlength and pattern from config.validation
