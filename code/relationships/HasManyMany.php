@@ -7,9 +7,6 @@ class HasManyMany extends GridField {
 	const ShowAsTagsField = 'tags';
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
-	// set this to the class names of classes which may be related via many_many to the extended model.
-	private static $allowed_related_classes = [];
-
 	/**
 	 * Customise if shows as a GridField or a TagField depending on config.show_as
 	 * @return array
@@ -24,6 +21,18 @@ class HasManyMany extends GridField {
 	}
 
 	/**
+	 * Return all related items. Optionally (for convenience more than anything) provide a relationship name to dereference otherwise this classes
+	 * late static binding relationship_name() will be used.
+	 *
+	 * @param string $relationshipName if supplied use this relationship instead of static relationship_name
+	 * @return \SS_List
+	 */
+	public function related($relationshipName = '') {
+		$relationshipName = $relationshipName ?: static::relationship_name();
+		return $this()->$relationshipName();
+	}
+
+	/**
 	 * Returns a field array using a tag field which can be used in derived classes instead of a GridField which is the default returned by cmsFields().
 	 * @return array
 	 */
@@ -33,7 +42,7 @@ class HasManyMany extends GridField {
 
 		return [
 			(new \TagField(
-				static::RelationshipName,
+				static::relationship_name(),
 				null,
 				$relatedClassName::get()
 			))->setIsMultiple($multipleSelect)->setCanCreate(false),
@@ -46,7 +55,7 @@ class HasManyMany extends GridField {
 		if (static::sortable()) {
 			$extra = [
 				'many_many_extraFields' => [
-					static::RelationshipName => [
+					static::relationship_name() => [
 						static::GridFieldOrderableRowsFieldName => 'Int',
 					],
 				],
@@ -58,34 +67,11 @@ class HasManyMany extends GridField {
 			$extra,
 			[
 				'many_many' => [
-					static::RelationshipName => static::RelatedClassName,
+					static::relationship_name() => static::related_class_name(),
 				],
 			]
 		);
 	}
 
-	/**
-	 * Allow override of the add new multiclass control to limit blocks to config.allowed_related_classes if set.
-	 *
-	 * @param $relationshipName
-	 * @param $configClassName
-	 * @return \Modular\GridField\GridFieldConfig
-	 */
-	protected function gridFieldConfig($relationshipName, $configClassName) {
-		$config = parent::gridFieldConfig($relationshipName, $configClassName);
-
-		// if config.allowed_classes is set then limit available classes to those listed there
-		// check this extension first, then the extended model.
-		$allowedClasses = $this->config()->get('allowed_related_classes')
-			?: $this()->config()->get('allowed_related_classes');
-
-		if ($allowedClasses) {
-			/** @var \GridFieldAddNewMultiClass $addNewMultiClass */
-			if ($addNewMultiClass = $config->getComponentByType('GridFieldAddNewMultiClass')) {
-				$addNewMultiClass->setClasses($allowedClasses);
-			}
-		}
-		return $config;
-	}
 
 }

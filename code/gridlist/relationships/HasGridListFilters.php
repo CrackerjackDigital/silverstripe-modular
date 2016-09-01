@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Relationships;
 /**
- * Provides a tag field where multiple filters can be added. Filters are shown in page and used to constrain what current records in the GridList are visible.
+ * Provides a tag field where filters can be added.
  *
  * @package Modular\Fields
  */
@@ -9,24 +9,24 @@ class HasGridListFilters extends HasManyMany {
 	const RelationshipName = 'GridListFilters';
 	const RelatedClassName = 'Modular\Models\GridListFilter';
 
-	private static $show_as = self::ShowAsTagsField;
-
 	private static $sortable = false;
 
-	private static $multiple_select = true;
-
-	/**
-	 * Add filters from this fields extended class, so for a page it would be filters added to that page.
-	 *
-	 * @return array map of ID => Title
-	 */
-	public function provideGridListFilters() {
-		return \DataObject::get(static::related_class_name())->sort('Title')->map()->toArray();
+	public function cmsFields() {
+		return [
+			new \TagField(
+				static::RelationshipName,
+				'',
+				\DataObject::get(static::RelatedClassName)
+			),
+		];
 	}
 
-	public function provideGridListConstraints() {
-		return [
-			static::relationship_name('.ID') => array_keys($this->provideGridListFilters())
-		];
+	/**
+	 * Return filters related to the extended model
+	 *
+	 * #return \SS_List
+	 */
+	public function provideGridListFilters() {
+		return $this->related();
 	}
 }

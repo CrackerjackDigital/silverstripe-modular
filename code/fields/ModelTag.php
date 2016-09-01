@@ -10,8 +10,8 @@ use Permission;
  * format as a URLSegment. Does not change if the source field changes, only if it is empty.
  */
 class ModelTag extends Field {
-	const FieldName   = 'ModelTag';
-	const FieldSchema = 'Varchar(64)';
+	const SingleFieldName   = 'ModelTag';
+	const SingleFieldSchema = 'Varchar(64)';
 
 	protected $sourceFieldName = '';
 	protected $parentIDFieldName = '';
@@ -19,9 +19,9 @@ class ModelTag extends Field {
 
 	private static $can_edit_permissions = ['ADMIN'];
 
-	private static $hierarchical_tag_seperator = ':';
+	private static $hierarchical_tag_separator = ':';
 
-	private static $hierarchical_source_seperator = ' > ';
+	private static $hierarchical_source_separator = ' > ';
 
 	/**
 	 * ModelTag constructor can be used in config to set alternate field names as:
@@ -40,25 +40,6 @@ class ModelTag extends Field {
 	}
 
 	/**
-	 * Add db fields here so can use late static binding for self.FieldName and self.FieldSchema.
-	 *
-	 * @param string $class
-	 * @param string $extension
-	 * @return array
-	 */
-	public function extraStatics($class = null, $extension = null) {
-		$parent = parent::extraStatics($class, $extension) ?: [];
-		return array_merge_recursive(
-			$parent,
-			[
-				'db' => [
-					static::FieldName => static::FieldSchema,
-				],
-			]
-		);
-	}
-
-	/**
 	 * Returns the name of the field on the model used to generate the tag, e.g. the 'Title' field.
 	 *
 	 * @return string
@@ -68,47 +49,17 @@ class ModelTag extends Field {
 	}
 
 	/**
-	 * Add as editable field if current user has permissions from config.can_edit_permissions.
-	 *
-	 * @return array
-	 */
-	public function cmsFields() {
-		if (Permission::check(static::config()->get('can_edit_permissions'))) {
-			return [
-				new \TextField(
-					static::FieldName
-				),
-			];
-		} else {
-			return [
-				new \ReadonlyField(
-					static::FieldName
-				),
-			];
-		}
-	}
-
-	/**
 	 * If the ModelTag field is empty (length 0) then fill it with generated value.
 	 */
 	public function onBeforeWrite() {
 		parent::onBeforeWrite();
-		if (0 === strlen($this()->{static::FieldName})) {
-			$this()->{static::FieldName} = $this->generateValue();
+		if (0 === strlen($this()->{static::SingleFieldName})) {
+			$this()->{static::SingleFieldName} = $this->generateValue();
 		}
 	}
 
 	/**
-	 * Return the tag value from the extended model.
-	 *
-	 * @return string|null
-	 */
-	public function ModelTag() {
-		return $this()->{static::FieldName};
-	}
-
-	/**
-	 * Generate a full tag path walking up the chain via parents seperated by config.hierarchical_source_seperator.
+	 * Generate a full tag path walking up the chain via parents separated by config.hierarchical_source_separator.
 	 * If the parent doesn't have ModelTag extension then self.fallbackFieldName will be used if supplied in extension ctor.
 	 *
 	 * TODO test/debug this
@@ -121,20 +72,20 @@ class ModelTag extends Field {
 		if ($parentID = $this->ParentID()) {
 			if ($parent = $this()->{$this->parentIDFieldName}()) {
 				if ($parent->hasExtension('ModelTag')) {
-					$tag = $parent->HierarchicalModelTag() . $this->config()->get('hierarchical_tag_seperator');
-				} elseif ($parent->hasField(static::FieldName)) {
-					$tag = $parent->{static::FieldName} . $this->config()->get('hierarchical_tag_seperator');
+					$tag = $parent->HierarchicalModelTag() . $this->config()->get('hierarchical_tag_separator');
+				} elseif ($parent->hasField(static::SingleFieldName)) {
+					$tag = $parent->{static::SingleFieldName} . $this->config()->get('hierarchical_tag_separator');
 				} elseif ($this->fallbackFieldName && $parent->hasField($this->fallbackFieldName)) {
-					$tag = $parent->{$this->fallbackFieldName} . $this->config()->get('hierarchical_tag_seperator');
+					$tag = $parent->{$this->fallbackFieldName} . $this->config()->get('hierarchical_tag_separator');
 				}
 			}
 		}
-		return $tag . $this->ModelTag();
+		return $tag . $this()->ModelTag;
 	}
 
 	/**
 	 * Generates a full tag path using the models 'Source' field (e.g. 'Title') instead of the tag field via the ParentID relationship specified
-	 * in the extension ctor. Components will be seperated by config.hierarchical_source_seperator
+	 * in the extension ctor. Components will be separated by config.hierarchical_source_separator
 	 *
 	 *
 	 * @return string
@@ -145,10 +96,10 @@ class ModelTag extends Field {
 		if ($parentID = $this->ParentID()) {
 			if ($parent = $this()->{$this->parentIDFieldName}()) {
 				if ($parent->hasExtension('ModelTag')) {
-					$title = $parent->HierarchicalSource() . $this->config()->get('hierarchical_source_seperator');
+					$title = $parent->HierarchicalSource() . $this->config()->get('hierarchical_source_separator');
 				} elseif ($parent->hasField($this->sourceFieldName)) {
 					// can only go one level up here
-					$title = $parent->{$this->sourceFieldName} . $this->config()->get('hierarchical_source_seperator');
+					$title = $parent->{$this->sourceFieldName} . $this->config()->get('hierarchical_source_separator');
 				}
 			}
 		}
@@ -190,7 +141,7 @@ class ModelTag extends Field {
 		}
 		/** @var DataList $duplicate */
 		$duplicate = DataList::create($this()->ClassName)->filter([
-			static::FieldName => $urlSegment,
+			static::SingleFieldName => $urlSegment,
 		]);
 
 		if ($parentID = $this->ParentID()) {

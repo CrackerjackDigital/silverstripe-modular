@@ -6,11 +6,6 @@ class Download extends File {
 
 	private static $upload_folder = 'downloads';
 
-	public function DisplayInSidebar() {
-		return true;
-	}
+	private static $cms_tab_name = 'Root.Main';
 
-	public function DisplayInContent() {
-		return false;
-	}
 }

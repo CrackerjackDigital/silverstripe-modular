@@ -2,15 +2,15 @@
 namespace Modular\GridField;
 
 use Modular\Fields\Field;
+use Modular\GridField\GridFieldOrderableRows;
 
 class GridField extends Field {
 	const ShowAsGridField = 'grid';
-	
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
-	const GridFieldOrderableRowsFieldName = 'Sort';
+	const GridFieldOrderableRowsFieldName = GridFieldOrderableRows::SortFieldName;
 
 	// wether to show the field as a GridField or a TagField
 	private static $show_as = self::ShowAsGridField;
@@ -58,8 +58,8 @@ class GridField extends Field {
 		return static::RelatedClassName;
 	}
 
-	public static function relationship_name($append = '') {
-		return static::RelationshipName . $append;
+	public static function relationship_name($fieldName = '') {
+		return static::RelationshipName . ($fieldName ? ".$fieldName" : '');
 	}
 
 	/**
@@ -112,7 +112,7 @@ class GridField extends Field {
 		if ($this()->isInDB()) {
 			// only add if this record is already saved
 			$config->addComponent(
-				new \GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
 			);
 		}
 

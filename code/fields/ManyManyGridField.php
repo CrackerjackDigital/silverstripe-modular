@@ -5,14 +5,14 @@ use Modular\GridField\GridFieldConfig;
 use Modular\Relationships\HasManyMany;
 use Quaff\Controllers\Model;
 
+use Modular\GridField\GridFieldOrderableRows;
+
 class HasManyManyGridField extends HasManyMany {
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
 	private static $cms_tab_name = '';
 
 	private static $sortable = true;
-
-	private static $allowed_related_classes = [];
 
 	/**
 	 * If model is saved then a gridfield, otherwise a 'save master first' hint.
@@ -50,7 +50,7 @@ class HasManyManyGridField extends HasManyMany {
 		if ($this()->isInDB()) {
 			// only add if this record is already saved
 			$config->addComponent(
-				new \GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
 			);
 		}
 
@@ -79,14 +79,6 @@ class HasManyManyGridField extends HasManyMany {
 				"Link existing {plural} by Title"
 			)
 		);
-		// if config.allowed_classes is set then limit available classes to those listed there
-		$allowedClasses = $this->config()->get('allowed_related_classes');
-		if ($allowedClasses) {
-			/** @var \GridFieldAddNewMultiClass $addNewMultiClass */
-			if ($addNewMultiClass = $config->getComponentByType('GridFieldAddNewMultiClass')) {
-				$addNewMultiClass->setClasses($this->config()->get('allowed_related_classes'));
-			}
-		}
 		return $config;
 	}
 

@@ -10,7 +10,6 @@ class HasImages extends HasManyMany implements Imagery {
 
 	const RelationshipName        = 'Images';
 	const RelatedClassName        = 'Image';
-	const UploadFieldName         = 'Images';
 	const DefaultUploadFolderName = 'images';
 
 	private static $allowed_image_files = 'image';
