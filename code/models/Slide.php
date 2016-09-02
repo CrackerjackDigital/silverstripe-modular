@@ -1,9 +1,7 @@
 <?php
 namespace Modular\Models;
 
-use Modular\Model;
-
-class Slide extends Model {
+class Slide extends \Modular\Model {
 	const SortFieldName = 'Sort';
 	const RelationshipName = 'CarouselBlock';
 	const RelatedClassName = 'Modular\Blocks\Block';

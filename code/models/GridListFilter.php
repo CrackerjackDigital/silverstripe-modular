@@ -4,9 +4,8 @@ namespace Modular\Models;
  * @property string ModelTag
  */
 use Modular\Fields\ModelTag;
-use Modular\Model;
 
-class GridListFilter extends Model {
+class GridListFilter extends \Modular\Model {
 	const TagFieldName = ModelTag::SingleFieldName;
 
 	private static $db = [

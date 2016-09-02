@@ -2,9 +2,8 @@
 namespace Modular\Models;
 
 use Modular\Fields\ModelTag;
-use Modular\Model;
 
-class Tag extends Model {
+class Tag extends \Modular\Model {
 	// convenience
 	const TagFieldName = ModelTag::SingleFieldName;
 }

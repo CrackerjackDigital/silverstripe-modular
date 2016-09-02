@@ -1,9 +1,7 @@
 <?php
 namespace Modular\Models;
 
-use Modular\Model;
-
-class InternalOrExternalLink extends Model {
+class InternalOrExternalLink extends \Modular\Model {
 	const SortFieldName    = 'Sort';
 	const RelationshipName = 'LinksBlock';
 	const RelatedClassName = 'Modular\Blocks\Block';
