@@ -61,7 +61,7 @@ class MediaLinkType extends Field {
 		if (ClassInfo::exists('DisplayLogicCriteria')) {
 			$fieldName = $field->getName();
 
-			if ($fieldName == ExternalLink::ExternalLinkFieldName) {
+			if ($fieldName == ExternalLink::SingleFieldName) {
 				// hide external link field unless MediaLinkType field is that option
 				$field->hideUnless(self::MediaLinkTypeFieldName)->isEqualTo(ExternalLink::ExternalLinkOption);
 
@@ -98,7 +98,7 @@ class MediaLinkType extends Field {
 	 */
 	public function ResolvedLink() {
 		if ($this->IsExternalLink()) {
-			return $this()->{ExternalLink::ExternalLinkFieldName};
+			return $this()->{ExternalLink::SingleFieldName};
 		} elseif ($this->IsMedia()) {
 			return $this->getMediaLink();
 		} elseif ($this->IsEmbedCode()) {

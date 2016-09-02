@@ -63,7 +63,7 @@ class InternalOrExternalLink extends Field {
 				$field->hideUnless(self::LinkTypeFieldName)
 					->isEqualTo(InternalLink::InternalLinkOption);
 
-			} elseif ($fieldName == ExternalLink::ExternalLinkFieldName) {
+			} elseif ($fieldName == ExternalLink::SingleFieldName) {
 
 				$field->hideUnless(self::LinkTypeFieldName)
 					->isEqualTo(ExternalLink::ExternalLinkOption);
@@ -113,7 +113,7 @@ class InternalOrExternalLink extends Field {
 	protected function linkOptions() {
 		return [
 			InternalLink::InternalLinkOption => singleton('Modular\Models\InternalOrExternalLink')->fieldDecoration(InternalLink::InternalLinkFieldName, 'Label', 'Internal link'),
-			ExternalLink::ExternalLinkOption => singleton('Modular\Models\InternalOrExternalLink')->fieldDecoration(ExternalLink::ExternalLinkFieldName, 'Label', 'External link'),
+			ExternalLink::ExternalLinkOption => singleton('Modular\Models\InternalOrExternalLink')->fieldDecoration(ExternalLink::SingleFieldName, 'Label', 'External link'),
 		];
 	}
 

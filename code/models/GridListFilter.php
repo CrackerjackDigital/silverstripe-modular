@@ -3,9 +3,12 @@ namespace Modular\Models;
 /**
  * @property string ModelTag
  */
+use Modular\Fields\ModelTag;
 use Modular\Model;
 
 class GridListFilter extends Model {
+	const TagFieldName = ModelTag::SingleFieldName;
+
 	private static $db = [
 		'Sort' => 'Int'
 	];
@@ -22,7 +25,7 @@ class GridListFilter extends Model {
 	 * @return string
 	 */
 	public function Filter() {
-		return $this->ModelTag;
+		return $this->{static::TagFieldName};
 	}
 
 	public function FilterLink() {

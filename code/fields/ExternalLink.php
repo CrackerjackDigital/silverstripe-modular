@@ -1,20 +1,9 @@
 <?php
 namespace Modular\Fields;
 
-use TextField;
-
 class ExternalLink extends Field {
 	const ExternalLinkOption    = 'ExternalLink';
-	const ExternalLinkFieldName = 'ExternalLink';
-	const RelationshipName      = 'ExternalLink';
+	const SingleFieldName       = 'ExternalLink';
+	const SingleFieldSchema     = 'Text';
 
-	private static $db = [
-		self::RelationshipName => 'Text',
-	];
-
-	public function cmsFields() {
-		return [
-			new TextField(self::ExternalLinkFieldName),
-		];
-	}
 }

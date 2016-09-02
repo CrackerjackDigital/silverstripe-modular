@@ -14,7 +14,7 @@ class CallToAction extends Block {
 				return $target->Link();
             }
 		} elseif ($this->{InternalOrExternalLink::LinkTypeFieldName} == ExternalLink::ExternalLinkOption) {
-			return $this->{ExternalLink::ExternalLinkFieldName};
+			return $this->{ExternalLink::SingleFieldName};
 		}
 	}
 

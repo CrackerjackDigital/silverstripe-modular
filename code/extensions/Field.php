@@ -109,6 +109,20 @@ abstract class Field extends ModelExtension {
 	}
 
 	/**
+	 * Update summary fields to use Label from localisation yml if it exists.
+	 * @param array $fields
+	 */
+	public function updateSummaryFields(&$fields) {
+		$fields[ static::SingleFieldName ] = $this->fieldDecoration(
+			static::SingleFieldName,
+			'Label',
+			isset($fields[ static::SingleFieldName ])
+				? $fields[ static::SingleFieldName ]
+				: static::SingleFieldName
+		);
+	}
+
+	/**
 	 * Update form fields to have:
 	 *  label, guide and description from lang.yml
 	 *  minlength, maxlength and pattern from config.validation
@@ -248,117 +262,119 @@ abstract class Field extends ModelExtension {
 		$messages = [];
 		$cmsFields = $this->cmsFields();
 
-		// if one is defined all need to be defined
-		/** @var FormField $field */
-		foreach ($cmsFields as $field) {
-			$fieldName = $field->getName();
-			$fieldConstraints = $this->fieldConstraints($fieldName, [0, 0, '']);
+		if ($cmsFields) {
 
-			//if there are no validation rules for this field, or they are 'empty' rules move onto the next one
-			if (!$fieldConstraints || $fieldConstraints == [0, 0, '']) {
-				continue;
-			}
+			// if one is defined all need to be defined
+			/** @var FormField $field */
+			foreach ($cmsFields as $field) {
+				$fieldName = $field->getName();
+				$fieldConstraints = $this->fieldConstraints($fieldName, [0, 0, '']);
 
-			// deconstruct the constraints
-			list($minlength, $maxlength, $pattern) = $fieldConstraints;
+				//if there are no validation rules for this field, or they are 'empty' rules move onto the next one
+				if (!$fieldConstraints || $fieldConstraints == [0, 0, '']) {
+					continue;
+				}
 
-			$lengthType = null;
-			$length = 0;
+				// deconstruct the constraints
+				list($minlength, $maxlength, $pattern) = $fieldConstraints;
 
-			/** @var SS_List|mixed|null $value */
-			if ($this()->hasMethod($fieldName)) {
-				if ($value = $this()->$fieldName()) {
-					if ($value instanceof SS_List) {
-						$length = $value->count();
-						$lengthType = $this()->i18n_plural_name();
+				$lengthType = null;
+				$length = 0;
+
+				/** @var SS_List|mixed|null $value */
+				if ($this()->hasMethod($fieldName)) {
+					if ($value = $this()->$fieldName()) {
+						if ($value instanceof SS_List) {
+							$length = $value->count();
+							$lengthType = $this()->i18n_plural_name();
+						}
+					}
+				} elseif ((substr($fieldName, -2, 2) == 'ID') && $this()->hasMethod(substr($fieldName, -2 - 2))) {
+					$length = $this()->$fieldName();
+					$lengthType = $this()->i18n_singular_name();
+				}
+				if (is_null($lengthType)) {
+					$value = $this()->$fieldName;
+
+					if (is_array($value)) {
+						$length = count($value);
+						$lengthType = 'choice';
+					} else {
+						// need to strip tags to get a realistic length on html fields, just leave white-space out of count
+						$length = $this->valueLength($value);
+						$lengthType = 'letter';
 					}
 				}
-			} elseif ((substr($fieldName, -2, 2) == 'ID') && $this()->hasMethod(substr($fieldName, -2 - 2))) {
-				$length = $this()->$fieldName();
-				$lengthType = $this()->i18n_singular_name();
-			}
-			if (is_null($lengthType)) {
-				$value = $this()->$fieldName;
 
-				if (is_array($value)) {
-					$length = count($value);
-					$lengthType = 'choice';
-				} else {
-					// need to strip tags to get a realistic length on html fields, just leave white-space out of count
-					$length = $this->valueLength($value);
-					$lengthType = 'letter';
+				if ($pattern) {
+					// set start and end pattern of '~' so we can use slashes in the config file
+					// and make regexps just a we bit more friendly.
+					$pattern = '~' . trim($pattern, '/~') . '~';
+
+					if (false === preg_match($pattern, $value)) {
+						// add pattern error message to $messages
+						$messages[] = $this->fieldDecoration(
+							$fieldName,
+							"Format", "be in format {pattern}",
+							[
+								'pattern' => $pattern,
+							],
+							$field
+						);
+					}
 				}
-			}
 
-			if ($pattern) {
-				// set start and end pattern of '~' so we can use slashes in the config file
-				// and make regexps just a we bit more friendly.
-				$pattern = '~' . trim($pattern, '/~') . '~';
-
-				if (false === preg_match($pattern, $value)) {
-					// add pattern error message to $messages
+				//validate that value falls between the min and max length
+				$lengthMessage = '';
+				if ($minlength != $maxlength) {
+					if ($minlength && ($length < $minlength)) {
+						if ($minlength == 1) {
+							$lengthMessage = 'be provided';
+						} else {
+							$lengthMessage = "have at least {minlength} $lengthType" . ($minlength > 1 ? 's' : '');
+						}
+					}
+					if ($maxlength && ($length > $maxlength)) {
+						$lengthMessage = "have at most {maxlength} $lengthType" . ($maxlength > 1 ? 's' : '');
+					}
+				} else {
+					if ($minlength && ($length < $minlength)) {
+						if ($minlength == 1) {
+							$lengthMessage = 'be provided';
+						} else {
+							$lengthMessage = "{minlength} $lengthType" . ($minlength > 1 ? 's' : '');;
+						}
+					}
+				}
+				if ($lengthMessage) {
 					$messages[] = $this->fieldDecoration(
-						$fieldName,
-						"Format", "be in format {pattern}",
+						$fieldName, "Length", $lengthMessage,
 						[
-							'pattern' => $pattern,
+							'minlength' => $minlength,
+							'maxlength' => $maxlength,
+							'pattern'   => $pattern,
 						],
 						$field
 					);
 				}
-			}
 
-			//validate that value falls between the min and max length
-			$lengthMessage = '';
-			if ($minlength != $maxlength) {
-				if ($minlength && ($length < $minlength)) {
-					if ($minlength == 1) {
-						$lengthMessage = 'be provided';
-					} else {
-						$lengthMessage = "have at least {minlength} $lengthType" . ($minlength > 1 ? 's' : '');
-					}
+				//if there were any error messages, set the error result and throw exception
+				if ($messages) {
+					$message = $this->fieldDecoration(
+						$fieldName,
+						"Label",
+						"{label} should " . implode(' and ', $messages),
+						[
+							'label' => $field->Title() ?: $fieldName,
+						]
+					);
+
+					$result->error($message);
+
+					throw new ValidationException($result, $message);
 				}
-				if ($maxlength && ($length > $maxlength)) {
-					$lengthMessage = "have at most {maxlength} $lengthType" . ($maxlength > 1 ? 's' : '');
-				}
-			} else {
-				if ($minlength && ($length < $minlength)) {
-					if ($minlength == 1) {
-						$lengthMessage = 'be provided';
-					} else {
-						$lengthMessage = "{minlength} $lengthType" . ($minlength > 1 ? 's' : '');;
-					}
-				}
-			}
-			if ($lengthMessage) {
-				$messages[] = $this->fieldDecoration(
-					$fieldName, "Length", $lengthMessage,
-					[
-						'minlength' => $minlength,
-						'maxlength' => $maxlength,
-						'pattern'   => $pattern,
-					],
-					$field
-				);
-			}
-
-			//if there were any error messages, set the error result and throw exception
-			if ($messages) {
-				$message = $this->fieldDecoration(
-					$fieldName,
-					"Label",
-					"{label} should " . implode(' and ', $messages),
-					[
-						'label' => $field->Title() ?: $fieldName,
-					]
-				);
-
-				$result->error($message);
-
-				throw new ValidationException($result, $message);
 			}
 		}
-
 	}
 
 	/**
