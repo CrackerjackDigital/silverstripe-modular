@@ -5,7 +5,6 @@ namespace Modular\Models;
  */
 use Modular\Fields\ModelTag;
 use Modular\Model;
-use Modular\Relationships\HasTags;
 
 class GridListFilter extends Model {
 	const TagFieldName = ModelTag::SingleFieldName;
@@ -26,7 +25,7 @@ class GridListFilter extends Model {
 	 * @return string
 	 */
 	public function Filter() {
-		return $this->ModelTag;
+		return $this->{static::TagFieldName};
 	}
 
 	public function FilterLink() {
