@@ -34,7 +34,7 @@ abstract class Field extends ModelExtension {
 
 	// if SingleFieldName and SingleFieldSchema are provided then they will be added to the
 	// config.db array by extraStatics
-	const SingleFieldName = '';
+	const SingleFieldName   = '';
 	const SingleFieldSchema = '';
 
 	const DefaultUploadFolderName = 'incoming';
@@ -71,7 +71,7 @@ abstract class Field extends ModelExtension {
 		if (static::SingleFieldName && static::SingleFieldSchema) {
 			if ($dbField = $this->owner->dbObject(static::SingleFieldName)) {
 				if ($formField = $dbField->scaffoldFormField()) {
-					$fields[static::SingleFieldName] = $formField;
+					$fields[ static::SingleFieldName ] = $formField;
 				}
 			}
 		}
@@ -95,6 +95,7 @@ abstract class Field extends ModelExtension {
 
 	/**
 	 * If static.SingleFieldName && static.SingleFieldSchema are set add them to db array.
+	 *
 	 * @param null $class
 	 * @param null $extension
 	 * @return mixed
@@ -103,23 +104,26 @@ abstract class Field extends ModelExtension {
 		return array_merge_recursive(
 			parent::extraStatics($class, $extension) ?: [],
 			(static::SingleFieldName && static::SingleFieldSchema)
-		        ? [ 'db' => [ static::SingleFieldName => static::SingleFieldSchema ] ]
+				? ['db' => [static::SingleFieldName => static::SingleFieldSchema]]
 				: []
 		);
 	}
 
 	/**
 	 * Update summary fields to use Label from localisation yml if it exists.
+	 *
 	 * @param array $fields
 	 */
 	public function updateSummaryFields(&$fields) {
-		$fields[ static::SingleFieldName ] = $this->fieldDecoration(
-			static::SingleFieldName,
-			'Label',
-			isset($fields[ static::SingleFieldName ])
-				? $fields[ static::SingleFieldName ]
-				: static::SingleFieldName
-		);
+		if (static::SingleFieldName) {
+			$fields[ static::SingleFieldName ] = $this->fieldDecoration(
+				static::SingleFieldName,
+				'Label',
+				isset($fields[ static::SingleFieldName ])
+					? $fields[ static::SingleFieldName ]
+					: static::SingleFieldName
+			);
+		}
 	}
 
 	/**
@@ -131,28 +135,29 @@ abstract class Field extends ModelExtension {
 	public function updateCMSFields(FieldList $fields) {
 		$allFieldsConstraints = $this->config()->get(static::ValidationRulesConfigVarName) ?: [];
 
-		$cmsFields = $this->cmsFields();
+		if ($cmsFields = $this->cmsFields()) {
+			/** @var FormField $field */
+			foreach ($cmsFields as $field) {
+				$fieldName = $field->getName();
 
-		/** @var FormField $field */
-		foreach ($cmsFields as $field) {
-			$fieldName = $field->getName();
+				if ($fieldName) {
+					// remove any existing field with this name already added e.g. by cms scaffolding.
+					$fields->removeByName($fieldName);
 
-			if ($fieldName) {
-				// remove any existing field with this name already added e.g. by cms scaffolding.
-				$fields->removeByName($fieldName);
+					$this->addHTMLAttributes($field);
 
-				$this->addHTMLAttributes($field);
+					$this->setFieldDecorations($field);
 
-				$this->setFieldDecorations($field);
-
+				}
+				// add any extra constraints, display-logic etc on a per-field basis
+				$this()->extend('customFieldConstraints', $field, $allFieldsConstraints);
 			}
-			// add any extra constraints, display-logic etc on a per-field basis
-			$this()->extend('customFieldConstraints', $field, $allFieldsConstraints);
+			$fields->addFieldsToTab(
+				$this->cmsTab(),
+				$cmsFields
+			);
 		}
-		$fields->addFieldsToTab(
-			$this->cmsTab(),
-			$cmsFields
-		);
+
 	}
 
 	/**
@@ -247,7 +252,6 @@ abstract class Field extends ModelExtension {
 			}
 		}
 	}
-
 
 	/**
 	 * Validates fields according to their validation rules, specifically
@@ -419,7 +423,6 @@ abstract class Field extends ModelExtension {
 		}
 		return [];
 	}
-
 
 	/**
 	 * Configure date fields to be in various states as per parameter options.
