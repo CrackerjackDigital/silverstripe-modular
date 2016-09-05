@@ -1,11 +1,12 @@
 <?php
 namespace Modular\Behaviours;
 
-use Modular\ModelExtension;
-use Controller;
-use SilverStripeNavigator;
-use LiteralField;
 use CMSPreviewable;
+use Controller;
+use LiteralField;
+use Modular\ModelExtension;
+use SilverStripeNavigator;
+
 /**
  * Adds preview pane to CMS for extended Models.
  *
