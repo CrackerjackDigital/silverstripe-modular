@@ -11,6 +11,9 @@ class ModelExtension extends DataExtension {
 	use enabler;
 	use owned;
 
+	public static function class_name() {
+		return get_called_class();
+	}
 	/**
 	 * Writes the extended model and returns it if write returns truthish, otherwise returns null.
 	 *
