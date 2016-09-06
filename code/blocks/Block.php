@@ -59,6 +59,20 @@ class Block extends Model {
 		return [$this->template()];
 	}
 
+	/**
+	 * Return the current page from Director.
+	 *
+	 * @return \Page
+	 */
+	public function CurrentPage() {
+		/** @var \Page $parent */
+		return \Director::get_current_page();
+	}
+
+	/**
+	 * Return current pages ClassName.
+	 * @return string
+	 */
 	public function PageClassName() {
 		return \Director::get_current_page()->ClassName;
 	}
