@@ -81,6 +81,27 @@ class HasBlocks extends HasManyMany {
 			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
 	}
 
+	public function OnlyBlocks($blockClasses) {
+		$blockClasses = is_array($blockClasses) ? $blockClasses : explode(',', $blockClasses);
+		return $this()
+			->Blocks()
+			->filter('ClassName', $blockClasses)
+			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
+	}
+
+	/**
+	 * Returns all blocks
+	 * @param $blockClasses
+	 * @return mixed
+	 */
+	public function NotBlocks($blockClasses) {
+		$blockClasses = is_array($blockClasses) ? $blockClasses : explode(',', $blockClasses);
+		return $this()
+			->Blocks()
+			->exclude('ClassName', $blockClasses)
+			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
+	}
+
 	/**
 	 * Parse a string of rules such as '!NotBlockClass, AddBlockClass' int array of includes, excludes for filtering
 	 *

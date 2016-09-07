@@ -1,5 +1,5 @@
 <?php
-namespace Modular\GridList;
+namespace Modular\Search;
 
 use Modular\Object;
 use Modular\Exception;

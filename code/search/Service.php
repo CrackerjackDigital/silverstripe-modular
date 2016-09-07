@@ -1,17 +1,17 @@
 <?php
-namespace Modular\GridList;
+namespace Modular\Search;
 
-use Modular\Object;
-
-class Service extends Object {
-	const FiltersClassName = 'Modular\GridList\Filters';
+class Service extends \Modular\Object {
+	const FiltersClassName = 'Modular\Search\Filters';
 
 	public function mode() {
 		return $this->Filters()->mode();
 	}
+
 	public function sort() {
 		return $this->Filters()->sort();
 	}
+
 	protected function Filters() {
 		return \Injector::inst()->get(static::FiltersClassName);
 	}
