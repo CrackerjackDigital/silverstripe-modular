@@ -1,6 +1,7 @@
 <?php
 namespace Modular\GridList;
 
+use Modular\config;
 use Modular\ContentControllerExtension;
 use Modular\Models\GridListFilter;
 use Modular\owned;
@@ -12,6 +13,10 @@ use Modular\owned;
  */
 class GridList extends ContentControllerExtension {
 	use owned;
+	use config;
+
+	const PaginatorServiceName = 'GridListPaginator';
+	const DefaultPageLength = 12;
 
 	public function GridList() {
 		return new \ArrayData([
@@ -40,7 +45,30 @@ class GridList extends ContentControllerExtension {
 			$out->merge($list);
 		}
 		$out->removeDuplicates();
-		return $out;
+		return $this->paginator($out);
+	}
+
+	/**
+	 * @param \SS_List $items
+	 * @return \PaginatedList
+	 */
+	protected function paginator(\SS_List $items) {
+		$params = \Controller::curr()->getRequest();
+
+		/** @var \PaginatedList $paginated */
+		$paginated = \Injector::inst()->create(
+			static::PaginatorServiceName,
+			$items,
+			$params
+		);
+		$paginated->setPageLength($this->pageLength());
+		return $paginated;
+	}
+
+	protected function pageLength() {
+		return $this()->config()->get('gridlist_page_length')
+			?: ($this->config()->get('gridlist_page_length')
+				?: static::DefaultPageLength);
 	}
 
 	/**
