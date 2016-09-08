@@ -11,15 +11,17 @@ class RelatedPages extends ModelExtension implements ItemsProvider {
 	 * @return mixed
 	 */
 	public function provideGridListItems() {
-		$classes = \ClassInfo::subclassesFor('RelatedPages');
+		$classes = \ClassInfo::subclassesFor(RelatedPages::class_name());
 
 		$items = new \ArrayList();
 
 		foreach ($classes as $class) {
-			if ($this()->hasExtension($class)) {
-				$items->merge(
-					$this()->{$class::relationship_name()}()
-				);
+			if ($class !== RelatedPages::class_name()) {
+				if ($this()->hasExtension($class)) {
+					$items->merge(
+						$this()->{$class::relationship_name()}()
+					);
+				}
 			}
 		}
 		return $items;
