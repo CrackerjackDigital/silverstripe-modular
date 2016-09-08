@@ -16,17 +16,22 @@ class GridList extends ContentControllerExtension {
 	use config;
 
 	const PaginatorServiceName = 'GridListPaginator';
-	const DefaultPageLength = 12;
+	const DefaultPageLength    = 12;
 
 	public function GridList() {
 		return new \ArrayData([
-			'Items'   => $this->items(),
-			'Filters' => $this->filters(),
-			'Mode'    => $this->Mode(),
-			'Sort'    => $this->Sort(),
+			'Items'     => $this->paginator($this->items()),
+			'Filters'   => $this->filters(),
+			'Mode'      => $this->Mode(),
+			'Sort'      => $this->Sort(),
+			'NextStart' => $this->NextStart(),
+		    'MoreAvailable' => $this->moreAvailable()
 		]);
 	}
 
+	/**
+	 * @return \SS_List
+	 */
 	protected function items() {
 		$out = new \ArrayList();
 
@@ -42,10 +47,10 @@ class GridList extends ContentControllerExtension {
 		$page = \Director::get_current_page();
 		$lists = $page->invokeWithExtensions('provideGridListItems');
 		foreach ($lists as $list) {
-			$out->merge($list);
+			$out->push($list);
 		}
 		$out->removeDuplicates();
-		return $this->paginator($out);
+		return $out;
 	}
 
 	/**
@@ -63,6 +68,10 @@ class GridList extends ContentControllerExtension {
 		);
 		$paginated->setPageLength($this->pageLength());
 		return $paginated;
+	}
+
+	protected function moreAvailable() {
+		return $this->NextStart() < $this->items()->Count();
 	}
 
 	protected function pageLength() {
@@ -97,8 +106,17 @@ class GridList extends ContentControllerExtension {
 		return $out;
 	}
 
+	public function Start() {
+		return \Controller::curr()->getRequest()->getVar('start');
+	}
+
+	public function NextStart() {
+		return (int) $this->Start() + (int) $this->pageLength();
+	}
+
 	/**
 	 * Return current sort criteria which should be applied to the GridList items
+	 *
 	 * @return mixed
 	 */
 	public function Sort() {
@@ -107,6 +125,7 @@ class GridList extends ContentControllerExtension {
 
 	/**
 	 * Return the current mode the GridList should show in.
+	 *
 	 * @return mixed
 	 */
 	public function Mode() {

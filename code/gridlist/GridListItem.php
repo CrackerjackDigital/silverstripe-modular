@@ -2,22 +2,22 @@
 namespace Modular\GridList;
 
 use Modular\ModelExtension;
+use Modular\Relationships\HasGridListFilters;
 
 /**
  * Render the extended model (e.g. Block) or view (e.g. Page) as an item in a gridlist using the associated template
  */
 class GridListItem extends ModelExtension {
 	/**
-	 * Renders with selected template passing through parameters
+	 * Renders the item into the gridlist with selected template passing through Filters which are defined on the item.
 	 * GridListItem constructor.
 	 */
 	public function GridListItem() {
-		$lists = $this()->invokeWithExtensions('provideGridListFilters');
-		$filters = new \ArrayList();
-		foreach ($lists as $list) {
-			$filters->merge($list);
+		$filters = [];
+		
+		if ($this()->hasExtension(HasGridListFilters::class_name())) {
+			$filters = $this()->{HasGridListFilters::relationship_name()}();
 		}
-		$filters->removeDuplicates();
 		return $this()->renderWith($this->template(), [
 			'Filters' => $filters
 		]);
