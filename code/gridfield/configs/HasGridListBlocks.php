@@ -9,15 +9,6 @@ namespace Modular\GridField;
 class HasGridListBlocksGridFieldConfig extends HasManyManyGridFieldConfig {
 	private static $add_new_multi_class = true;
 
-	private static $allowed_related_classes = [
-		'GridListContentBlock',
-		'GridListDownloadBlock',
-		'GridListImageBlock',
-		'GridListLinkedPageBlock',
-		'GridListSubscribeBlock',
-		'GridListVideoBlock'
-	];
-
 	private static $exclude_related_classes = [
 		'Modular*'
 	];
