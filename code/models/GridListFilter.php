@@ -20,7 +20,7 @@ class GridListFilter extends \Modular\Model {
 	}
 
 	/**
-	 * GridListFilter should have ModelTag extension so use that as the Filter value in page etc.
+	 * GridListFilters should have ModelTag extension so use that as the Filter value in page etc.
 	 * @return string
 	 */
 	public function Filter() {

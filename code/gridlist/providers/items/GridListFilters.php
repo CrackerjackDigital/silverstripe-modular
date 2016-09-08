@@ -10,7 +10,7 @@ use Modular\Relationships\HasGridListFilters;
  *
  * @package Modular\GridList\Providers
  */
-class GridListFilter extends ModelExtension implements ItemsProvider {
+class GridListFilters extends ModelExtension implements ItemsProvider {
 	public function provideGridListItems() {
 		if ($this()->hasExtension(HasGridListFilters::class_name())) {
 			$filterIDs = array_keys(

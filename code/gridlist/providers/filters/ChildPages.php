@@ -1,14 +1,12 @@
 <?php
 namespace Modular\GridList\Providers\Filters;
 
+use Modular\GridList\Interfaces\FiltersProvider;
+use Modular\ModelExtension;
 use Modular\Models\GridListFilter;
 use Modular\Relationships\HasGridListFilters;
 
-/**
- * Trait provides filters from children of the current page ordered by their frequency descending.
- */
-trait children {
-	abstract public function __invoke();
+class ChildPages extends ModelExtension implements FiltersProvider {
 
 	/**
 	 * @return \ArrayList|\DataList
@@ -16,7 +14,7 @@ trait children {
 	public function provideGridListFilters() {
 		$pages = $this()->Children();
 		$counted = [];
-
+		
 		foreach ($pages as $page) {
 			if ($page->hasMethod(HasGridListFilters::RelationshipName)) {
 				$filters = $page->related(HasGridListFilters::RelationshipName);

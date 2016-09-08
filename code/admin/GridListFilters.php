@@ -28,7 +28,7 @@ class GridListFilters extends ModelAdmin {
 		$fields = $form->Fields();
 
 		/** @var \GridField $gridField */
-		if ($gridField = $fields->dataFieldByName('Modular-Models-GridListFilter')) {
+		if ($gridField = $fields->dataFieldByName('Modular-Models-GridListFilters')) {
 			if ($config = $gridField->getConfig()) {
 				$config->addComponent(new GridFieldOrderableRows('Sort'));
 			}

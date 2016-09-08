@@ -1,17 +1,15 @@
 <?php
 namespace Modular\GridList\Providers\Filters;
+
+use Modular\GridList\Interfaces\FiltersProvider;
+use Modular\ModelExtension;
 use Modular\Models\GridListFilter;
 
-/**
- * Trait provides default GridListFilters
- *
- * @package Modular\GridList\Providers\Filters
- */
-trait defaults {
+class GridListFilters extends ModelExtension implements FiltersProvider {
 	public function provideGridListFilters() {
 		// now we add the default filter on to fill in any space
 
 		return GridListFilter::get()->sort('Sort');
-
 	}
+
 }

@@ -22,12 +22,12 @@ class GridList extends ContentControllerExtension {
 		return new \ArrayData([
 			'Items'   => $this->items(),
 			'Filters' => $this->filters(),
-			'Mode'    => $this->mode(),
-			'Sort'    => $this->sort(),
+			'Mode'    => $this->Mode(),
+			'Sort'    => $this->Sort(),
 		]);
 	}
 
-	public function items() {
+	protected function items() {
 		$out = new \ArrayList();
 
 		// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
@@ -77,7 +77,7 @@ class GridList extends ContentControllerExtension {
 	 *
 	 * @return \ArrayList
 	 */
-	public function filters() {
+	protected function filters() {
 		$out = new \ArrayList();
 
 		// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
@@ -101,7 +101,7 @@ class GridList extends ContentControllerExtension {
 	 * Return current sort criteria which should be applied to the GridList items
 	 * @return mixed
 	 */
-	public function sort() {
+	public function Sort() {
 		return singleton('GridListFilterService')->sort();
 	}
 
@@ -109,7 +109,7 @@ class GridList extends ContentControllerExtension {
 	 * Return the current mode the GridList should show in.
 	 * @return mixed
 	 */
-	public function mode() {
+	public function Mode() {
 		return singleton('GridListFilterService')->mode();
 	}
 }
