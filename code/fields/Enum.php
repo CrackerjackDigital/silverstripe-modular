@@ -2,6 +2,8 @@
 namespace Modular\Fields;
 
 abstract class EnumField extends Field {
+	const SingleFieldName = '';
+	
 	/**
 	 * Can be numerically indexed or associative.
 	 * If numeric, then values will be used as both key and value in dropdown
@@ -12,6 +14,12 @@ abstract class EnumField extends Field {
 	
 	private static $options = [];
 	
+	public static function field_schema()
+	{
+		$options = array_keys(static::all_options());
+		return "Enum('" . implode(',', $options) . "')";
+	}
+	
 	public function cmsFields()
 	{
 		return [
@@ -21,11 +29,6 @@ abstract class EnumField extends Field {
 				$this->dropdownMap()
 			)
 		];
-	}
-	public static function field_schema()
-	{
-		$options = array_keys(static::all_options());
-		return "Enum('" . implode(',', $options) . "')";
 	}
 	
 	public function dropdownMap()

@@ -7,7 +7,7 @@ trait owned {
 	}
 
 	/**
-	 * @return mixed
+	 * @return Model|Controller|\DataObject
 	 */
 	public function owner() {
 		return $this->owner;

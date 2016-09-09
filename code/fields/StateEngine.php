@@ -3,8 +3,13 @@ namespace Modular\Fields;
 
 use Modular\Model;
 
+/**
+ * Class which only allows certain transitions for this fields values as defined by config.states. Adds a field
+ * to extended module <ClassName>StateUpdated
+ * @package Modular\Fields
+ */
 class StateEngineField extends EnumField {
-	
+	const UpdatedFieldPostfix = 'StateUpdated';
 	/**
 	 * Array of states to array of valid 'next' states.
 	 *
@@ -28,12 +33,35 @@ class StateEngineField extends EnumField {
 		#   ]
 	];
 	
-	/**
-	 * @return Model
-	 */
-	public function owner() {
-		return parent::owner();
+	public function cmsFields() {
+		return array_merge(
+			parent::cmsFields(),
+			[
+				static::date_field_name() =>
+			]
+		);
 	}
+	
+	/**
+	 * Adds <ClassName>StateUpdated field as SS_DateTime.
+	 * @param null $class
+	 * @param null $extension
+	 * @return array
+	 */
+	public function extraStatics($class = null, $extension = null)
+	{
+		return array_merge_recursive(
+			parent::extraStatics($class, $extension),
+			[
+				static::date_field_name() => 'SS_DateTime'
+			]
+		);
+	}
+	
+	public static function date_field_name() {
+		return get_called_class() . static::UpdatedFieldPostfix;
+	}
+	
 	
 	public function dropdownMap()
 	{
