@@ -11,4 +11,8 @@ class Model extends \DataObject {
 	public function __invoke() {
 		return $this;
 	}
+
+	public static function class_name() {
+		return get_called_class();
+	}
 }

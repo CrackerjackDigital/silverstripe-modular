@@ -47,7 +47,7 @@ class GridList extends ContentControllerExtension {
 		$page = \Director::get_current_page();
 		$lists = $page->invokeWithExtensions('provideGridListItems');
 		foreach ($lists as $list) {
-			$out->push($list);
+			$out->merge($list);
 		}
 		$out->removeDuplicates();
 		return $out;
