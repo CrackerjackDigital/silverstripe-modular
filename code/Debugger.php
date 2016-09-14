@@ -3,6 +3,7 @@ namespace Modular;
 
 use Controller;
 use Filesystem;
+use Modular\Exceptions\Debug;
 use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
@@ -244,21 +245,31 @@ class Debugger extends Object {
 
 	/**
 	 * Log to provided file or to a generated file. Filename is relative to site root if it starts with a '/' otherwise is interpreted as relative
-	 * to assets folder.
+	 * to assets folder. Checks to make sure final log file path is inside the web root.
 	 *
 	 * @param  int    $level        only log above this level
 	 * @param  string $filePathName log to this file or if not supplied generate one
 	 * @return $this
 	 */
 	public function toFile($level, $filePathName = '') {
-		if ($filePathName) {
+		$baseFolder = \Director::baseFolder();
 
-			$this->logFilePathName = substr($filePathName, 0, 1) == '/'
-				? (\Director::baseFolder() . $filePathName)
-				: (ASSETS_PATH . $filePathName);
+		if ($filePathName) {
+			$filePathName = realpath(
+				substr($filePathName, 0, 1) == '/'
+					? ($baseFolder . "/$filePathName")
+					: (ASSETS_PATH . "/$filePathName")
+			);
+
+			// test we are in web root after resolving absolute file path otherwise log to a default log file
+			if (substr($filePathName, 0, strlen($baseFolder)) == $baseFolder) {
+				// ok
+				$this->logFilePathName = $filePathName;
+			} else {
+				$this->logFilePathName = $this->makeLogFileName();
+			}
 
 		} else {
-
 			$this->logFilePathName = $this->makeLogFileName();
 		}
 
@@ -266,6 +277,11 @@ class Debugger extends Object {
 			new SS_LogFileWriter($this->logFilePathName),
 			$this->lvl($level)
 		);
+
+		// log an warning if we got an invalid path above
+		if ($filePathName && (substr($filePathName, 0, strlen($baseFolder)) != $baseFolder)) {
+			$this->warn("Invalid file path outside of web root '$filePathName' using '$this->logFilePathName' instead");
+		}
 		return $this;
 	}
 
