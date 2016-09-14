@@ -55,13 +55,17 @@ class Debugger extends Object {
 	// set when toFile is called.
 	private $logFilePathName;
 
+	// when destructor is called on the logger email the log file to this address
 	private $emailLogFileTo;
 
+	// where are messages coming from?
 	private $source;
 
+	// what level will we trigger at
 	private $level;
 
-	private $screenLevel;
+	// what level is on-screen trigger, generally pemissive
+	private $screenLevel = self::DebugTrace;
 
 	public function __construct($level = self::DefaultDebugLevel, $source = '') {
 		parent::__construct();
@@ -170,26 +174,22 @@ class Debugger extends Object {
 	}
 
 	public function log($message, $facilities, $source = '') {
+		$levels = $this->config()->get('levels');
+		$level = $this->lvl($facilities);
+		$source = $source ?: $this->source();
 
-		if ($level = $this->lvl($facilities)) {
-			$levels = $this->config()->get('levels');
-
-			if (!isset($levels[ $level ])) {
-				$this->log("Bad debug level '$level'", self::DebugWarn);
-				$level = self::DebugErr;
-			}
-			$message = $this->formatMessage($message, $levels[ $level ], $source);
-			SS_Log::log($message, $level);
-
+		if ($level) {
+			SS_Log::log("$source: $message", $level);
 		}
-		if (!is_null($this->screenLevel) && $this->lvl($facilities, $this->screenLevel)) {
-			echo $message . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
+		$toScreen = $this->lvl($facilities, $this->screenLevel);
+		if ($toScreen) {
+			$str = isset($levels[$toScreen]) ? $levels[$toScreen] : '???';
+			echo $this->formatMessage($message, $str, $source) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 		}
 		return $this;
 	}
 
 	public function info($message, $source = '') {
-		$message = $this->formatMessage($message, 'INF', $source);
 		$this->log($message, self::DebugInfo, $source);
 		return $this;
 	}
@@ -199,25 +199,21 @@ class Debugger extends Object {
 			echo $message . (\Director::is_cli() ? '' : "<br/>") . PHP_EOL;
 			ob_flush();
 		}
-		$message = $this->formatMessage($message, 'TRC', $source);
 		$this->log($message, self::DebugTrace, $source);
 		return $this;
 	}
 
 	public function notice($message, $source = '') {
-		$message = $this->formatMessage($message, 'NTC ', $source);
 		$this->log($message, self::DebugNotice, $source);
 		return $this;
 	}
 
 	public function warn($message, $source = '') {
-		$message = $this->formatMessage($message, 'WRN ', $source);
 		$this->log($message, self::DebugWarn, $source);
 		return $this;
 	}
 
 	public function error($message, $source = '') {
-		$message = $this->formatMessage($message, 'ERR', $source);
 		$this->log($message, self::DebugErr, $source);
 		return $this;
 	}
