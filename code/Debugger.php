@@ -49,8 +49,8 @@ class Debugger extends Object {
 	// name of log file to create if none supplied to toFile
 	private static $log_file = 'silverstripe.log';
 
-	// path to create log file in relative to assets folder if no file supplied to toFile
-	private static $log_path = 'logs';
+	// path to create log file in relative to base folder
+	private static $log_path = '../logs';
 
 	// set when toFile is called.
 	private $logFilePathName;
@@ -128,7 +128,7 @@ class Debugger extends Object {
 		$this->source($source);
 
 		if ($this->bitfieldTest($level, self::DebugFile)) {
-			if ($logFile = static::config()->get('log_file')) {
+			if ($logFile = $this->makeLogFileName()) {
 				$this->toFile($level, $logFile);
 			}
 		}
@@ -179,7 +179,7 @@ class Debugger extends Object {
 		$source = $source ?: $this->source();
 
 		if ($level) {
-			SS_Log::log("$source: $message", $level);
+			SS_Log::log("$source: $message" . PHP_EOL, $level);
 		}
 		$toScreen = $this->lvl($facilities, $this->screenLevel);
 		if ($toScreen) {
@@ -248,17 +248,10 @@ class Debugger extends Object {
 	 * @return $this
 	 */
 	public function toFile($level, $filePathName = '') {
-		$baseFolder = \Director::baseFolder();
-
 		if ($filePathName) {
-			$filePathName = realpath(
-				substr($filePathName, 0, 1) == '/'
-					? ($baseFolder . "/$filePathName")
-					: (ASSETS_PATH . "/$filePathName")
-			);
+			$filePathName = Application::make_safe_path($filePathName, true) . '/' . basename($filePathName);
 
-			// test we are in web root after resolving absolute file path otherwise log to a default log file
-			if (substr($filePathName, 0, strlen($baseFolder)) == $baseFolder) {
+			if (Application::is_safe_path(dirname($filePathName))) {
 				// ok
 				$this->logFilePathName = $filePathName;
 			} else {
@@ -268,15 +261,22 @@ class Debugger extends Object {
 		} else {
 			$this->logFilePathName = $this->makeLogFileName();
 		}
+		if (!is_dir(dirname($this->logFilePathName))) {
+			$filePathName = $this->logFilePathName;
+			$this->logFilePathName = $this->makeLogFileName();
+		}
 
 		SS_Log::add_writer(
 			new SS_LogFileWriter($this->logFilePathName),
 			$this->lvl($level)
 		);
 
-		// log an warning if we got an invalid path above
-		if ($filePathName && (substr($filePathName, 0, strlen($baseFolder)) != $baseFolder)) {
+		// log an warning if we got an invalid path above so we know this and can fix
+		if ($filePathName && !Application::is_safe_path(dirname($filePathName))) {
 			$this->warn("Invalid file path outside of web root '$filePathName' using '$this->logFilePathName' instead");
+		}
+		if ($filePathName && !is_dir(dirname($filePathName))) {
+			$this->warn("Path for '$filePathName' does not exist, using '$this->logFilePathName' instead");
 		}
 		return $this;
 	}
@@ -298,9 +298,17 @@ class Debugger extends Object {
 	 * the assets folder then will not try and create the path.
 	 *
 	 * @return string
+	 * @throws \Modular\Exceptions\Application
 	 */
 	protected function makeLogFileName() {
-		if (!$filePathName = static::config()->get('log_file')) {
+		if ($filePathName = static::config()->get('log_file')) {
+			// if no path then dirname returns '.' we don't want that but empty path instead
+			$path = trim(dirname($filePathName), '.');
+			if (!$path) {
+				$path = static::config()->get('log_path');
+			}
+			$fileName = basename($filePathName, '.log');
+		} else {
 			$path = static::config()->get('log_path');
 			$date = date('Ymd_his');
 
@@ -309,18 +317,14 @@ class Debugger extends Object {
 				: ("$date-");
 
 			$fileName = basename(tempnam($path, $prefix));
-		} else {
-			$path = dirname($filePathName);
-			$fileName = basename($filePathName, '.log');
 		}
-		$path = realpath(Controller::join_links(
-			ASSETS_PATH,
-			$path
-		));
+		$path = Application::make_safe_path($path, false);
+
 		if (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH) {
 			// we only try and make a logging directory if we are inside the assets folder
 			Filesystem::makeFolder($path);
 		}
+
 		return "$path/$fileName.log";
 	}
 }
