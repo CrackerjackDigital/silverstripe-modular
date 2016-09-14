@@ -12,11 +12,11 @@ class Debugger extends Object {
 	use enabler;
 
 	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
-	const DebugErr    = SS_Log::ERR;           // 3
-	const DebugWarn   = SS_Log::WARN;
-	const DebugNotice = SS_Log::NOTICE;
-	const DebugInfo   = SS_Log::INFO;
-	const DebugTrace  = SS_Log::DEBUG;       // 7
+	const DebugErr    = SS_Log::ERR;        // 3
+	const DebugWarn   = SS_Log::WARN;       // 4
+	const DebugNotice = SS_Log::NOTICE;     // 5
+	const DebugInfo   = SS_Log::INFO;       // 6
+	const DebugTrace  = SS_Log::DEBUG;      // 7
 
 	// disable all debugging
 	const DebugOff = 16;
@@ -38,7 +38,8 @@ class Debugger extends Object {
 	// og back far enough
 	const DebugPerClass = 256;
 
-	const DefaultDebugLevel = 48; // self::DebugOff | self::DebugFile
+	// debug warning and debug to file
+	const DefaultDebugLevel = 36;
 
 	// name of log file to create
 	private static $log_file = 'silverstripe.log';
@@ -99,11 +100,21 @@ class Debugger extends Object {
 		]);
 	}
 
-	public function log($message, $facilities, $source = '') {
+	/**
+	 * Return level if level from facilities less than current level otherwise false.
+	 *
+	 * @param $facilities
+	 * @return bool|int
+	 */
+	protected function lvl($facilities) {
 		// strip out non-level facilities
 		$level = $facilities & (self::DebugErr | self::DebugWarn | self::DebugNotice | self::DebugInfo | self::DebugTrace);
+		return $level <= $this->level() ? $level : false;
+	}
 
-		if ($level <= $this->level()) {
+	public function log($message, $facilities, $source = '') {
+
+		if ($level = $this->lvl($facilities)) {
 			$levels = $this->config()->get('levels');
 
 			if (!isset($levels[ $level ])) {
@@ -123,6 +134,10 @@ class Debugger extends Object {
 	}
 
 	public function trace($message, $source = '') {
+		if ($this->lvl(self::DebugTrace)) {
+			echo $message . (\Director::is_cli() ? '' : "<br/>") . PHP_EOL;
+			ob_flush();
+		}
 		$message = $this->formatMessage($message, 'TRC', $source);
 		$this->log($message, self::DebugTrace, $source);
 		return $this;
