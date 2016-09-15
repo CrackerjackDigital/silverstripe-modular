@@ -5,6 +5,7 @@ use Modular\config;
 use Modular\ContentControllerExtension;
 use Modular\Models\GridListFilter;
 use Modular\owned;
+use Modular\Relationships\HasGridListFilters;
 
 /**
  * Add extensions to models which provide items, filters and other control to a GridList.
@@ -49,7 +50,19 @@ class GridList extends ContentControllerExtension {
 		foreach ($lists as $list) {
 			$out->merge($list);
 		}
+
 		$out->removeDuplicates();
+		// now we filter the results to remove any items which don't have a filter in the 'master filters'
+
+		$masterLists = $this()->extend('provideMasterFilters');
+		$masterIDs = [];
+
+		foreach ($masterLists as $masterList) {
+			$masterIDs = array_merge($masterIDs, $masterList->column('ID'));
+		}
+		if ($masterIDs) {
+			$out->filter(HasGridListFilters::relationship_name('ID'), $masterIDs);
+		}
 		return $out;
 	}
 
