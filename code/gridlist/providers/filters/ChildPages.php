@@ -14,7 +14,7 @@ class ChildPages extends ModelExtension implements FiltersProvider {
 	public function provideGridListFilters() {
 		$pages = $this()->Children();
 		$counted = [];
-		
+
 		foreach ($pages as $page) {
 			if ($page->hasMethod(HasGridListFilters::RelationshipName)) {
 				$filters = $page->related(HasGridListFilters::RelationshipName);
@@ -29,7 +29,7 @@ class ChildPages extends ModelExtension implements FiltersProvider {
 		}
 		if ($counted) {
 			asort($counted);
-			return GridListFilter::get()->filter('ID', array_keys($counted));
+//			return GridListFilter::get()->filter('ID', array_keys($counted));
 		}
 		return new \ArrayList();
 	}

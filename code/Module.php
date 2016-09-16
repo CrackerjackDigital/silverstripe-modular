@@ -1,8 +1,7 @@
 <?php
 namespace Modular;
 
-use Director;
-use Requirements;
+use \Director;
 
 abstract class Module extends Object {
 	use config;
