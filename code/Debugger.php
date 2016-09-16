@@ -1,10 +1,9 @@
 <?php
 namespace Modular;
 
-use Controller;
-use \Modular\Interfaces\Debugger as DebugInterface;
 use Filesystem;
-use Modular\Exceptions\Debug;
+use Modular\Exceptions\Debug as Exception;
+use Modular\Interfaces\Debugger as DebugInterface;
 use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
@@ -57,7 +56,7 @@ class Debugger extends Object implements DebugInterface
 	// set when toFile is called.
 	private $logFilePathName;
 
-	// when destructor is called on the logger email the log file to this address
+	// set by emailLog, when destructor is called on the Debugger instance email the log file to this address
 	private $emailLogFileTo;
 
 	// where are messages coming from?
@@ -96,28 +95,7 @@ class Debugger extends Object implements DebugInterface
 		return new $class($level, $source);
 	}
 	
-	public function level($level = null)
-	{
-		if (func_num_args()) {
-			$this->level = $level;
-			if ($level & static::DebugScreen) {
-				$this->screenLevel = $level;
-			}
-			return $this;
-		} else {
-			return $this->level;
-		}
-	}
-
-	public function source($source = null) {
-		if (func_num_args()) {
-			$this->source = $source;
-			return $this;
-		} else {
-			return $this->source;
-		}
-	}
-
+	
 	/**
 	 * Set levels and source and if flags indicate debugging to file screen or email initialise those aspects of debugging using defaults from config.
 	 * @param      $level
@@ -129,7 +107,7 @@ class Debugger extends Object implements DebugInterface
 		
 		$this->level($level);
 		$this->source($source);
-
+		
 		if ($this->bitfieldTest($level, self::DebugFile)) {
 			if ($logFile = $this->makeLogFileName()) {
 				$this->toFile($level, $logFile);
@@ -145,6 +123,37 @@ class Debugger extends Object implements DebugInterface
 		}
 		
 		return $this;
+	}
+	
+	/**
+	 * Get or set level.
+	 *
+	 * @param null $level
+	 * @return $this
+	 */
+	public function level($level = null)
+	{
+		if (func_num_args()) {
+			$this->level = $level;
+			return $this;
+		} else {
+			return $this->level;
+		}
+	}
+	
+	/**
+	 * Get or set source.
+	 *
+	 * @param null $source
+	 * @return $this
+	 */
+	public function source($source = null) {
+		if (func_num_args()) {
+			$this->source = $source;
+			return $this;
+		} else {
+			return $this->source;
+		}
 	}
 
 	/**
@@ -220,32 +229,40 @@ class Debugger extends Object implements DebugInterface
 		
 		return $this;
 	}
-
+	
 	public function error($message, $source = '') {
 		$this->log($message, self::DebugErr, $source);
 		
 		return $this;
 	}
-
+	
+	public function fail($message, $source = '') {
+		$this->log($message, self::DebugErr, $source);
+		throw new Exception($this->formatMessage($message, self::DebugErr));
+	}
+	
+	/**
+	 * Set the screen level.
+	 * @param int $level
+	 * @return $this
+	 */
 	public function toScreen($level) {
 		$this->screenLevel = $level;
+		return $this;
 	}
 
 	/**
-	 * Set the email address to send emails to
+	 * Set the level and email address to send emails to for every event.
 	 *
-	 * @param $address
 	 * @param $level
+	 * @param $emailAddress
 	 * @return $this
 	 */
-	public function toEmail($address, $level) {
-		if ($address) {
-			SS_Log::add_writer(
-				new SS_LogEmailWriter($address),
-				$level
-			);
-		};
-		
+	public function toEmail($level, $emailAddress) {
+		SS_Log::add_writer(
+			new SS_LogEmailWriter($emailAddress),
+			$level
+		);
 		return $this;
 	}
 
@@ -292,12 +309,13 @@ class Debugger extends Object implements DebugInterface
 	}
 	
 	/**
-	 * At end of Debugger lifecycle file set by toFile will be sent to this email address.
+	 * At end of Debugger lifecycle file set by toFile will be sent to this email address. This is independent of
+	 * toEmail which logs every event.
 	 *
 	 * @param $emailAddress
 	 * @return $this
 	 */
-	public function sendFile($emailAddress) {
+	public function emailLog($emailAddress) {
 		$this->emailLogFileTo = $emailAddress;
 		return $this;
 	}

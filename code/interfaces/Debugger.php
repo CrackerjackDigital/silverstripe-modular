@@ -8,7 +8,7 @@ interface Debugger
 	public static function debugger($level = \Modular\Debugger::DefaultDebugLevel, $prefix = '');
 	
 	/**
-	 * @param int|null  new level or get
+	 * @param int|null new level or get
 	 * @return $this|int
 	 */
 	public function level($level = null);
@@ -71,19 +71,25 @@ interface Debugger
 	 */
 	public function fail($message, $source = '');
 	
-	/**
-	 * @param $address
-	 * @param $level
-	 * @return $this
-	 */
-	public function toEmail($address, $level);
 	
 	/**
-	 * @param        $path
-	 * @param        $level
-	 * @param string $source
-	 * @return this
+	 * @param int $level
+	 * @return $this
 	 */
-	public function toFile($path, $level, $source = '');
+	public function toScreen($level);
+	
+	/**
+	 * @param string $emailAddress
+	 * @param int    $level
+	 * @return $this
+	 */
+	public function toEmail($level, $emailAddress);
+	
+	/**
+	 * @param int    $level
+	 * @param string $filePathName to log events to if not provided one will be generated
+	 * @return $this
+	 */
+	public function toFile($level, $filePathName = '');
 	
 }
