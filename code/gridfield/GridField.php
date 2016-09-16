@@ -54,8 +54,15 @@ class GridField extends Field {
 		return static::RelationshipName . $append;
 	}
 
-	public static function related_class_name() {
-		return static::RelatedClassName;
+	/**
+	 * Returns the related class name optionally appended by '.fieldName', so e.g. when used as a filter in a relationship you will get full
+	 * namespaced class for the relationship column.
+	 *
+	 * @param string $fieldName
+	 * @return string
+	 */
+	public static function related_class_name($fieldName = '') {
+		return static::RelatedClassName . ($fieldName ? ".$fieldName" : '');
 	}
 
 	public static function relationship_name($fieldName = '') {

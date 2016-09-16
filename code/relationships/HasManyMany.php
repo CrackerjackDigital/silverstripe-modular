@@ -33,6 +33,15 @@ class HasManyMany extends GridField {
 	}
 
 	/**
+	 * Return an array of IDs from the other end of this extendsions Relationship or the supplied relationship name.
+	 * @param string $relationshipName
+	 * @return array
+	 */
+	public function relatedIDs($relationshipName = '') {
+		return $this->related($relationshipName)->column('ID');
+	}
+
+	/**
 	 * Returns a field array using a tag field which can be used in derived classes instead of a GridField which is the default returned by cmsFields().
 	 * @return array
 	 */

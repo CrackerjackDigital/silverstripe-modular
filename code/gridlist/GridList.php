@@ -3,6 +3,7 @@ namespace Modular\GridList;
 
 use Modular\config;
 use Modular\ContentControllerExtension;
+use Modular\Model;
 use Modular\Models\GridListFilter;
 use Modular\owned;
 use Modular\Relationships\HasGridListFilters;
@@ -26,12 +27,12 @@ class GridList extends ContentControllerExtension {
 			'Mode'      => $this->Mode(),
 			'Sort'      => $this->Sort(),
 			'NextStart' => $this->NextStart(),
-		    'MoreAvailable' => $this->moreAvailable()
+		    'MoreAvailable' => $this->moreAvailable(),
 		]);
 	}
 
 	/**
-	 * @return \SS_List
+	 * @return \ArrayList
 	 */
 	protected function items() {
 		$out = new \ArrayList();
@@ -39,34 +40,31 @@ class GridList extends ContentControllerExtension {
 		// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
 		// this will return an array of SS_Lists
 		$lists = $this()->extend('provideGridListItems');
-		foreach ($lists as $list) {
-			$out->merge($list);
+		/** @var \ManyManyList $list */
+		foreach ($lists as $items) {
+			$this()->extend('filterGridListItems', $items);
+			$out->merge($items);
 		}
 
 		// then we get items from the current page via relationships
 		// such as HasRelatedPages, HasTags etc
 		$page = \Director::get_current_page();
+		// this returns a list of lists
 		$lists = $page->invokeWithExtensions('provideGridListItems');
+		/** @var \ManyManyList $list */
 		foreach ($lists as $list) {
-			$out->merge($list);
+			foreach ($list as $items) {
+				$page->invokeWithExtensions('filterGridListItems', $items);
+				$out->merge($items);
+			}
 		}
-
 		$out->removeDuplicates();
-		// now we filter the results to remove any items which don't have a filter in the 'master filters'
-
-		$masterLists = $this()->extend('provideMasterFilters');
-		$masterIDs = [];
-
-		foreach ($masterLists as $masterList) {
-			$masterIDs = array_merge($masterIDs, $masterList->column('ID'));
-		}
-		if ($masterIDs) {
-			$out->filter(HasGridListFilters::relationship_name('ID'), $masterIDs);
-		}
 		return $out;
 	}
 
 	/**
+	 * Given a list of items return a paginated version.
+	 *
 	 * @param \SS_List $items
 	 * @return \PaginatedList
 	 */
@@ -105,13 +103,6 @@ class GridList extends ContentControllerExtension {
 		// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
 		// this will return an array of SS_Lists
 		$lists = $this()->extend('provideGridListFilters');
-		foreach ($lists as $list) {
-			$out->merge($list);
-		}
-		// then we get items from the current page via relationships
-		// such as HasRelatedPages, HasTags etc
-		$page = \Director::get_current_page();
-		$lists = $page->invokeWithExtensions('provideGridListFilters');
 		foreach ($lists as $list) {
 			$out->merge($list);
 		}
