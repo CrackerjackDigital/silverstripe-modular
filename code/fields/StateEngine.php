@@ -37,7 +37,9 @@ class StateEngineField extends EnumField {
 		return array_merge(
 			parent::cmsFields(),
 			[
-				static::date_field_name() =>
+				static::date_field_name() => $this->configureDateTimeField(
+					new \DatetimeField(static::date_field_name())
+				)
 			]
 		);
 	}

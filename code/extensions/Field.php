@@ -6,7 +6,7 @@ use DatetimeField;
 use FieldList;
 use FormField;
 use LiteralField;
-use Modular\Exception;
+use Modular\Exceptions\Exception;
 use Modular\lang;
 use Modular\Model;
 use Modular\ModelExtension;
@@ -68,7 +68,7 @@ abstract class Field extends ModelExtension {
 	 */
 	public function singleFieldValue($set = null) {
 		if (!static::SingleFieldName) {
-			throw new Exception("Called singleFieldValue() with no SingleFieldName set")
+			throw new Exception("Called singleFieldValue() with no SingleFieldName set");
 		}
 		if (func_num_args()) {
 			$this()->{static::SingleFieldName} = $set;
@@ -450,6 +450,7 @@ abstract class Field extends ModelExtension {
 	 *
 	 * @param \DateField $field
 	 * @param bool       $showMultipleFields
+	 * @return \DateField
 	 */
 	protected function configureDateField(DateField $field, $showMultipleFields = true) {
 		if ($showMultipleFields) {
@@ -457,11 +458,13 @@ abstract class Field extends ModelExtension {
 				->setConfig('dmyseparator', ' / ')// set the separator
 				->setConfig('dmyplaceholders', 'true'); // enable HTML 5 Placeholders
 		}
+		return $field;
 	}
-
+	
 	/**
 	 * @param \TimeField $field
 	 * @param bool       $showMultipleFields
+	 * @return TimeField
 	 */
 	protected function configureTimeField(TimeField $field, $showMultipleFields = true) {
 		if ($showMultipleFields) {
@@ -470,19 +473,22 @@ abstract class Field extends ModelExtension {
 				$field->setConfig('timeformat', $format);
 			}
 		}
+		return $field;
 	}
-
+	
 	/**
 	 * Configures the Date and Time fields in the wrapping DatetimeField.
 	 *
 	 * @param \DatetimeField $field
 	 * @param bool           $showMultipleFields
+	 * @return DatetimeField
 	 */
 	protected function configureDateTimeField(DatetimeField $field, $showMultipleFields = true) {
 		if ($showMultipleFields) {
 			$this->configureDateField($field->getDateField(), $showMultipleFields);
 			$this->configureTimeField($field->getTimeField(), $showMultipleFields);
 		}
+		return $field;
 	}
 
 	/**

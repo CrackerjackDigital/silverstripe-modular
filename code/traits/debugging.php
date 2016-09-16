@@ -16,7 +16,7 @@ trait debugging {
 				$debugger->level($level);
 			}
 		} else {
-			$debugger = \Injector::inst()->get('Modular\Debugger', $level);
+			$debugger = \Injector::inst()->get('Debugger', $level);
 		}
 		return $debugger;
 	}
@@ -40,13 +40,7 @@ trait debugging {
 	public static function debug_error($message) {
 		static::debugger()->error($message, get_called_class());
 	}
-
-	/**
-	 * @param      $message
-	 * @param null $httpResponceCode if provided then will force and httpError with this code.
-	 * @throws \Modular\Exceptions\Debug
-	 * @throws \SS_HTTPResponse_Exception
-	 */
+	
 	public function debug_fail($message, $httpResponceCode = null) {
 		$this->debugger()->error($message, get_called_class());
 		if ($httpResponceCode && !\Director::is_cli()) {

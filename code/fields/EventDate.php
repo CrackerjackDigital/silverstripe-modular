@@ -7,4 +7,5 @@ namespace Modular\Fields;
 class EventDate extends DateTimeField {
 	const SingleFieldName = 'EventDate';
 	const ShowTimeField = false;
+	
 }
