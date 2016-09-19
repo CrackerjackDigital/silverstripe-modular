@@ -119,6 +119,7 @@ class Application extends Module {
 			$path = $baseFolder . "/$path";
 		} elseif (substr($path, 0, 1) == '/') {
 			// absolute from server root (but up one, e.g. may be '../logs' equivalent
+			// TODO: this is not nice, seems arbitrary, fix
 			$rpath = dirname(realpath($path));
 
 			if (substr($rpath, 0, strlen(dirname($baseFolder))) == dirname($baseFolder)) {

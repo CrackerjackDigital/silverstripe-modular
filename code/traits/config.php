@@ -3,7 +3,9 @@ namespace Modular;
 
 trait config {
 	public static function config($className = null) {
-		return \Config::inst()->forClass($className ?: get_called_class());
+		return \Config::inst()->forClass(
+			$className ?: get_called_class()
+		);
 	}
 
 	/**
