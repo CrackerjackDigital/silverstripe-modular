@@ -59,6 +59,7 @@ class GridList extends ContentControllerExtension {
 			}
 		}
 		$out->removeDuplicates();
+		$page->extend('sequenceGridListItems', $out);
 		return $out;
 	}
 
