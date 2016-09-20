@@ -1,5 +1,7 @@
 <?php
 namespace Modular\Relationships;
+use Modular\Fields\Title;
+
 /**
  * Provides a tag field where filters can be added.
  *
@@ -11,6 +13,10 @@ class HasGridListFilters extends HasManyMany {
 
 	private static $sortable = false;
 
+	private static $summary_fields = [
+		'DisplayGridListFilters' => 'Filters'
+	];
+
 	public function cmsFields() {
 		return [
 			new \TagField(
@@ -19,6 +25,14 @@ class HasGridListFilters extends HasManyMany {
 				\DataObject::get(static::RelatedClassName)
 			),
 		];
+	}
+
+	/**
+	 * Return csv list of filters suitable for use eg in summary_fields.
+	 * @return string
+	 */
+	public function DisplayGridListFilters() {
+		return implode(', ', $this->related()->column(Title::SingleFieldName));
 	}
 
 	/**
