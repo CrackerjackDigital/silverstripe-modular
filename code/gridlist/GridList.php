@@ -36,31 +36,35 @@ class GridList extends ContentControllerExtension {
 	 * @return \ArrayList
 	 */
 	protected function items() {
-		$out = new \ArrayList();
+		static $out;
 
-		// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
-		// this will return an array of SS_Lists
-		$lists = $this()->extend('provideGridListItems');
-		/** @var \ManyManyList $list */
-		foreach ($lists as $items) {
-			$this()->extend('filterGridListItems', $items);
-			$out->merge($items);
-		}
+		if (!$out) {
+			$out = new \ArrayList();
 
-		// then we get items from the current page via relationships
-		// such as HasRelatedPages, HasTags etc
-		$page = \Director::get_current_page();
-		// this returns a list of lists
-		$lists = $page->invokeWithExtensions('provideGridListItems');
-		/** @var \ManyManyList $list */
-		foreach ($lists as $list) {
-			foreach ($list as $items) {
-				$page->invokeWithExtensions('filterGridListItems', $items);
+			// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
+			// this will return an array of SS_Lists
+			$lists = $this()->extend('provideGridListItems');
+			/** @var \ManyManyList $list */
+			foreach ($lists as $items) {
+				$this()->extend('filterGridListItems', $items);
 				$out->merge($items);
 			}
+
+			// then we get items from the current page via relationships
+			// such as HasRelatedPages, HasTags etc
+			$page = \Director::get_current_page();
+			// this returns a list of lists
+			$lists = $page->invokeWithExtensions('provideGridListItems');
+			/** @var \ManyManyList $list */
+			foreach ($lists as $list) {
+				foreach ($list as $items) {
+					$page->invokeWithExtensions('filterGridListItems', $items);
+					$out->merge($items);
+				}
+			}
+			$out->removeDuplicates();
+			$page->extend('sequenceGridListItems', $out);
 		}
-		$out->removeDuplicates();
-		$page->extend('sequenceGridListItems', $out);
 		return $out;
 	}
 
