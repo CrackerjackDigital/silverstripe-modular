@@ -28,6 +28,7 @@ class GridList extends ContentControllerExtension {
 			'Sort'      => $this->Sort(),
 			'NextStart' => $this->NextStart(),
 		    'MoreAvailable' => $this->moreAvailable(),
+		    'DefaultFilter' => $this->defaultFilter()
 		]);
 	}
 
@@ -61,6 +62,10 @@ class GridList extends ContentControllerExtension {
 		$out->removeDuplicates();
 		$page->extend('sequenceGridListItems', $out);
 		return $out;
+	}
+
+	protected function defaultFilter() {
+		return \Director::get_current_page()->DefaultFilter();
 	}
 
 	/**
