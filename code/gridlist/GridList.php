@@ -46,24 +46,38 @@ class GridList extends ContentControllerExtension {
 			$lists = $this()->extend('provideGridListItems');
 			/** @var \ManyManyList $list */
 			foreach ($lists as $items) {
-				$this()->extend('filterGridListItems', $items);
 				$out->merge($items);
 			}
 
-			// then we get items from the current page via relationships
-			// such as HasRelatedPages, HasTags etc
-			$page = \Director::get_current_page();
-			// this returns a list of lists
-			$lists = $page->invokeWithExtensions('provideGridListItems');
-			/** @var \ManyManyList $list */
+			$out->removeDuplicates();
+
+			$this()->extend('sequenceGridListItems', $out);
+		}
+		return $out;
+	}
+
+	/**
+	 * Returns the filters which should show in-page gathered via provideGridListFilters. These are composed of those specifically set on the GridList first
+	 * and then those for the current page which may have an alternate strategy to provide them, such as most popular filters from child pages.
+	 *
+	 * @return \ArrayList
+	 */
+	protected function filters() {
+		static $out;
+		if (!$out) {
+			$out = new \ArrayList();
+
+			// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
+			// this will return an array of SS_Lists
+			$lists = $this()->extend('provideGridListFilters');
 			foreach ($lists as $list) {
-				foreach ($list as $items) {
-					$page->invokeWithExtensions('filterGridListItems', $items);
-					$out->merge($items);
-				}
+				$out->merge($list);
 			}
 			$out->removeDuplicates();
-			$page->extend('sequenceGridListItems', $out);
+
+			$items = $this->items();
+
+			$this()->extend('constrainGridListFilters', $out, $items);
 		}
 		return $out;
 	}
@@ -99,28 +113,6 @@ class GridList extends ContentControllerExtension {
 		return $this()->config()->get('gridlist_page_length')
 			?: ($this->config()->get('gridlist_page_length')
 				?: static::DefaultPageLength);
-	}
-
-	/**
-	 * Returns the filters which should show in-page gathered via provideGridListFilters. These are composed of those specifically set on the GridList first
-	 * and then those for the current page which may have an alternate strategy to provide them, such as most popular filters from child pages.
-	 *
-	 * @return \ArrayList
-	 */
-	protected function filters() {
-		static $out;
-		if (!$out) {
-			$out = new \ArrayList();
-
-			// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
-			// this will return an array of SS_Lists
-			$lists = $this()->extend('provideGridListFilters');
-			foreach ($lists as $list) {
-				$out->merge($list);
-			}
-			$out->removeDuplicates();
-		}
-		return $out;
 	}
 
 	public function Start() {

@@ -27,9 +27,10 @@ trait lang {
 	 */
 	public function fieldDecoration($fieldName, $decoration = 'Label', $default = '', array $tokens = [], $field = null) {
 		$tokens = array_merge(
+			$this->fieldDecorationTokens(),
 			[
 				'singular' => $this->singularName(),
-				'plural'   => $this->pluralName()
+				'plural'   => $this->pluralName(),
 			],
 			($field instanceof \FormField)
 				? ['label' => $field->Title()]
@@ -59,6 +60,17 @@ trait lang {
 			}
 		}
 		return $value;
+	}
+
+	/**
+	 * Override to provide specific tokens for replacement in field decorations
+	 * as [ 'token-name' => value ]
+	 * will be filled into decoration text placeholder {token-name}
+	 *
+	 * @return array
+	 */
+	protected function fieldDecorationTokens() {
+		return [];
 	}
 
 	protected function singularName() {

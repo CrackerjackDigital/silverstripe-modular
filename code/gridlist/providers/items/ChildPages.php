@@ -5,6 +5,11 @@ use Modular\Fields\Field;
 use Modular\GridList\Interfaces\ItemsProvider;
 use Modular\ModelExtension;
 
+/**
+ * Add to a GridList host (e.g. GridListBlock) to provide all children of the page on which the block is added
+ *
+ * @package Modular\GridList\Providers\Items
+ */
 class ChildPages extends Field implements ItemsProvider {
 	const SingleFieldName = 'ProvideChildren';
 	const SingleFieldSchema = 'Boolean';
@@ -13,9 +18,15 @@ class ChildPages extends Field implements ItemsProvider {
 		self::SingleFieldName => true
 	];
 
+	/**
+	 * Return children of the current page
+	 * @return \DataList
+	 */
 	public function provideGridListItems() {
 		if ($this()->{static::SingleFieldName}) {
-			return $this()->Children();
+			if ($page = \Director::get_current_page()) {
+				return $page->Children();
+			}
 		}
 	}
 

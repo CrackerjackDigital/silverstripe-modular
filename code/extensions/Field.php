@@ -222,9 +222,14 @@ abstract class Field extends ModelExtension {
 		$field->setTitle(
 			$this->fieldDecoration($fieldName, "Label", $field->Title(), [], $field)
 		);
+		$guide = $this->fieldDecoration($fieldName, "Guide", '', [], $field);
+
 		$field->setRightTitle(
-			$this->fieldDecoration($fieldName, "Guide", '', [], $field)
+			$guide
 		);
+		if ($field instanceof \CheckboxField) {
+			$field->setDescription($guide);
+		}
 	}
 
 	/**
