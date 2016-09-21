@@ -21,7 +21,7 @@ class GridList extends ContentControllerExtension {
 	const DefaultPageLength    = 12;
 
 	public function GridList() {
-		return new \ArrayData([
+		$gridlist = new \ArrayData([
 			'Items'     => $this->paginator($this->items()),
 			'Filters'   => $this->filters(),
 			'Mode'      => $this->Mode(),
@@ -30,6 +30,7 @@ class GridList extends ContentControllerExtension {
 		    'MoreAvailable' => $this->moreAvailable(),
 		    'DefaultFilter' => $this->defaultFilter()
 		]);
+		return $gridlist;
 	}
 
 	/**
@@ -37,7 +38,6 @@ class GridList extends ContentControllerExtension {
 	 */
 	protected function items() {
 		static $out;
-
 		if (!$out) {
 			$out = new \ArrayList();
 
@@ -108,15 +108,18 @@ class GridList extends ContentControllerExtension {
 	 * @return \ArrayList
 	 */
 	protected function filters() {
-		$out = new \ArrayList();
+		static $out;
+		if (!$out) {
+			$out = new \ArrayList();
 
-		// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
-		// this will return an array of SS_Lists
-		$lists = $this()->extend('provideGridListFilters');
-		foreach ($lists as $list) {
-			$out->merge($list);
+			// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
+			// this will return an array of SS_Lists
+			$lists = $this()->extend('provideGridListFilters');
+			foreach ($lists as $list) {
+				$out->merge($list);
+			}
+			$out->removeDuplicates();
 		}
-		$out->removeDuplicates();
 		return $out;
 	}
 
