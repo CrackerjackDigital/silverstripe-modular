@@ -6,7 +6,9 @@ use Modular\Model;
 use Modular\Relationships\HasGridListFilters;
 
 /**
- * Removes filters which don't exist in any items, should be added to GridList host (e.g. GridListBlock)
+ * Removes filters which don't exist in any items, should be added to GridList host (e.g. GridListBlock).
+ *
+ * This will be called by GridList.filters after all filter providers have added their filters.
  *
  * @package Modular\GridList\Constraints\Filters
  */
@@ -17,6 +19,8 @@ class OnlyPresentInItems extends Field {
 	private static $defaults = [
 		self::SingleFieldName => false,
 	];
+
+	private static $show_all_if_none_present = false;
 
 	/**
 	 * @param \DataList $filters list of GridListFilter models
@@ -53,7 +57,9 @@ class OnlyPresentInItems extends Field {
 				}
 			}
 		}
-		$filters = $out->count() ? $out : $filters;
+		$filters = $this->config()->get('show_all_if_none_present')
+			? $out->count() ? $out : $filters
+			: $out;
 	}
 }
 

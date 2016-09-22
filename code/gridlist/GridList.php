@@ -20,15 +20,17 @@ class GridList extends ContentControllerExtension {
 	const PaginatorServiceName = 'GridListPaginator';
 	const DefaultPageLength    = 12;
 
+	private static $gridlist_page_length = self::DefaultPageLength;
+
 	public function GridList() {
 		$gridlist = new \ArrayData([
-			'Items'     => $this->paginator($this->items()),
-			'Filters'   => $this->filters(),
-			'Mode'      => $this->Mode(),
-			'Sort'      => $this->Sort(),
-			'NextStart' => $this->NextStart(),
-		    'MoreAvailable' => $this->moreAvailable(),
-		    'DefaultFilter' => $this->defaultFilter()
+			'Items'         => $this->paginator($this->items()),
+			'Filters'       => $this->filters(),
+			'Mode'          => $this->Mode(),
+			'Sort'          => $this->Sort(),
+			'NextStart'     => $this->NextStart(),
+			'MoreAvailable' => $this->moreAvailable(),
+			'DefaultFilter' => $this->defaultFilter(),
 		]);
 		return $gridlist;
 	}
@@ -109,10 +111,27 @@ class GridList extends ContentControllerExtension {
 		return $this->NextStart() < $this->items()->Count();
 	}
 
+	/**
+	 * Get page length from:
+	 *  - current page class config.gridlist_page_length
+	 *  - the extended models config.gridlist_page_length
+	 *  - this extensions config.gridlist_page_length
+	 *
+	 * If the page length is -1 then 0 is returned to indicate infinite page length.
+	 *
+	 * @return int
+	 */
 	protected function pageLength() {
-		return $this()->config()->get('gridlist_page_length')
-			?: ($this->config()->get('gridlist_page_length')
-				?: static::DefaultPageLength);
+		$page = \Director::get_current_page();
+
+		$length = $page->config()->get('gridlist_page_length')
+			?: ($this()->config()->get('gridlist_page_length')
+				?: $this->config()->get('gridlist_page_length'));
+
+		if ($length === -1) {
+			$length = 0;
+		}
+		return $length;
 	}
 
 	public function Start() {
