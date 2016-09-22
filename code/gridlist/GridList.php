@@ -39,23 +39,25 @@ class GridList extends ContentControllerExtension {
 	 * @return \ArrayList
 	 */
 	protected function items() {
-		static $out;
-		if (!$out) {
-			$out = new \ArrayList();
+		static $items;
+		if (!$items) {
+			$items = new \ArrayList();
 
 			// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
 			// this will return an array of SS_Lists
 			$lists = $this()->extend('provideGridListItems');
 			/** @var \ManyManyList $list */
-			foreach ($lists as $items) {
-				$out->merge($items);
+			foreach ($lists as $itemList) {
+				$items->merge($itemList);
 			}
 
-			$out->removeDuplicates();
+			$items->removeDuplicates();
 
-			$this()->extend('sequenceGridListItems', $out);
+			$this()->extend('constrainGridListItems', $items);
+
+			$this()->extend('sequenceGridListItems', $items);
 		}
-		return $out;
+		return $items;
 	}
 
 	/**
@@ -65,23 +67,23 @@ class GridList extends ContentControllerExtension {
 	 * @return \ArrayList
 	 */
 	protected function filters() {
-		static $out;
-		if (!$out) {
-			$out = new \ArrayList();
+		static $filters;
+		if (!$filters) {
+			$filters = new \ArrayList();
 
 			// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
 			// this will return an array of SS_Lists
 			$lists = $this()->extend('provideGridListFilters');
 			foreach ($lists as $list) {
-				$out->merge($list);
+				$filters->merge($list);
 			}
-			$out->removeDuplicates();
+			$filters->removeDuplicates();
 
 			$items = $this->items();
 
-			$this()->extend('constrainGridListFilters', $out, $items);
+			$this()->extend('constrainGridListFilters', $items, $filters);
 		}
-		return $out;
+		return $filters;
 	}
 
 	protected function defaultFilter() {

@@ -2,6 +2,7 @@
 namespace Modular\GridList\Constraints\Filters;
 
 use Modular\Fields\Field;
+use Modular\GridList\Interfaces\FilterConstraints;
 use Modular\Model;
 use Modular\Relationships\HasGridListFilters;
 
@@ -12,7 +13,7 @@ use Modular\Relationships\HasGridListFilters;
  *
  * @package Modular\GridList\Constraints\Filters
  */
-class OnlyPresentInItems extends Field {
+class OnlyPresentInItems extends Field implements FilterConstraints {
 	const SingleFieldName   = 'OnlyMatchingFilters';
 	const SingleFieldSchema = 'Boolean';
 
@@ -27,7 +28,7 @@ class OnlyPresentInItems extends Field {
 	 * @param \DataList $items   list of Pages and other models which could appear in a grid.
 	 * @return \ArrayList
 	 */
-	public function constrainGridListFilters(&$filters, $items) {
+	public function constrainGridListFilters($items, &$filters) {
 		$out = new \ArrayList();
 		if ($this()->{self::SingleFieldName}) {
 			$ids = $filters->column('ID');
