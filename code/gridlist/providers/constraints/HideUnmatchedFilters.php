@@ -13,17 +13,17 @@ use Modular\Relationships\HasGridListFilters;
  *
  * @package Modular\GridList\Constraints\Filters
  */
-class OnlyPresentInItems extends Field implements FilterConstraints {
-	const SingleFieldName   = 'OnlyMatchingFilters';
+class HideUnmatchedFilters extends Field implements FilterConstraints {
+	const SingleFieldName   = 'HideUnmatchedFilters';
 	const SingleFieldSchema = 'Boolean';
 
 	private static $defaults = [
 		self::SingleFieldName => false,
 	];
 
-	private static $show_all_if_none_present = false;
-
 	/**
+	 * If HideUnmatchedFilters is on then remove all filters which are not found in the items by their 'AssociatedFilters' relationship.
+	 *
 	 * @param \DataList $filters list of GridListFilter models
 	 * @param \DataList $items   list of Pages and other models which could appear in a grid.
 	 * @return \ArrayList
@@ -57,10 +57,8 @@ class OnlyPresentInItems extends Field implements FilterConstraints {
 					$out->push($filter);
 				}
 			}
+			$filters = $out;
 		}
-		$filters = $this->config()->get('show_all_if_none_present')
-			? $out->count() ? $out : $filters
-			: $out;
 	}
 }
 
