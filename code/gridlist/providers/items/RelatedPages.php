@@ -7,6 +7,7 @@ use Modular\Relationships\HasRelatedPages;
 
 /**
  * Provide all pages which have been related to this page via the 'RelatedPages' tab.
+ * Adds a field which enables this to be enabled/disabled in CMS.
  *
  * @package Modular\GridList\Providers\Items
  */
@@ -19,6 +20,21 @@ class RelatedPages extends Field implements ItemsProvider {
 	];
 
 	/**
+	 * Add implementors token which is csv of 'nice' names of implementors of HasRelatedPages relationship.
+	 * @return mixed
+	 */
+	public function fieldDecorationTokens() {
+		$implementors = implode(', ', HasRelatedPages::implementors());
+
+		return array_merge(
+			parent::fieldDecorationTokens(),
+			[
+				'implementors' => $implementors
+			]
+		);
+	}
+
+	/**
 	 * Use the 'related' method to return related pages.
 	 *
 	 * @return mixed
@@ -29,12 +45,7 @@ class RelatedPages extends Field implements ItemsProvider {
 				$items = new \ArrayList();
 
 				// iterate through children of 'HasRelatedPages', eg 'BusinessPages', 'DivisionPages' etc
-				foreach (\ClassInfo::subclassesFor(HasRelatedPages::class_name()) as $className) {
-					if ($className == HasRelatedPages::class_name()) {
-						// skip the related pages class itself
-						continue;
-					}
-
+				foreach (HasRelatedPages::implementors() as $className => $title) {
 					if ($page->hasExtension($className)) {
 						// get all the related e.g. country pages to this page via the 'RelatedCountries' back relationship
 						$items->merge(

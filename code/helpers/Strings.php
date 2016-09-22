@@ -44,17 +44,15 @@ class Strings extends Object {
 	}
 
 	/**
-	 * Create a Debugger for provided level or get it from the per-level cache.
+	 * Given a possibly namespaced class name return it as decamelised terminal class name.
 	 *
-	 * @param int    $level  bitfield from Debugger or'd DebugABC constants
-	 * @param string $prefix for filenames, email subjects etc
-	 * @return mixed
+	 * e.g. '\ShimpleDinging\Relationships\UberShimpleDinger' would become 'Uber Shimple Dinger'
+	 *
+	 * @param $className
+	 * @return string
 	 */
-	public static function debugger($level, $prefix = 'debug-') {
-		static $cache = [];
-		if (!isset($cache[ $level ])) {
-			$cache[ $level ] = new Debugger($level, $prefix);
-		}
-		return $cache[ $level ];
+	public static function class_to_label($className) {
+		return self::decamel(current(array_reverse(explode('\\', $className))));
 	}
+
 }

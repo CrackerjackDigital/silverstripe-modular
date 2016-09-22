@@ -6,7 +6,8 @@ use Modular\GridList\Interfaces\ItemsProvider;
 use Modular\ModelExtension;
 
 /**
- * Add to a GridList host (e.g. GridListBlock) to provide all children of the page on which the block is added
+ * Add to a GridList host (e.g. GridListBlock) to provide all children of the page on which the block is added.
+ * Adds a field which enables this to be enabled/disabled in CMS.
  *
  * @package Modular\GridList\Providers\Items
  */

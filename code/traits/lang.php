@@ -7,7 +7,8 @@ trait lang {
 	abstract public function __invoke();
 
 	function lang($key, $default = '', array $tokens = []) {
-		return _t(get_called_class(), ".$key", $default ?: $key, $tokens);
+		$calledClass = get_called_class();
+		return _t($calledClass, ".$key", $default ?: $calledClass, $tokens);
 	}
 
 	/**
@@ -26,8 +27,10 @@ trait lang {
 	 * @return string
 	 */
 	public function fieldDecoration($fieldName, $decoration = 'Label', $default = '', array $tokens = [], $field = null) {
+		$extraTokens = $this->fieldDecorationTokens();
+
 		$tokens = array_merge(
-			$this->fieldDecorationTokens(),
+			$extraTokens,
 			[
 				'singular' => $this->singularName(),
 				'plural'   => $this->pluralName(),
