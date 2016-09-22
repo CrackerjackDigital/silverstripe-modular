@@ -81,7 +81,7 @@ class HasManyMany extends GridField {
 			}
 			static::cache("$calledClass-implementors", $implementors);
 		}
-		return $implementors;
+		return $implementors ?: [];
 	}
 
 	/**

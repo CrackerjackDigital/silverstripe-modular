@@ -24,12 +24,22 @@ class RelatedPages extends Field implements ItemsProvider {
 	 * @return mixed
 	 */
 	public function fieldDecorationTokens() {
-		$implementors = implode(', ', HasRelatedPages::implementors());
+		$implementors = HasRelatedPages::implementors();
+		$titles = [];
+		/** @var \Page $page */
+		$page = $this();
 
+		foreach ($implementors as $className => $title) {
+			$relationshipName = $className::relationship_name();
+
+			if ($page->hasRelationship($relationshipName)) {
+				$titles[] = $title;
+			}
+		}
 		return array_merge(
 			parent::fieldDecorationTokens(),
 			[
-				'implementors' => $implementors
+				'implementors' => implode(', ', $titles ?: [ 'None found on this page type ' ])
 			]
 		);
 	}
