@@ -3,6 +3,7 @@ namespace Modular\GridList;
 
 use Modular\config;
 use Modular\ContentControllerExtension;
+use Modular\Fields\ModelTag;
 use Modular\Model;
 use Modular\Models\GridListFilter;
 use Modular\owned;
@@ -23,15 +24,28 @@ class GridList extends ContentControllerExtension {
 	private static $gridlist_page_length = self::DefaultPageLength;
 
 	public function GridList() {
-		$gridlist = new \ArrayData([
-			'Items'         => $this->paginator($this->items()),
-			'Filters'       => $this->filters(),
-			'Mode'          => $this->Mode(),
-			'Sort'          => $this->Sort(),
-			'NextStart'     => $this->NextStart(),
-			'MoreAvailable' => $this->moreAvailable(),
-			'DefaultFilter' => $this->defaultFilter(),
-		]);
+		$extraData = [];
+		foreach ($this()->extend('provideGridListTemplateData', $extraData) as $extendedData) {
+			$extraData = array_merge(
+				$extraData,
+				$extendedData
+			);
+		}
+		$pageLength = isset($extraData['PageLength']) ? $extraData['PageLength'] : $this->config()->get('gridlist_page_length');
+
+		$data = array_merge(
+			[
+				'Items'         => $this->paginator($this->items(), $this->service()->firstItem(), $pageLength),
+				'TotalItems'    => $this->items()->count(),
+				'Filters'       => $this->filters(),
+				'Mode'          => $this->service()->mode(),
+				'Sort'          => $this->service()->sort(),
+				'DefaultFilter' => $this->service()->defaultFilter()
+			],
+			$extraData
+		);
+
+		$gridlist = new \ArrayData($data);
 		return $gridlist;
 	}
 
@@ -43,11 +57,17 @@ class GridList extends ContentControllerExtension {
 		if (!$items) {
 			$items = new \ArrayList();
 
+			$currentFilterID = $this->service()->currentFilterID();
+
 			// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
 			// this will return an array of SS_Lists
 			$lists = $this()->extend('provideGridListItems');
 			/** @var \ManyManyList $list */
 			foreach ($lists as $itemList) {
+				if ($currentFilterID) {
+					$itemList = $itemList->filter(HasGridListFilters::relationship_name('ID'), $currentFilterID);
+				}
+
 				$items->merge($itemList);
 			}
 
@@ -86,17 +106,15 @@ class GridList extends ContentControllerExtension {
 		return $filters;
 	}
 
-	protected function defaultFilter() {
-		return \Director::get_current_page()->DefaultFilter();
-	}
-
 	/**
 	 * Given a list of items return a paginated version.
 	 *
 	 * @param \SS_List $items
+	 * @param int      $firstItem
+	 * @param int      $pageLength
 	 * @return \PaginatedList
 	 */
-	protected function paginator(\SS_List $items) {
+	protected function paginator(\SS_List $items, $firstItem, $pageLength) {
 		$params = \Controller::curr()->getRequest();
 
 		/** @var \PaginatedList $paginated */
@@ -105,60 +123,16 @@ class GridList extends ContentControllerExtension {
 			$items,
 			$params
 		);
-		$paginated->setPageLength($this->pageLength());
+		$paginated->setPageStart($firstItem);
+		$paginated->setPageLength($pageLength);
 		return $paginated;
 	}
 
-	protected function moreAvailable() {
-		return $this->NextStart() < $this->items()->Count();
-	}
-
 	/**
-	 * Get page length from:
-	 *  - current page class config.gridlist_page_length
-	 *  - the extended models config.gridlist_page_length
-	 *  - this extensions config.gridlist_page_length
-	 *
-	 * If the page length is -1 then 0 is returned to indicate infinite page length.
-	 *
-	 * @return int
+	 * @return \GridListService
 	 */
-	protected function pageLength() {
-		$page = \Director::get_current_page();
-
-		$length = $page->config()->get('gridlist_page_length')
-			?: ($this()->config()->get('gridlist_page_length')
-				?: $this->config()->get('gridlist_page_length'));
-
-		if ($length === -1) {
-			$length = 0;
-		}
-		return $length;
+	protected function service() {
+		return singleton('GridListService');
 	}
 
-	public function Start() {
-		return \Controller::curr()->getRequest()->getVar('start');
-	}
-
-	public function NextStart() {
-		return (int) $this->Start() + (int) $this->pageLength();
-	}
-
-	/**
-	 * Return current sort criteria which should be applied to the GridList items
-	 *
-	 * @return mixed
-	 */
-	public function Sort() {
-		return singleton('GridListFilterService')->sort();
-	}
-
-	/**
-	 * Return the current mode the GridList should show in.
-	 *
-	 * @return mixed
-	 */
-	public function Mode() {
-		return singleton('GridListFilterService')->mode();
-	}
 }

@@ -2,7 +2,7 @@
 namespace Modular\GridField;
 
 use Modular\Fields\Field;
-use Modular\GridField\GridFieldOrderableRows;
+use Modular\Model;
 
 class GridField extends Field {
 	const ShowAsGridField = 'grid';
@@ -106,6 +106,7 @@ class GridField extends Field {
 			?: static::GridFieldConfigName
 				?: get_class($this) . 'GridFieldConfig';
 
+		/** @var GridFieldConfig $config */
 		$config = $configClassName::create();
 		$config->setSearchPlaceholder(
 

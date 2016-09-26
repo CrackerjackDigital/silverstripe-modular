@@ -33,12 +33,14 @@ class AssociatedFilters extends Field implements ItemsProvider {
 		);
 	}
 
+	/**
+	 * Provide pages which have
+	 * @return \DataList
+	 */
 	public function provideGridListItems() {
 		if ($this()->{self::SingleFieldName}) {
 			if ($this()->hasExtension(HasGridListFilters::class_name())) {
-				$filterIDs = array_keys(
-					$this()->{HasGridListFilters::relationship_name()}()->map()->toArray()
-				);
+				$filterIDs = $this()->{HasGridListFilters::relationship_name()}()->column('ID');
 				$filterField = HasGridListFilters::relationship_name('ID');
 
 				return \Page::get()->filter([

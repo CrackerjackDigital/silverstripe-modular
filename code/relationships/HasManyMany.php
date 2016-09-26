@@ -91,6 +91,8 @@ class HasManyMany extends GridField {
 	 */
 	protected function tagFields() {
 		$multipleSelect = (bool) $this->config()->get('multiple_select');
+		$canCreate = (bool)$this->config()->get('allow_add_new');
+
 		$relatedClassName = static::RelatedClassName;
 
 		return [
@@ -98,7 +100,7 @@ class HasManyMany extends GridField {
 				static::relationship_name(),
 				null,
 				$relatedClassName::get()
-			))->setIsMultiple($multipleSelect)->setCanCreate(false),
+			))->setIsMultiple($multipleSelect)->setCanCreate($canCreate),
 		];
 	}
 

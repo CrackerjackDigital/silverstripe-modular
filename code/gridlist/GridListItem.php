@@ -12,15 +12,16 @@ class GridListItem extends ModelExtension {
 	 * Renders the item into the gridlist with selected template passing through Filters which are defined on the item.
 	 * GridListItem constructor.
 	 */
-	public function GridListItem() {
+	public function GridListItem($columns = 0) {
 		$filters = [];
-		
+
 		if ($this()->hasExtension(HasGridListFilters::class_name())) {
 			$filters = $this()->{HasGridListFilters::relationship_name()}();
 		}
-		return $this()->renderWith($this->template(), [
+		return $this()->renderWith($this->template(), new \ArrayData([
+			'Columns' => $columns,
 			'Filters' => $filters
-		]);
+		]));
 	}
 
 	/**
