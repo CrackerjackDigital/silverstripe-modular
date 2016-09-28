@@ -8,7 +8,7 @@ class Standalone extends \ContentController {
 		'blocks' => 'blocks',
 	];
 	private static $allowed_actions = [
-		'blocks' => 'true',
+		'blocks' => true
 	];
 
 	public function blocks(\SS_HTTPRequest $request) {
