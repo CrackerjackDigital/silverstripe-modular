@@ -31,16 +31,24 @@ class GridList extends ContentControllerExtension {
 				$extendedData
 			);
 		}
+		$firstItem = $this->service()->firstItem();
 		$pageLength = isset($extraData['PageLength']) ? $extraData['PageLength'] : $this->config()->get('gridlist_page_length');
+
+		$items = $this->items();
+		$totalCount = $items->count();
+
+		$paginated = $this->paginator($items, $firstItem, $pageLength);
+		$paginatedCount = $paginated->count();
 
 		$data = array_merge(
 			[
-				'Items'         => $this->paginator($this->items(), $this->service()->firstItem(), $pageLength),
-				'TotalItems'    => $this->items()->count(),
+				'Items'         => $paginated,
+				'TotalItems'    => $totalCount,
 				'Filters'       => $this->filters(),
 				'Mode'          => $this->service()->mode(),
 				'Sort'          => $this->service()->sort(),
-				'DefaultFilter' => $this->service()->defaultFilter()
+				'DefaultFilter' => $this->service()->defaultFilter(),
+				'LoadMore'      => $totalCount > ($firstItem + $paginatedCount) ? 1 : 0,
 			],
 			$extraData
 		);
@@ -64,10 +72,12 @@ class GridList extends ContentControllerExtension {
 			$lists = $this()->extend('provideGridListItems');
 			/** @var \ManyManyList $list */
 			foreach ($lists as $itemList) {
+				// filter to current filter if set
 				if ($currentFilterID) {
-					$itemList = $itemList->filter(HasGridListFilters::relationship_name('ID'), $currentFilterID);
+					$itemList = $itemList->filter([
+						HasGridListFilters::relationship_name('ID') => $currentFilterID,
+					]);
 				}
-
 				$items->merge($itemList);
 			}
 
