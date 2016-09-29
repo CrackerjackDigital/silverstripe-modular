@@ -24,36 +24,42 @@ class GridList extends ContentControllerExtension {
 	private static $gridlist_page_length = self::DefaultPageLength;
 
 	public function GridList() {
-		$extraData = [];
-		foreach ($this()->extend('provideGridListTemplateData', $extraData) as $extendedData) {
-			$extraData = array_merge(
-				$extraData,
-				$extendedData
+		static $gridlist;
+		if (!$gridlist) {
+			$extraData = [];
+			foreach ($this()->extend('provideGridListTemplateData', $extraData) as $extendedData) {
+				$extraData = array_merge(
+					$extraData,
+					$extendedData
+				);
+			}
+			$firstItem = $this->service()->firstItem();
+			$pageLength = isset($extraData['PageLength'])
+				? $extraData['PageLength']
+				: $this->config()->get('gridlist_page_length');
+
+			$items = $this->items();
+			$totalCount = $items->count();
+
+			$paginated = $this->paginator($items, $firstItem, $pageLength);
+			$paginatedLast = $firstItem + $pageLength;
+
+			$loadMore = ($totalCount > $paginatedLast) ? 1 : 0;
+
+			$data = array_merge(
+				[
+					'Items'         => $paginated,
+					'TotalItems'    => $totalCount,
+					'Filters'       => $this->filters(),
+					'Mode'          => $this->service()->mode(),
+					'Sort'          => $this->service()->sort(),
+					'DefaultFilter' => $this->service()->defaultFilter(),
+					'LoadMore'      => $loadMore
+				],
+				$extraData
 			);
+			$gridlist = new \ArrayData($data);
 		}
-		$firstItem = $this->service()->firstItem();
-		$pageLength = isset($extraData['PageLength']) ? $extraData['PageLength'] : $this->config()->get('gridlist_page_length');
-
-		$items = $this->items();
-		$totalCount = $items->count();
-
-		$paginated = $this->paginator($items, $firstItem, $pageLength);
-		$paginatedCount = $paginated->count();
-
-		$data = array_merge(
-			[
-				'Items'         => $paginated,
-				'TotalItems'    => $totalCount,
-				'Filters'       => $this->filters(),
-				'Mode'          => $this->service()->mode(),
-				'Sort'          => $this->service()->sort(),
-				'DefaultFilter' => $this->service()->defaultFilter(),
-				'LoadMore'      => $totalCount > ($firstItem + $paginatedCount) ? 1 : 0,
-			],
-			$extraData
-		);
-
-		$gridlist = new \ArrayData($data);
 		return $gridlist;
 	}
 
