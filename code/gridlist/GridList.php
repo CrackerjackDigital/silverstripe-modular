@@ -38,10 +38,11 @@ class GridList extends ContentControllerExtension {
 				? $extraData['PageLength']
 				: $this->config()->get('gridlist_page_length');
 
-			$items = $this->items();
+			$items = $this->items()->sort('EventDate desc');
 			$totalCount = $items->count();
 
 			$paginated = $this->paginator($items, $firstItem, $pageLength);
+
 			$paginatedLast = $firstItem + $pageLength;
 
 			$loadMore = ($totalCount > $paginatedLast) ? 1 : 0;
