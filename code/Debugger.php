@@ -4,6 +4,7 @@ namespace Modular;
 use Controller;
 use Filesystem;
 use Modular\Exceptions\Debug;
+use Modular\Exceptions\Exception;
 use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
@@ -215,6 +216,15 @@ class Debugger extends Object {
 
 	public function error($message, $source = '') {
 		$this->log($message, self::DebugErr, $source);
+		return $this;
+	}
+
+	public function fail($message, $source = '', Exception $exception) {
+		$this->log($message, self::DebugErr, $source);
+		if ($exception) {
+			$exception->setMessage($message);
+			throw $exception;
+		}
 		return $this;
 	}
 
