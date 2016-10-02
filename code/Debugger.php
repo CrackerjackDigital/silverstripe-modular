@@ -65,9 +65,6 @@ class Debugger extends Object {
 	// what level will we trigger at
 	private $level;
 
-	// what level is on-screen trigger, generally pemissive
-	private $screenLevel = self::DebugTrace;
-
 	public function __construct($level = self::DefaultDebugLevel, $source = '') {
 		parent::__construct();
 		$this->init($level, $source);
@@ -98,9 +95,6 @@ class Debugger extends Object {
 	public function level($level = null) {
 		if (func_num_args()) {
 			$this->level = $level;
-			if ($level & static::DebugScreen) {
-				$this->screenLevel = $level;
-			}
 			return $this;
 		} else {
 			return $this->level;
@@ -158,7 +152,7 @@ class Debugger extends Object {
 			"$severity:",
 			$source,
 			$message,
-		]);
+		]). (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 	}
 
 	/**
@@ -175,17 +169,10 @@ class Debugger extends Object {
 	}
 
 	public function log($message, $facilities, $source = '') {
-		$levels = $this->config()->get('levels');
-		$level = $this->lvl($facilities);
 		$source = $source ?: $this->source();
 
-		if ($level) {
+		if ($level = $this->lvl($facilities)) {
 			SS_Log::log("$source: $message" . PHP_EOL, $level);
-		}
-		$toScreen = $this->lvl($facilities, $this->screenLevel);
-		if ($toScreen) {
-			$str = isset($levels[$toScreen]) ? $levels[$toScreen] : '???';
-			echo $this->formatMessage($message, $str, $source) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 		}
 		return $this;
 	}
@@ -226,10 +213,6 @@ class Debugger extends Object {
 			throw $exception;
 		}
 		return $this;
-	}
-
-	public function toScreen($level) {
-		$this->screenLevel = $level;
 	}
 
 	/**
@@ -288,6 +271,15 @@ class Debugger extends Object {
 		if ($filePathName && !is_dir(dirname($filePathName))) {
 			$this->warn("Path for '$filePathName' does not exist, using '$this->logFilePathName' instead");
 		}
+		return $this;
+	}
+
+	/**
+	 * @param $level
+	 * @return $this
+	 */
+	public function toScreen($level) {
+		SS_Log::add_writer(new \LogOutputWriter($level));
 		return $this;
 	}
 
