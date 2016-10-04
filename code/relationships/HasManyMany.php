@@ -64,7 +64,7 @@ class HasManyMany extends GridField {
 	 * Return a map of derived implementations and their singular names.
 	 *
 	 * @param bool $includeCalledClass if true then the class being called will also be in the returned map
-	 * @return array [ className => title ]
+	 * @return array [ className => relationshipName ]
 	 */
 	public static function implementors($includeCalledClass = false) {
 		$calledClass = get_called_class();
@@ -77,7 +77,7 @@ class HasManyMany extends GridField {
 					// skip the related pages class itself if not included
 					continue;
 				}
-				$implementors[ $className ] = trim(Strings::decamel($className::relationship_name()));
+				$implementors[ $className ] = $className::relationship_name();
 			}
 			static::cache("$calledClass-implementors", $implementors);
 		}
