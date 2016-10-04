@@ -16,11 +16,13 @@ class Debugger extends Object {
 	const DefaultSendEmailsFrom = 'servers@moveforward.co.nz';
 
 	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
+	const DebugNone   = -1;
 	const DebugErr    = SS_Log::ERR;        // 3
 	const DebugWarn   = SS_Log::WARN;       // 4
 	const DebugNotice = SS_Log::NOTICE;     // 5
 	const DebugInfo   = SS_Log::INFO;       // 6
 	const DebugTrace  = SS_Log::DEBUG;      // 7
+	const DebugAll    = self::DebugTrace;   // easier to remember
 
 	// disable all debugging
 	const DebugOff = 16;
@@ -112,6 +114,7 @@ class Debugger extends Object {
 
 	/**
 	 * Set levels and source and if flags indicate debugging to file screen or email initialise those aspects of debugging using defaults from config.
+	 *
 	 * @param      $level
 	 * @param null $source
 	 * @return $this
@@ -152,7 +155,7 @@ class Debugger extends Object {
 			"$severity:",
 			$source,
 			$message,
-		]). (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
+		]) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 	}
 
 	/**
