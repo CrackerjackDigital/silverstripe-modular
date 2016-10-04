@@ -2,7 +2,7 @@
 namespace Modular\Fields;
 
 class TextContent extends Field {
-	const SingleFieldName = 'Content';
-	const SingleFieldSchema = 'HTMLText';
+	const SingleFieldName   = 'TextContent';
+	const SingleFieldSchema = 'Text';
 
 }
