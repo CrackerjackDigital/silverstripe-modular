@@ -1,6 +1,7 @@
 <?php
 namespace Modular;
 
+use Modular\Interfaces\Exception as ExceptionInterface;
 use Modular\Exceptions\Exception;
 
 trait debugging {
@@ -46,10 +47,10 @@ trait debugging {
 	}
 
 	/**
-	 * @param Exception $exception to log message from
+	 * @param ExceptionInterface $exception to log message from
 	 * @throws Exception
 	 */
-	public function debug_fail(Exception $exception) {
+	public function debug_fail(ExceptionInterface $exception) {
 		$this->debugger()->fail($exception->getMessage(), $exception->getFile() . ':' . $exception->getLine(), $exception);
 	}
 }
