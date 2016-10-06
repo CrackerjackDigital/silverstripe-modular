@@ -12,6 +12,7 @@ Modular\Models\Slide:
     - Modular\Behaviours\InternalOrExternalLink
     - Modular\Fields\InternalLink
     - Modular\Fields\ExternalLink
+    - Modular\Fields\LinkTitle
     - Modular\Fields\Image
 Modular\Models\Tag:
   extensions:
