@@ -12,15 +12,21 @@ class GridListItem extends ModelExtension {
 	 * Renders the item into the gridlist with selected template passing through Filters which are defined on the item.
 	 * GridListItem constructor.
 	 */
-	public function GridListItem() {
+	public function GridListItem($columns = 0) {
+		static $mode;
+		if (!$mode) {
+			$mode = \Injector::inst()->get('GridListFilterService')->mode();
+		}
 		$filters = [];
-		
+
 		if ($this()->hasExtension(HasGridListFilters::class_name())) {
 			$filters = $this()->{HasGridListFilters::relationship_name()}();
 		}
-		return $this()->renderWith($this->template(), [
-			'Filters' => $filters
-		]);
+		return $this()->renderWith($this->template($mode), new \ArrayData([
+			'Columns' => $columns,
+			'Filters' => $filters,
+		    'Hash' => md5($this()->ClassName . $this()->ID)
+		]));
 	}
 
 	/**
@@ -29,10 +35,10 @@ class GridListItem extends ModelExtension {
 	 *
 	 * @return string
 	 */
-	protected function template() {
+	protected function template($mode) {
 		if (!$template = $this()->config()->get('gridlist_template')) {
 			$template = "GridList/" . $this()->ClassName;
 		}
-		return "$template" . '_' . \Injector::inst()->get('GridListFilterService')->mode();
+		return "$template" . '_' . $mode;
 	}
 }

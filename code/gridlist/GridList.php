@@ -3,6 +3,7 @@ namespace Modular\GridList;
 
 use Modular\config;
 use Modular\ContentControllerExtension;
+use Modular\Fields\ModelTag;
 use Modular\Model;
 use Modular\Models\GridListFilter;
 use Modular\owned;
@@ -20,76 +21,80 @@ class GridList extends ContentControllerExtension {
 	const PaginatorServiceName = 'GridListPaginator';
 	const DefaultPageLength    = 12;
 
+	private static $gridlist_page_length = self::DefaultPageLength;
+
 	public function GridList() {
-		return new \ArrayData([
-			'Items'     => $this->paginator($this->items()),
-			'Filters'   => $this->filters(),
-			'Mode'      => $this->Mode(),
-			'Sort'      => $this->Sort(),
-			'NextStart' => $this->NextStart(),
-		    'MoreAvailable' => $this->moreAvailable(),
-		]);
+		static $gridlist;
+		if (!$gridlist) {
+			$extraData = [];
+			foreach ($this()->extend('provideGridListTemplateData', $extraData) as $extendedData) {
+				$extraData = array_merge(
+					$extraData,
+					$extendedData
+				);
+			}
+			$firstItem = $this->service()->firstItem();
+			$pageLength = isset($extraData['PageLength'])
+				? $extraData['PageLength']
+				: $this->config()->get('gridlist_page_length');
+
+			$items = $this->items()->sort('EventDate desc');
+			$totalCount = $items->count();
+
+			$paginated = $this->paginator($items, $firstItem, $pageLength);
+
+			$paginatedLast = $firstItem + $pageLength;
+
+			$loadMore = ($totalCount > $paginatedLast) ? 1 : 0;
+
+			$data = array_merge(
+				[
+					'Items'         => $paginated,
+					'TotalItems'    => $totalCount,
+					'Filters'       => $this->filters(),
+					'Mode'          => $this->service()->mode(),
+					'Sort'          => $this->service()->sort(),
+					'DefaultFilter' => $this->service()->defaultFilter(),
+					'LoadMore'      => $loadMore
+				],
+				$extraData
+			);
+			$gridlist = new \ArrayData($data);
+		}
+		return $gridlist;
 	}
 
 	/**
 	 * @return \ArrayList
 	 */
 	protected function items() {
-		$out = new \ArrayList();
+		static $items;
+		if (!$items) {
+			$items = new \ArrayList();
 
-		// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
-		// this will return an array of SS_Lists
-		$lists = $this()->extend('provideGridListItems');
-		/** @var \ManyManyList $list */
-		foreach ($lists as $items) {
-			$this()->extend('filterGridListItems', $items);
-			$out->merge($items);
-		}
+			$currentFilterID = $this->service()->currentFilterID();
 
-		// then we get items from the current page via relationships
-		// such as HasRelatedPages, HasTags etc
-		$page = \Director::get_current_page();
-		// this returns a list of lists
-		$lists = $page->invokeWithExtensions('provideGridListItems');
-		/** @var \ManyManyList $list */
-		foreach ($lists as $list) {
-			foreach ($list as $items) {
-				$page->invokeWithExtensions('filterGridListItems', $items);
-				$out->merge($items);
+			// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
+			// this will return an array of SS_Lists
+			$lists = $this()->extend('provideGridListItems');
+			/** @var \ManyManyList $list */
+			foreach ($lists as $itemList) {
+				// filter to current filter if set
+				if ($currentFilterID) {
+					$itemList = $itemList->filter([
+						HasGridListFilters::relationship_name('ID') => $currentFilterID,
+					]);
+				}
+				$items->merge($itemList);
 			}
+
+			$items->removeDuplicates();
+
+			$this()->extend('constrainGridListItems', $items);
+
+			$this()->extend('sequenceGridListItems', $items);
 		}
-		$out->removeDuplicates();
-		$page->extend('sequenceGridListItems', $out);
-		return $out;
-	}
-
-	/**
-	 * Given a list of items return a paginated version.
-	 *
-	 * @param \SS_List $items
-	 * @return \PaginatedList
-	 */
-	protected function paginator(\SS_List $items) {
-		$params = \Controller::curr()->getRequest();
-
-		/** @var \PaginatedList $paginated */
-		$paginated = \Injector::inst()->create(
-			static::PaginatorServiceName,
-			$items,
-			$params
-		);
-		$paginated->setPageLength($this->pageLength());
-		return $paginated;
-	}
-
-	protected function moreAvailable() {
-		return $this->NextStart() < $this->items()->Count();
-	}
-
-	protected function pageLength() {
-		return $this()->config()->get('gridlist_page_length')
-			?: ($this->config()->get('gridlist_page_length')
-				?: static::DefaultPageLength);
+		return $items;
 	}
 
 	/**
@@ -99,41 +104,52 @@ class GridList extends ContentControllerExtension {
 	 * @return \ArrayList
 	 */
 	protected function filters() {
-		$out = new \ArrayList();
+		static $filters;
+		if (!$filters) {
+			$filters = new \ArrayList();
 
-		// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
-		// this will return an array of SS_Lists
-		$lists = $this()->extend('provideGridListFilters');
-		foreach ($lists as $list) {
-			$out->merge($list);
+			// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
+			// this will return an array of SS_Lists
+			$lists = $this()->extend('provideGridListFilters');
+			foreach ($lists as $list) {
+				$filters->merge($list);
+			}
+			$filters->removeDuplicates();
+
+			$items = $this->items();
+
+			$this()->extend('constrainGridListFilters', $items, $filters);
 		}
-		$out->removeDuplicates();
-		return $out;
-	}
-
-	public function Start() {
-		return \Controller::curr()->getRequest()->getVar('start');
-	}
-
-	public function NextStart() {
-		return (int) $this->Start() + (int) $this->pageLength();
+		return $filters;
 	}
 
 	/**
-	 * Return current sort criteria which should be applied to the GridList items
+	 * Given a list of items return a paginated version.
 	 *
-	 * @return mixed
+	 * @param \SS_List $items
+	 * @param int      $firstItem
+	 * @param int      $pageLength
+	 * @return \PaginatedList
 	 */
-	public function Sort() {
-		return singleton('GridListFilterService')->sort();
+	protected function paginator(\SS_List $items, $firstItem, $pageLength) {
+		$params = \Controller::curr()->getRequest();
+
+		/** @var \PaginatedList $paginated */
+		$paginated = \Injector::inst()->create(
+			static::PaginatorServiceName,
+			$items,
+			$params
+		);
+		$paginated->setPageStart($firstItem);
+		$paginated->setPageLength($pageLength);
+		return $paginated;
 	}
 
 	/**
-	 * Return the current mode the GridList should show in.
-	 *
-	 * @return mixed
+	 * @return \GridListService
 	 */
-	public function Mode() {
-		return singleton('GridListFilterService')->mode();
+	protected function service() {
+		return singleton('GridListService');
 	}
+
 }

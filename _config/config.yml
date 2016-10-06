@@ -1,6 +1,9 @@
 ---
 Name: modular-config
 ---
+Director:
+  rules:
+    'gridlist//$Action/$PageID': Modular\GridList\Controllers\Standalone
 ContentController:
   extensions:
     - Modular\ContentControllerExtension

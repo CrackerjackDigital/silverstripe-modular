@@ -4,6 +4,7 @@ namespace Modular;
 use Controller;
 use Filesystem;
 use Modular\Exceptions\Debug;
+use Modular\Exceptions\Exception;
 use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
@@ -15,11 +16,13 @@ class Debugger extends Object {
 	const DefaultSendEmailsFrom = 'servers@moveforward.co.nz';
 
 	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
+	const DebugNone   = -1;
 	const DebugErr    = SS_Log::ERR;        // 3
 	const DebugWarn   = SS_Log::WARN;       // 4
 	const DebugNotice = SS_Log::NOTICE;     // 5
 	const DebugInfo   = SS_Log::INFO;       // 6
 	const DebugTrace  = SS_Log::DEBUG;      // 7
+	const DebugAll    = self::DebugTrace;   // easier to remember
 
 	// disable all debugging
 	const DebugOff = 16;
@@ -64,9 +67,6 @@ class Debugger extends Object {
 	// what level will we trigger at
 	private $level;
 
-	// what level is on-screen trigger, generally pemissive
-	private $screenLevel = self::DebugTrace;
-
 	public function __construct($level = self::DefaultDebugLevel, $source = '') {
 		parent::__construct();
 		$this->init($level, $source);
@@ -97,9 +97,6 @@ class Debugger extends Object {
 	public function level($level = null) {
 		if (func_num_args()) {
 			$this->level = $level;
-			if ($level & static::DebugScreen) {
-				$this->screenLevel = $level;
-			}
 			return $this;
 		} else {
 			return $this->level;
@@ -117,6 +114,7 @@ class Debugger extends Object {
 
 	/**
 	 * Set levels and source and if flags indicate debugging to file screen or email initialise those aspects of debugging using defaults from config.
+	 *
 	 * @param      $level
 	 * @param null $source
 	 * @return $this
@@ -157,7 +155,7 @@ class Debugger extends Object {
 			"$severity:",
 			$source,
 			$message,
-		]);
+		]) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 	}
 
 	/**
@@ -174,17 +172,10 @@ class Debugger extends Object {
 	}
 
 	public function log($message, $facilities, $source = '') {
-		$levels = $this->config()->get('levels');
-		$level = $this->lvl($facilities);
 		$source = $source ?: $this->source();
 
-		if ($level) {
+		if ($level = $this->lvl($facilities)) {
 			SS_Log::log("$source: $message" . PHP_EOL, $level);
-		}
-		$toScreen = $this->lvl($facilities, $this->screenLevel);
-		if ($toScreen) {
-			$str = isset($levels[$toScreen]) ? $levels[$toScreen] : '???';
-			echo $this->formatMessage($message, $str, $source) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 		}
 		return $this;
 	}
@@ -218,8 +209,13 @@ class Debugger extends Object {
 		return $this;
 	}
 
-	public function toScreen($level) {
-		$this->screenLevel = $level;
+	public function fail($message, $source = '', Exception $exception) {
+		$this->log($message, self::DebugErr, $source);
+		if ($exception) {
+			$exception->setMessage($message);
+			throw $exception;
+		}
+		return $this;
 	}
 
 	/**
@@ -278,6 +274,15 @@ class Debugger extends Object {
 		if ($filePathName && !is_dir(dirname($filePathName))) {
 			$this->warn("Path for '$filePathName' does not exist, using '$this->logFilePathName' instead");
 		}
+		return $this;
+	}
+
+	/**
+	 * @param $level
+	 * @return $this
+	 */
+	public function toScreen($level) {
+		SS_Log::add_writer(new \LogOutputWriter($level));
 		return $this;
 	}
 
