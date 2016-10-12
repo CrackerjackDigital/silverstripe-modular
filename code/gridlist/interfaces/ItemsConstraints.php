@@ -1,7 +1,7 @@
 <?php
 namespace Modular\GridList\Interfaces;
 
-interface ItemConstraints {
+interface ItemsConstraints {
 	/**
 	 * @param \SS_LIst $items
 	 * @return mixed
