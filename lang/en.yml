@@ -68,6 +68,10 @@ en:
       Placeholder: "Short descriptive title for this {singular}"
       Guide: 'Title of this {singular}'
       Length: "{label} needs to be between {minlength} and {maxlength} characters long"
+  Modular\GridList\Fields\Mode:
+    GridListMode:
+      Label: 'Display mode'
+      Guide: 'Choose how you would like items to show in the grid'
 # block types
   Modular\Blocks\Block:
     SINGULARNAME: 'Block'

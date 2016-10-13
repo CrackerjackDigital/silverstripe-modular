@@ -35,7 +35,10 @@ class GridList extends ContentControllerExtension {
 	 */
 	public function GridList($overrideMode = '') {
 		static $gridlist;
-		if (!$gridlist) {
+		static $cachedMode;
+		if (!$gridlist || ($cachedMode != $overrideMode)) {
+			$cachedMode = $overrideMode;
+
 			$extraData = [];
 			// get extra data such as for pagination PageLength etc
 			foreach ($this()->extend('provideGridListTemplateData', $extraData) as $extendedData) {
