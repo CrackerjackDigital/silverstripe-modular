@@ -17,7 +17,7 @@ class HasGridListBlocks extends HasBlocks implements ItemsSequencer {
 	 *
 	 * @param \ArrayList|\DataList $items
 	 */
-	public function sequenceGridListItems(&$items) {
+	public function sequenceGridListItems(&$items, $mode = null) {
 		$out = new \ArrayList();
 
 		// reverse sort so insertFirst works
