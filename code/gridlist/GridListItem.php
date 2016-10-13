@@ -22,7 +22,9 @@ class GridListItem extends ModelExtension {
 		if ($this()->hasExtension(HasGridListFilters::class_name())) {
 			$filters = $this()->{HasGridListFilters::relationship_name()}();
 		}
-		return $this()->renderWith($this->template($mode), new \ArrayData([
+		$template = $this->template($mode);
+		
+		return $this()->renderWith($template, new \ArrayData([
 			'Columns' => $columns,
 			'Filters' => $filters,
 		    'Hash' => md5($this()->ClassName . $this()->ID)

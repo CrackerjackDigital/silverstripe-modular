@@ -1,6 +1,7 @@
 <?php
 namespace Modular\GridList\Controllers;
 
+use Modular\GridList\GridList;
 use Modular\Relationships\HasBlocks;
 
 class Standalone extends \ContentController {
@@ -23,8 +24,7 @@ class Standalone extends \ContentController {
 						$gridList = $gridListBlock->GridList();
 						// set the load more header sued by client to show/hide laod more button
 						$this->getResponse()->addHeader('X-Load-More', $gridList->LoadMore);
-
-						return $gridListBlock->renderWith('GridList/GridListItems');
+						return $gridListBlock->renderWith("GridListItems");
 					}
 				}
 			}

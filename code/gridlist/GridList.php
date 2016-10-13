@@ -92,13 +92,13 @@ class GridList extends ContentControllerExtension {
 	 * @return string mode chosen, e.g. 'grid' or 'list'
 	 */
 	protected function mode($fromTemplate = '') {
-		$options = array_filter([
+		$options = [
 			$fromTemplate,
 			$this->service()->mode(),
 			$this()->config()->get('gridlist_mode'),
 			$this->config()->get('default_mode'),
-		]);
-		return current($options);
+		];
+		return trim(current(array_filter($options)));
 	}
 
 	/**
