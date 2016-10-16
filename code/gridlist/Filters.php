@@ -39,7 +39,7 @@ class Filters extends Object {
 		self::PageLengthGetVar,
 	];
 
-	private static $default_mode = '';
+	private static $default_mode = 'grid';
 
 	private static $default_sort = 'a-z';
 
