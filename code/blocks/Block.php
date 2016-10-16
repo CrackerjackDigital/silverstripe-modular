@@ -1,6 +1,7 @@
 <?php
 namespace Modular\Blocks;
 
+use Modular\Interfaces\LinkType;
 use Modular\Model;
 
 /**
@@ -16,15 +17,49 @@ use Modular\Model;
  * 'Download',
  * 'Pull Quote'
  */
-class Block extends Model {
+class Block extends Model implements LinkType {
 	private static $template = '';
 
 	private static $summary_fields = [
 		'BlockType' => 'Block Type'
 	];
 
+	private static $link_type = '';
+
 	public function BlockType() {
 		return $this->i18n_singular_name();
+	}
+
+	/**
+	 * Returns:
+	 *  -   configured config.link_type for this block
+	 *
+	 * or if not configured
+	 *
+	 *  -   terminal part of the class name of this block without namespace and without 'Block' suffix
+	 *
+	 * # VideoBlock => 'Video'
+	 * # Modular\Blocks\CallToAction => 'CallToAction'
+	 *
+	 * @return string
+	 */
+	public function LinkType() {
+		if (!$linkType = $this->config()->get('link_type')) {
+			$linkType = current(array_reverse(explode('\\', static::block_class())));
+			$linkType = (substr($linkType, -5) == 'Block')
+				? substr($linkType, 0, -5)
+				: $linkType;
+		}
+		return $linkType;
+	}
+
+	/**
+	 * Return text to show in a link to this block (or more likely a link this block contains, such as a File via the HasLinks interface).
+	 * @return mixed
+	 */
+	public function LinkText() {
+		$blockClass = get_class($this);
+		return _t("$blockClass.LinkText", 'MORE');
 	}
 
 	/**
