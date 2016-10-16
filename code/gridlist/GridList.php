@@ -33,14 +33,12 @@ class GridList extends ContentControllerExtension {
 	 * @param string $overrideMode one of the self.ModeABC constants, will force gridlist to be in this mode always
 	 * @return \ArrayData
 	 */
-	public function GridList($overrideMode = '') {
+	public function GridList() {
 		static $gridlist;
-		static $cachedMode;
-		if (!$gridlist || ($cachedMode != $overrideMode)) {
-			$cachedMode = $overrideMode;
 
+		if (!$gridlist) {
 			$extraData = [];
-			// get extra data such as for pagination PageLength etc
+			// get extra data such as for pagination PageLength, GridList Mode etc
 			foreach ($this()->extend('provideGridListTemplateData', $extraData) as $extendedData) {
 				$extraData = array_merge(
 					$extraData,
@@ -52,7 +50,7 @@ class GridList extends ContentControllerExtension {
 				? $extraData['PageLength']
 				: $this->config()->get('default_page_length');
 
-			$mode = $this->mode($overrideMode);
+			$mode = $this->mode();
 
 			$items = $this->items($mode);
 
@@ -67,6 +65,7 @@ class GridList extends ContentControllerExtension {
 			// this will be sent back as a header X-Load-More
 			$loadMore = ($totalCount > $paginatedLast) ? 1 : 0;
 
+			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[
 					'Items'         => $paginated,
@@ -91,17 +90,10 @@ class GridList extends ContentControllerExtension {
 	 *  -   extended models config.gridlist_mode (a GridListBlock not a page)
 	 *  -   this config.default_mode
 	 *
-	 * @param string $fromTemplate will override other choices if provided
 	 * @return string mode chosen, e.g. 'grid' or 'list'
 	 */
-	protected function mode($fromTemplate = '') {
-		$options = [
-			$fromTemplate,
-			$this->service()->mode(),
-			$this()->config()->get('gridlist_mode'),
-			$this->config()->get('default_mode'),
-		];
-		return trim(current(array_filter($options)));
+	public function Mode() {
+		return $this->service()->mode();
 	}
 
 	/**

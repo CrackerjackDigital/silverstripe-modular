@@ -36,7 +36,8 @@ class File extends Block implements HasLinks  {
 				new \ArrayData([
 					'Title' => $file->Title,
 				    'Link' => $file->Link(),
-				    'LinkType' => $this->LinkType()
+				    'LinkType' => $this->LinkType(),
+				    'LinkText' => $this->LinkText()
 				])
 			);
 		}

@@ -4,6 +4,7 @@ Name: modular-models-config
 Modular\Blocks\GridList:
   extensions:
     - Modular\GridList\Fields\Mode
+    - Modular\GridList\Layout\ModeForPage
 Modular\Models\GridListFilter:
   extensions:
     - Modular\Fields\Title

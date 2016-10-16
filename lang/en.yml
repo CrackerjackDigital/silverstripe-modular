@@ -71,7 +71,7 @@ en:
   Modular\GridList\Fields\Mode:
     GridListMode:
       Label: 'Display mode'
-      Guide: 'Choose how you would like items to show in the grid'
+      Guide: 'How items will display in the grid, if this cannot be changed then it is configured elsewhere for the page'
 # block types
   Modular\Blocks\Block:
     SINGULARNAME: 'Block'

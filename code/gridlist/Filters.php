@@ -39,7 +39,7 @@ class Filters extends Object {
 		self::PageLengthGetVar,
 	];
 
-	private static $default_mode = 'grid';
+	private static $default_mode = '';
 
 	private static $default_sort = 'a-z';
 
@@ -53,7 +53,20 @@ class Filters extends Object {
 	}
 
 	public function mode() {
-		return $this->getVar(static::ModeGetVar, self::SessionSaveAll) ?: $this->config()->get('default_mode');
+		return current($this->modes());
+	}
+
+	/**
+	 * Return array of mode strings in preference order from query string or configuration.
+	 * @return mixed
+	 */
+	public function modes() {
+		$options = [
+			$this->getVar(static::ModeGetVar, self::SessionSaveAll),
+			\Director::get_current_page()->config()->get('gridlist_default_mode'),
+			$this->config()->get('default_mode'),
+		];
+		return array_filter($options);
 	}
 
 	public function sort() {
