@@ -23,7 +23,8 @@ class Links extends Block implements HasLinks {
 			$links->push(new \ArrayData([
 				'Link' => $link->ResolvedLink(),
 				'Title' => $link->Title,
-				'LinkType' => $link->LinkType
+				'LinkType' => $link->LinkType,
+			    'LinkText' => $this->LinkText() ?: $link->LinkText()
 			]));
 		}
 		return $links;

@@ -94,6 +94,12 @@ class InternalOrExternalLink extends Field {
 		return $link;
 	}
 
+	public function LinkText() {
+		$class = get_class($this());
+		$type = $this->IsInternal() ? 'InternalLinkText' : 'ExternalLinkText';
+		return _t("$class.$type", _t("$class.LinkText", ''));
+	}
+
 	/**
 	 * Usefull for templates to indicate external links
 	 *
