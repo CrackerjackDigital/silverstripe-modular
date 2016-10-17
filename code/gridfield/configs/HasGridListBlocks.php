@@ -2,9 +2,8 @@
 namespace Modular\GridField;
 
 /**
- * Alters the config to be suitable for adding/removing blocks from an article.
+ * Alters the config to be suitable for adding/removing manually managed (curated) blocks on a gridfield.
  *
- * Adds an 'AddNewMultiClass' selector
  */
 class HasGridListBlocksGridFieldConfig extends HasManyManyGridFieldConfig {
 	private static $add_new_multi_class = true;
@@ -12,5 +11,4 @@ class HasGridListBlocksGridFieldConfig extends HasManyManyGridFieldConfig {
 	private static $exclude_related_classes = [
 		'Modular*'
 	];
-
 }

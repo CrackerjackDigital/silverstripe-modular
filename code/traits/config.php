@@ -1,9 +1,13 @@
 <?php
 namespace Modular;
 
+use Modular\Exceptions\Config as Exception;
+
 trait config {
 	public static function config($className = null) {
-		return \Config::inst()->forClass($className ?: get_called_class());
+		return \Config::inst()->forClass(
+			$className ?: get_called_class()
+		);
 	}
 
 	/**
@@ -20,6 +24,30 @@ trait config {
 	}
 
 	/**
+	 * Require a non-null setting.
+	 *
+	 * @param      $name
+	 * @param null $key
+	 * @param null $className
+	 * @param null $sourceOptions
+	 * @throws \Modular\Exceptions\Exception
+	 * @return mixed
+	 */
+	public static function require_config_setting($name, $key = null, $className = null, $sourceOptions = null) {
+		$value = static::get_config_setting($name, $key, $className, $sourceOptions);
+		if (is_null($value)) {
+			throw new Exception("config variable '$name' not set");
+		}
+		if (!is_null($key)) {
+			if (!is_array($value) || !array_key_exists($key, $value)) {
+				throw new Exception("config variable '{$name}[{$key}]' not set or '$name' is not an array");
+			}
+			$value = $value[$key];
+		}
+		return $value;
+	}
+
+	/**
 	 * @param      $name
 	 * @param null $key           if value is an array and key is supplied return this key or null
 	 * @param null $className     class name to get config of or null for get_called_class()
@@ -27,9 +55,11 @@ trait config {
 	 * @return array|null|string
 	 */
 	public static function get_config_setting($name, $key = null, $className = null, $sourceOptions = null) {
-		$value = static::config($className ?: get_called_class())->get($name, $sourceOptions);
+		$className = $className ?: get_called_class();
 
-		if ($key && $value && is_array($value)) {
+		$value = static::config($className)->get($name, $sourceOptions);
+
+		if (!is_null($key) && is_array($value)) {
 			if (array_key_exists($key, $value)) {
 				$value = $value[ $key ];
 			} else {

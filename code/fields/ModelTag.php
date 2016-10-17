@@ -39,6 +39,15 @@ class ModelTag extends Field {
 		parent::__construct();
 	}
 
+	public function fieldDecorationTokens() {
+		return array_merge(
+			parent::fieldDecorationTokens(),
+			[
+				'modelTag' => $this->singleFieldValue()
+			]
+		);
+	}
+
 	/**
 	 * Returns the name of the field on the model used to generate the tag, e.g. the 'Title' field.
 	 *

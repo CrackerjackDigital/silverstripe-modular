@@ -9,5 +9,4 @@ namespace Modular\Blocks;
  * @method \SS_List GridListBlocks
  */
 class GridList extends Block {
-	
 }

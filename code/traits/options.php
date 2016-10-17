@@ -28,5 +28,15 @@ trait options {
 		}
 		return $this->options;
 	}
+
+	public function option($name, $key = null) {
+		$option = array_key_exists($name, $this->options) ? $this->options[ $name ] : null;
+		if (func_num_args() == 2) {
+			if (is_array($option) && array_key_exists($key, $option)) {
+				$option = $option[ $key ];
+			}
+		}
+		return $option;
+	}
 }
 

@@ -182,6 +182,16 @@ abstract class Field extends ModelExtension {
 	}
 
 	/**
+	 * Return the value of the implemented SingleField on the extended model.
+	 * @return mixed
+	 */
+	public function singleFieldValue() {
+		if (static::SingleFieldName) {
+			return $this()->{static::SingleFieldName};
+		}
+	}
+
+	/**
 	 * Return a map of fieldname => value for data relevant to only this extension.
 	 *
 	 * @return array
@@ -243,9 +253,14 @@ abstract class Field extends ModelExtension {
 		$field->setTitle(
 			$this->fieldDecoration($fieldName, "Label", $field->Title(), [], $field)
 		);
+		$guide = $this->fieldDecoration($fieldName, "Guide", '', [], $field);
+
 		$field->setRightTitle(
-			$this->fieldDecoration($fieldName, "Guide", '', [], $field)
+			$guide
 		);
+		if ($field instanceof \CheckboxField) {
+			$field->setDescription($guide);
+		}
 	}
 
 	/**
@@ -306,8 +321,14 @@ abstract class Field extends ModelExtension {
 				$lengthType = null;
 				$length = 0;
 
-				/** @var SS_List|mixed|null $value */
-				if ($this()->hasMethod($fieldName)) {
+				if ($this()->hasField($fieldName . 'ID')) {
+					// get the title before we append ID
+					$lengthType = $field->Title() ?: $fieldName;
+
+					$fieldName = $fieldName . 'ID';
+					$length = $this()->$fieldName ? 1 : 0;
+
+				} elseif ($this()->hasMethod($fieldName)) {
 					if ($value = $this()->$fieldName()) {
 						if ($value instanceof SS_List) {
 							$length = $value->count();
@@ -504,18 +525,19 @@ abstract class Field extends ModelExtension {
 			$this->config()->get(static::ValidationRulesConfigVarName) ?: [],
 			$this()->config()->get(static::ValidationRulesConfigVarName) ?: []
 		);
+		$constraints = $defaults;;
 
-		if (isset($allFieldsConstraints[ $fieldName ])) {
-			if (is_bool($allFieldsConstraints[ $fieldName ])) {
-				// use the boolean as the min length, could be 0 or 1 which is enough
-				$constraints = [(int) $allFieldsConstraints[ $fieldName ], 0, ''] + $defaults;
-
-			} else {
-				// presume it's an array or something else we handle
-				$constraints = $allFieldsConstraints[ $fieldName ];
+		foreach ([$fieldName, $fieldName . 'ID'] as $name) {
+			if (isset($allFieldsConstraints[ $name ])) {
+				if (is_bool($allFieldsConstraints[ $name ])) {
+					// use the boolean as the min length, could be 0 or 1 which is enough
+					$constraints = [(int) $allFieldsConstraints[ $name ], 0, ''] + $defaults;
+				} else {
+					// presume it's an array or something else we handle
+					$constraints = $allFieldsConstraints[ $name ];
+				}
+				break;
 			}
-		} else {
-			$constraints = $defaults;
 		}
 		return $constraints;
 	}
