@@ -3,8 +3,8 @@ namespace Modular;
 
 use DataObject;
 use Quaff\Exceptions\Mapping;
-use Quaff\Mappers\ArrayMapper;
-
+use Quaff\Mappers\AssociativeArray;
+/*
 require_once 'traits/bitfield.php';
 require_once 'traits/cache.php';
 require_once 'traits/config.php';
@@ -18,13 +18,14 @@ require_once 'traits/requirements.php';
 require_once 'traits/tokens.php';
 require_once 'traits/upload.php';
 require_once 'traits/related.php';
-
+*/
 class Object extends \Object {
 	use cache;
 	use lang;
 	use bitfield;
 	use config;
 	use debugging;
+	use reflection;
 
 	/**
 	 * Invoking an Object returns itself.
