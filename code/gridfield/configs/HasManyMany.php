@@ -46,6 +46,7 @@ class HasManyManyGridFieldConfig extends GridFieldConfig {
 		/** @var \GridFieldAddNewMultiClass $component */
 		if ($component = $this->getComponentByType(static::ComponentAddNewMultiClass)) {
 			if ($component instanceof \GridFieldAddNewMultiClass) {
+				asort($classes);
 				$component->setClasses($classes);
 			}
 		}

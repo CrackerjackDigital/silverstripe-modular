@@ -3,6 +3,7 @@ namespace Modular\Blocks;
 
 use Modular\Interfaces\LinkType;
 use Modular\Model;
+use Modular\Relationships\HasBlocks;
 
 /**
  * Class which represents a block which can be added to an Article, of types ( in display order ). The types in the grid dropdown are determined by
@@ -21,13 +22,32 @@ class Block extends Model implements LinkType {
 	private static $template = '';
 
 	private static $summary_fields = [
-		'BlockType' => 'Block Type'
+		'BlockType' => 'Block Type',
+	    'BlockZones' => 'Zone(s)'
 	];
 
 	private static $link_type = '';
 
 	public function BlockType() {
 		return $this->i18n_singular_name();
+	}
+
+	/**
+	 * Return a csv of zones for this block class.
+	 * @return mixed
+	 */
+	public function BlockZones() {
+		$zones = [];
+		$blocksForZone = \Config::inst()->get('Page', 'blocks_for_zone');
+
+		foreach ($blocksForZone as $zone => $zoneBlocks) {
+			foreach ($zoneBlocks as $blockClass) {
+				if ($blockClass == $this->ClassName) {
+					$zones[] = $zone;
+				}
+			}
+		}
+		return implode(', ', $zones);
 	}
 
 	/**
