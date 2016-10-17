@@ -50,10 +50,10 @@ class Debugger extends Object {
 	private static $send_emails_from = self::DefaultSendEmailsFrom;
 
 	// name of log file to create if none supplied to toFile
-	private static $log_file = 'silverstripe.log';
+	private static $log_file = '';
 
 	// path to create log file in relative to base folder
-	private static $log_path = '../logs';
+	private static $log_path = '';
 
 	// set when toFile is called.
 	private $logFilePathName;
@@ -175,7 +175,7 @@ class Debugger extends Object {
 		$source = $source ?: $this->source();
 
 		if ($level = $this->lvl($facilities)) {
-			SS_Log::log("$source: $message" . PHP_EOL, $level);
+			SS_Log::log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
 		}
 		return $this;
 	}
@@ -245,20 +245,17 @@ class Debugger extends Object {
 	 */
 	public function toFile($level, $filePathName = '') {
 		if ($filePathName) {
-			$filePathName = Application::make_safe_path($filePathName, true) . '/' . basename($filePathName);
-
-			if (Application::is_safe_path(dirname($filePathName))) {
-				// ok
-				$this->logFilePathName = $filePathName;
-			} else {
-				$this->logFilePathName = $this->makeLogFileName();
+			if (substr($filePathName, -4) != '.log') {
+				$filePathName .= ".log";
 			}
-
+			if ($path = Application::make_safe_path(dirname($filePathName))) {
+				$this->logFilePathName = Controller::join_links(
+					$path,
+					$this->config()->get('log_path'),
+					basename($filePathName)
+				);
+			};
 		} else {
-			$this->logFilePathName = $this->makeLogFileName();
-		}
-		if (!is_dir(dirname($this->logFilePathName))) {
-			$filePathName = $this->logFilePathName;
 			$this->logFilePathName = $this->makeLogFileName();
 		}
 
@@ -268,7 +265,7 @@ class Debugger extends Object {
 		);
 
 		// log an warning if we got an invalid path above so we know this and can fix
-		if ($filePathName && !Application::is_safe_path(dirname($filePathName))) {
+		if ($filePathName && !Application::make_safe_path(dirname($filePathName))) {
 			$this->warn("Invalid file path outside of web root '$filePathName' using '$this->logFilePathName' instead");
 		}
 		if ($filePathName && !is_dir(dirname($filePathName))) {
@@ -317,19 +314,11 @@ class Debugger extends Object {
 			$path = static::config()->get('log_path');
 			$date = date('Ymd_his');
 
-			$prefix = $this->source
-				? ("{$this->source}-$date-")
-				: ("$date-");
+			$prefix = $this->source ?: "$date-";
 
-			$fileName = basename(tempnam($path, $prefix));
+			$fileName = basename(tempnam($path, "silverstripe-$prefix")) . ".log";
 		}
 		$path = Application::make_safe_path($path, false);
-
-		if (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH) {
-			// we only try and make a logging directory if we are inside the assets folder
-			Filesystem::makeFolder($path);
-		}
-
 		return "$path/$fileName.log";
 	}
 }

@@ -20,8 +20,10 @@ class File extends HasOne {
 
 	private static $tab_name = 'Root.Files';
 
+	// folder directly under '/assets'
 	private static $base_upload_folder = '';
 
+	// this will be appended to 'base_upload_folder'
 	private static $upload_folder = self::DefaultUploadFolderName;
 
 	public function cmsFields() {

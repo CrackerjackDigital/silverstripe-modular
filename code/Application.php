@@ -56,26 +56,58 @@ class Application extends Module {
 	 *      but
 	 *          is_safe_path('/var/sites/website/conf') will return false
 	 *
-	 * by default the assets folder is always a safe path.
+	 * by default configuration the assets folder is always a safe path.
 	 *
-	 * @param string $pathWithoutFileName
+	 * @param string $path (no filename)
 	 * @param bool   $fail throw an exception if test fails
-	 * @return bool
+	 * @param bool   $createIfNotExists create the directory if it doesn't exist (and is in assets folder only).
+	 * @return bool|string path or false if not safe
 	 * @throws \Modular\Exceptions\Application
 	 */
-	public static function is_safe_path($pathWithoutFileName, $fail = false) {
-		if (!$pathWithoutFileName)  {
-			if ($fail) {
-				throw new Exception("No path passed");
-			}
-			return false;
+	public static function make_safe_path($path, $fail = false, $createIfNotExists = true) {
+		if ($fail && !$path) {
+			throw new Exception("Empty path passed");
 		}
-		$baseFolder = rtrim(\Director::baseFolder(), PATH_SEPARATOR);
-		$pathWithoutFileName = rtrim(realpath($pathWithoutFileName), PATH_SEPARATOR);
+		// output this path in errors before realpath etc
+		$originalPath = $path;
+
+		$basePath = rtrim(BASE_PATH, PATH_SEPARATOR);
+		$assetsPath = rtrim(ASSETS_PATH, PATH_SEPARATOR);
+
+		if (false !== strpos($path, '.')) {
+			// any dots treat as relative to base folder, so could go up to '../logs' inside of parent of web root
+			$path = "$basePath/$path";
+
+		} elseif (substr($path, 0, 1) == '/') {
+			// absolute from server root (not web root), but up one so e.g. '../logs' will work
+			// TODO: this is not nice, seems arbitrary, fix
+			$rpath = dirname(realpath($path));
+
+			if (substr($rpath, 0, strlen(dirname($basePath))) != dirname($basePath)) {
+				// we are absolute from assets folder
+				$path = "$assetsPath/$path";
+			}
+		} else {
+			// relative to assets folder
+			$path = "$assetsPath/$path";
+		}
+
+		$safePaths = static::config()->get('safe_paths') ?: [];
+
+		// rebuild path with parent 'realnamed' so we can at least be one path segment out ok (realpath fails if a dir doesn't exist)
+		if ($parentPath = realpath(dirname($path))) {
+			// parent exists so use that with the last bit of the
+			$path = rtrim($parentPath, PATH_SEPARATOR) . '/' . basename($path);
+		} else {
+			// choose the first safe path
+			$path = realpath($basePath . "/" . current($safePaths));
+		}
+
+		$found = false;
 
 		// loop through each candidate path and append to the web root or use if absolute path to test against the passed path
 		// paths are normalised to exclude trailing '/'
-		foreach (static::config()->get('safe_paths') as $candidate) {
+		foreach ($safePaths as $candidate) {
 			$candidate = rtrim($candidate, PATH_SEPARATOR);
 
 			if (realpath($candidate) == $candidate) {
@@ -83,60 +115,25 @@ class Application extends Module {
 				$test = rtrim($candidate, PATH_SEPARATOR);
 			} else {
 				// else treat as relative to base folder try that
-				$test = rtrim(realpath($baseFolder . "/$candidate"), PATH_SEPARATOR);
+				$test = rtrim(realpath($basePath . "/$candidate"), PATH_SEPARATOR);
 			}
 			// e.g. "/var/sites/website/logs"
-			if (substr($pathWithoutFileName, 0, strlen($test)) == $test) {
-				return true;
+			if (substr($path, 0, strlen($test)) == $test) {
+				// it matches one of the registered config.safe_paths so break;
+				$found = true;
+				break;
 			}
 		}
-		if ($fail) {
-			throw new Exception("Not a safe path: '$pathWithoutFileName");
+		$path = rtrim(realpath($path), PATH_SEPARATOR);
+
+		// create if requested and in assets folder
+		if (!is_dir($path) && $createIfNotExists && (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH)) {
+			\Filesystem::makeFolder($path);
 		}
-		return false;
-	}
-
-	/**
-	 * Given a path relative to the assets folder e.g. 'uploads/images'
-	 * or relative to base folder e.g. '../logs'
-	 * or absolute from server root folder e.g. '/var/sites/website/htdocs/assets/logs/'
-	 *
-	 * return an absolute path with no '/' at end which is safe according to config.safe_paths or null if can't do it
-	 * from provided parameters
-	 *
-	 * @param      $path
-	 * @param bool $hasFileName strip filename first before making path
-	 * @return null|string
-	 */
-	public static function make_safe_path($path, $hasFileName = true) {
-		$baseFolder = rtrim(\Director::baseFolder(), PATH_SEPARATOR);
-		$assetsFolder = rtrim(ASSETS_PATH, PATH_SEPARATOR);
-
-		$path = rtrim(($hasFileName ? dirname($path) : $path), PATH_SEPARATOR);
-
-		if (false !== strpos($path, '.')) {
-			// any dots treat as relative to base folder
-			$path = $baseFolder . "/$path";
-		} elseif (substr($path, 0, 1) == '/') {
-			// absolute from server root (but up one, e.g. may be '../logs' equivalent
-			// TODO: this is not nice, seems arbitrary, fix
-			$rpath = dirname(realpath($path));
-
-			if (substr($rpath, 0, strlen(dirname($baseFolder))) == dirname($baseFolder)) {
-				// yes, leave it
-			} else {
-				// no we are absolute from assets folder
-				$path = $assetsFolder . "/$path";
-			}
-		} else {
-			// relative to assets folder
-			$path = $assetsFolder . "/$path";
+		if ($fail && !($found && is_dir($path))) {
+			throw new Exception("Not a safe path or path doesn't exist: '$originalPath");
 		}
-		$path = realpath($path);
-		if (static::is_safe_path($path)) {
-			return $path;
-		}
-		return null;
+		return $found ? $path: false;
 	}
 
 	/**
