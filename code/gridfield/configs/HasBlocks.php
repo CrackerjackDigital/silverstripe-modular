@@ -23,12 +23,13 @@ class HasBlocksGridFieldConfig extends HasManyManyGridFieldConfig {
 		'GridListLinkedPageBlock',
 		'GridListSubscribeBlock',
 		'GridListVideoBlock',
+	    'HeroSlideBlock'                // home page hero slider only on home page.
 	];
 
 	public static function allowed_related_classes() {
 		$out = [];
 		foreach (\ClassInfo::subclassesFor('Modular\Blocks\Block') as $className) {
-			$out[$className] = singleton($className)->i18n_singular_name();
+			$out[ $className ] = singleton($className)->i18n_singular_name();
 		}
 		return $out;
 	}
@@ -36,6 +37,7 @@ class HasBlocksGridFieldConfig extends HasManyManyGridFieldConfig {
 	/**
 	 * For the add blocks dropdown we can optionally prefix the label in the dropdown with the zone from Block.BlockZones.
 	 * If config.prune_unzoned_blocks is true then we also remove blocks which currently do not have a zone.
+	 * Blocks are prefixed with zones from Page blocks_for_zone and ordered in the dropdown as the zones in that array are ordered.
 	 *
 	 * @param array $addExtraClasses
 	 * @return array
@@ -43,25 +45,29 @@ class HasBlocksGridFieldConfig extends HasManyManyGridFieldConfig {
 	public static function limited_related_classes($addExtraClasses = []) {
 		$pruned = [];
 
-		$classes = parent::limited_related_classes($addExtraClasses);
+		$allowedClasses = parent::limited_related_classes($addExtraClasses);
+		asort($allowedClasses);
+
 		if (static::config()->get('prefix_zones')) {
+			$blocksForZone = singleton('Page')->config()->get('blocks_for_zone');
+			foreach ($blocksForZone as $zone => $blockClasses) {
+				asort($blockClasses);
 
-			// reference to $label so we update the label in place incase we are returning all blocks, not just those with zones
-			foreach ($classes as $class => &$label) {
-				if (\ClassInfo::exists($class)) {
+				foreach ($allowedClasses as $class => &$label) {
+					foreach ($blockClasses as $blockClass) {
+						if ($blockClass == $class) {
+							$label = "$zone - $label";
+							$pruned[ $class ] = $label;
 
-					$single = singleton($class);
-					if ($single->hasMethod('BlockZones')) {
-
-						if ($zones = $single->BlockZones()) {
-							$label = "$zones - $label";
-							$pruned[$class] = $label;
+							// we only allow a block to show in one zone at the moment
+							// TODO fix if we want blocks to appear e.g. in Content and SideBar Zones
+							break;
 						}
 					}
 				}
 			}
 		}
-		return static::config()->get('prune_unzoned_blocks') ? $pruned : $classes;
+		return static::config()->get('prune_unzoned_blocks') ? $pruned : $allowedClasses;
 	}
 
 }
