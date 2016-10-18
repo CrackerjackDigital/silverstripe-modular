@@ -5,11 +5,12 @@ use Controller;
 use Filesystem;
 use Modular\Exceptions\Debug;
 use Modular\Exceptions\Exception;
+use Modular\Interfaces\Logger;
 use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
 
-class Debugger extends Object {
+class Debugger extends Object implements Logger {
 	use bitfield;
 	use enabler;
 
@@ -31,21 +32,30 @@ class Debugger extends Object {
 	const DebugScreen = 64;
 	const DebugEmail  = 128;
 
+	const DebugEnvDev  = 103;      // screen | file | trace
+	const DebugEnvTest = 165;      // file | email | notice
+	const DebugEnvLive = 132;      // email | warn
+
+	const LevelFromEnv = null;
+
+	private static $environment_levels = [
+		'dev'  => self::DebugEnvDev,
+		'test' => self::DebugEnvTest,
+		'live' => self::DebugEnvLive,
+	];
+
 	private static $levels = [
-		self::DebugErr    => 'ERROR',
-		self::DebugWarn   => 'WARN',
+		self::DebugErr    => 'ERROR ',
+		self::DebugWarn   => 'WARN  ',
 		self::DebugNotice => 'NOTICE',
-		self::DebugInfo   => 'INFO',
-		self::DebugTrace  => 'TRACE',
+		self::DebugInfo   => 'INFO  ',
+		self::DebugTrace  => 'TRACE ',
 	];
 
 	// TODO implement writing a log file per class as well as global log, may need to move this into trait
 	// as we need to get the class name for the file maybe, though SS_Log already handles backtrace it doesn't
 	// og back far enough
 	const DebugPerClass = 256;
-
-	// debug warning level and debug to file and screen
-	const DefaultDebugLevel = 102;
 
 	private static $send_emails_from = self::DefaultSendEmailsFrom;
 
@@ -67,7 +77,7 @@ class Debugger extends Object {
 	// what level will we trigger at
 	private $level;
 
-	public function __construct($level = self::DefaultDebugLevel, $source = '') {
+	public function __construct($level = self::LevelFromEnv, $source = '') {
 		parent::__construct();
 		$this->init($level, $source);
 	}
@@ -89,14 +99,21 @@ class Debugger extends Object {
 		}
 	}
 
-	public static function debugger($level = self::DefaultDebugLevel, $source = '') {
+	public static function debugger($level = self::LevelFromEnv, $source = '') {
 		$class = get_called_class();
 		return new $class($level, $source);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function level($level = null) {
 		if (func_num_args()) {
-			$this->level = $level;
+			if ($level === self::LevelFromEnv) {
+				$this->env();
+			} else {
+				$this->level = $level;
+			}
 			return $this;
 		} else {
 			return $this->level;
@@ -110,6 +127,17 @@ class Debugger extends Object {
 		} else {
 			return $this->source;
 		}
+	}
+
+	/**
+	 * Set level from config.environment_levels for passed type
+	 * @param string $env 'dev', 'test', 'live'
+	 * @return $this
+	 * @fluent
+	 */
+	public function env($env = SS_ENVIRONMENT_TYPE) {
+		$this->level = $this->config()->get('environment_levels')[ $env ];
+		return $this;
 	}
 
 	/**
@@ -171,8 +199,12 @@ class Debugger extends Object {
 		return $level <= $compareToLevel ? $level : false;
 	}
 
+	/**
+	 * @inheritdoc
+	 *
+	 */
 	public function log($message, $facilities, $source = '') {
-		$source = $source ?: $this->source();
+		$source = $source ?: ($this->source() ?: get_called_class());
 
 		if ($level = $this->lvl($facilities)) {
 			SS_Log::log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
