@@ -7,6 +7,7 @@ use Modular\Fields\ExternalLink;
 use ClassInfo;
 use DropdownField;
 use FormField;
+use Modular\Interfaces\LinkType;
 
 /**
  * Binds InternalLink and ExternalLink fields with a LinkType field and attaches associated behaviours (display logic etc).
@@ -71,6 +72,7 @@ class InternalOrExternalLink extends Field {
 			}
 		}
 	}
+
 	/**
 	 * Returns text of link, either as entered for External or generated from Internal. If Internal an target page
 	 * isn't found then returns LinkAttributeExtension.InternalLink.MissingTarget message e.g. '[linked page not found]' type message
@@ -90,6 +92,12 @@ class InternalOrExternalLink extends Field {
 			$link = $this()->InternalLink()->Link();
 		}
 		return $link;
+	}
+
+	public function LinkText() {
+		$class = get_class($this());
+		$type = $this->IsInternal() ? 'InternalLinkText' : 'ExternalLinkText';
+		return _t("$class.$type", _t("$class.LinkText", ''));
 	}
 
 	/**

@@ -22,4 +22,5 @@ class InternalOrExternalLink extends \Modular\Model {
 		$fields->replaceField(self::SortFieldName, new \HiddenField(self::SortFieldName));
 		return $fields;
 	}
+
 }

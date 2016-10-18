@@ -18,15 +18,27 @@ class GridList extends ContentControllerExtension {
 	use owned;
 	use config;
 
+	const ModeGrid = 'grid';
+	const ModeList = 'list';
+
 	const PaginatorServiceName = 'GridListPaginator';
 	const DefaultPageLength    = 12;
 
-	private static $gridlist_page_length = self::DefaultPageLength;
+	private static $default_page_length = self::DefaultPageLength;
 
+	private static $default_mode = self::ModeGrid;
+
+	/**
+	 * Return data for templates, accessible via e.g. GridList.Items and GridList.Mode
+	 * @param string $overrideMode one of the self.ModeABC constants, will force gridlist to be in this mode always
+	 * @return \ArrayData
+	 */
 	public function GridList() {
 		static $gridlist;
+
 		if (!$gridlist) {
 			$extraData = [];
+			// get extra data such as for pagination PageLength, GridList Mode etc
 			foreach ($this()->extend('provideGridListTemplateData', $extraData) as $extendedData) {
 				$extraData = array_merge(
 					$extraData,
@@ -36,26 +48,33 @@ class GridList extends ContentControllerExtension {
 			$firstItem = $this->service()->firstItem();
 			$pageLength = isset($extraData['PageLength'])
 				? $extraData['PageLength']
-				: $this->config()->get('gridlist_page_length');
+				: $this->config()->get('default_page_length');
 
-			$items = $this->items();
+			$mode = $this->mode();
+
+			$items = $this->items($mode);
+
 			$totalCount = $items->count();
+
+			$this()->extend('groupGridListItems', $items, $mode);
 
 			$paginated = $this->paginator($items, $firstItem, $pageLength);
 
 			$paginatedLast = $firstItem + $pageLength;
 
+			// this will be sent back as a header X-Load-More
 			$loadMore = ($totalCount > $paginatedLast) ? 1 : 0;
 
+			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[
 					'Items'         => $paginated,
 					'TotalItems'    => $totalCount,
-					'Filters'       => $this->filters(),
-					'Mode'          => $this->service()->mode(),
+					'Filters'       => $this->filters($mode),
+					'Mode'          => $mode,
 					'Sort'          => $this->service()->sort(),
 					'DefaultFilter' => $this->service()->defaultFilter(),
-					'LoadMore'      => $loadMore
+					'LoadMore'      => $loadMore,
 				],
 				$extraData
 			);
@@ -65,9 +84,31 @@ class GridList extends ContentControllerExtension {
 	}
 
 	/**
+	 * Returns first mode from:
+	 *  -   template parameter
+	 *  -   url query string via service
+	 *  -   extended models config.gridlist_mode (a GridListBlock not a page)
+	 *  -   this config.default_mode
+	 *
+	 * @return string mode chosen, e.g. 'grid' or 'list'
+	 */
+	public function Mode() {
+		return $this->service()->mode();
+	}
+
+	/**
+	 * Return instance of service that this gridlist is using
+	 *
+	 * @return \GridListService
+	 */
+	public static function service() {
+		return \Injector::inst()->get('GridListService');
+	}
+
+	/**
 	 * @return \ArrayList
 	 */
-	protected function items() {
+	protected function items($mode) {
 		static $items;
 		if (!$items) {
 			$items = new \ArrayList();
@@ -92,7 +133,7 @@ class GridList extends ContentControllerExtension {
 
 			$this()->extend('constrainGridListItems', $items);
 
-			$this()->extend('sequenceGridListItems', $items);
+			$this()->extend('sequenceGridListItems', $items, $mode);
 		}
 		return $items;
 	}
@@ -103,7 +144,7 @@ class GridList extends ContentControllerExtension {
 	 *
 	 * @return \ArrayList
 	 */
-	protected function filters() {
+	protected function filters($mode) {
 		static $filters;
 		if (!$filters) {
 			$filters = new \ArrayList();
@@ -116,7 +157,7 @@ class GridList extends ContentControllerExtension {
 			}
 			$filters->removeDuplicates();
 
-			$items = $this->items();
+			$items = $this->items($mode);
 
 			$this()->extend('constrainGridListFilters', $items, $filters);
 		}
@@ -143,13 +184,6 @@ class GridList extends ContentControllerExtension {
 		$paginated->setPageStart($firstItem);
 		$paginated->setPageLength($pageLength);
 		return $paginated;
-	}
-
-	/**
-	 * @return \GridListService
-	 */
-	protected function service() {
-		return singleton('GridListService');
 	}
 
 }
