@@ -2,7 +2,6 @@
 namespace Modular;
 
 use Director;
-use Requirements;
 use Modular\Exceptions\Exception;
 
 abstract class Module extends Object {
@@ -269,9 +268,9 @@ abstract class Module extends Object {
 			$required = array_merge(
 				$scriptTypes,
 				[
-					self::FileTypeCSS                => Requirements::backend()->get_css(),
-					self::FileTypeJavascript         => Requirements::backend()->get_javascript(),
-					self::FileTypeJavascriptTemplate => Requirements::backend()->get_custom_scripts(),
+					self::FileTypeCSS                => \Requirements::backend()->get_css(),
+					self::FileTypeJavascript         => \Requirements::backend()->get_javascript(),
+					self::FileTypeJavascriptTemplate => \Requirements::backend()->get_custom_scripts(),
 				]
 			);
 
@@ -286,7 +285,7 @@ abstract class Module extends Object {
 
 							$blocked[ $fileType ][] = $require;
 
-							Requirements::block(
+							\Requirements::block(
 								$required
 							);
 						}
@@ -368,7 +367,7 @@ abstract class Module extends Object {
 	 * @param $path
 	 */
 	protected static function css($controller, $path) {
-		Requirements::css($path);
+		\Requirements::css($path);
 	}
 
 	/**
@@ -378,7 +377,7 @@ abstract class Module extends Object {
 	 * @param $path
 	 */
 	protected static function js($controller, $path) {
-		Requirements::javascript($path);
+		\Requirements::javascript($path);
 	}
 
 	/**
@@ -391,7 +390,7 @@ abstract class Module extends Object {
 	 * @param null $info
 	 */
 	protected static function jst($controller, $path, $info = null) {
-		Requirements::javascriptTemplate(
+		\Requirements::javascriptTemplate(
 			$path,
 			self::requirements_template_data(
 				$controller,
@@ -427,7 +426,7 @@ abstract class Module extends Object {
 						);
 					}
 					if (!empty($requirements[ $fileType ])) {
-						Requirements::combine_files(
+						\Requirements::combine_files(
 							"{$moduleName}.$fileType",
 							$requirements[ $fileType ]
 						);
