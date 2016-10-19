@@ -17,5 +17,8 @@ if (isset($_REQUEST['flush'])) {
 				}
 			}
 		});
+		foreach (glob(__DIR__ . '/../*/autoloader.php') as $filePathName) {
+			require_once($filePathName);
+		}
 	}
 }
