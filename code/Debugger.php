@@ -218,10 +218,6 @@ class Debugger extends Object implements Logger {
 	}
 
 	public function trace($message, $source = '') {
-		if ($this->lvl(self::DebugTrace)) {
-			echo $message . (\Director::is_cli() ? '' : "<br/>") . PHP_EOL;
-			ob_flush();
-		}
 		$this->log($message, self::DebugTrace, $source);
 		return $this;
 	}
@@ -276,19 +272,26 @@ class Debugger extends Object implements Logger {
 	 * @return $this
 	 */
 	public function toFile($level, $filePathName = '') {
+		$originalFilePathName = $filePathName;
+
 		if ($filePathName) {
 			if (substr($filePathName, -4) != '.log') {
 				$filePathName .= ".log";
 			}
-			if ($path = Application::make_safe_path(dirname($filePathName))) {
-				$this->logFilePathName = Controller::join_links(
-					$path,
-					$this->config()->get('log_path'),
-					basename($filePathName)
-				);
-			};
 		} else {
-			$this->logFilePathName = $this->makeLogFileName();
+			$filePathName = $this->config()->get('log_file') ?: Application::log_file();
+		}
+		if (trim(dirname($filePathName), '.') == '') {
+			$filePathName = ($this->config()->get('log_path') ?: Application::log_path()) . '/' . $filePathName;
+		}
+		if ($path = Application::make_safe_path(dirname($filePathName))) {
+			$this->logFilePathName = Controller::join_links(
+				$path,
+				basename($filePathName)
+			);
+		};
+		if (!$this->logFilePathName) {
+			$this->logFilePathName = Application::log_path() . '/' . Application::log_file();
 		}
 
 		SS_Log::add_writer(
@@ -297,10 +300,10 @@ class Debugger extends Object implements Logger {
 		);
 
 		// log an warning if we got an invalid path above so we know this and can fix
-		if ($filePathName && !Application::make_safe_path(dirname($filePathName))) {
+		if ($filePathName && !Application::make_safe_path(dirname($originalFilePathName))) {
 			$this->warn("Invalid file path outside of web root '$filePathName' using '$this->logFilePathName' instead");
 		}
-		if ($filePathName && !is_dir(dirname($filePathName))) {
+		if ($filePathName && !is_dir(dirname($originalFilePathName))) {
 			$this->warn("Path for '$filePathName' does not exist, using '$this->logFilePathName' instead");
 		}
 		return $this;
@@ -310,7 +313,10 @@ class Debugger extends Object implements Logger {
 	 * @param $level
 	 * @return $this
 	 */
-	public function toScreen($level) {
+	public function toScreen($level = self::LevelFromEnv) {
+		if (is_null($level) || $level === self::LevelFromEnv) {
+			$level = $this->config()->get('environment_levels')[ SS_ENVIRONMENT_TYPE ];
+		}
 		SS_Log::add_writer(new \LogOutputWriter($level));
 		return $this;
 	}

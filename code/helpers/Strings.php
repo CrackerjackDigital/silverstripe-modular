@@ -32,15 +32,25 @@ class Strings extends Object {
 	}
 
 	/**
-	 * Returns provided camel-case string as converted to spaced 'proper case' preserving acronyms.
+	 * Given a CamelCASEString returns a 'Proper CASE String' preserving acronyms
 	 *
-	 * @param        $in
-	 * @param string $join
+	 * @param string $in
+	 * @param string $join the output string with this, set to '' to get a CamelCASEString again.
 	 * @return string
 	 */
 	public static function decamel($in, $join = ' ') {
-		$parts = preg_split("/((?<=[a-z])(?=[A-Z])|(?=[A-Z][a-z]))/", $in);
-		return implode($join, $parts);
+		return implode($join, preg_split("/((?<=[a-z])(?=[A-Z])|(?=[A-Z][a-z]))/", $in));
+	}
+
+	/**
+	 * Given a snake-case-string returns a 'Proper Case String'
+	 *
+	 * @param string $in
+	 * @param string $join the output string parts with this, set to '' for a CamelCaseString
+	 * @return string
+	 */
+	public static function desnake($in, $join = ' ') {
+		return implode($join, array_map('ucfirst', explode(' ', str_replace(['_', '-'], ' ', $in))));
 	}
 
 	/**

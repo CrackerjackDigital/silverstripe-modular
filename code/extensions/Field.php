@@ -37,6 +37,8 @@ abstract class Field extends ModelExtension {
 	const SingleFieldName   = '';
 	const SingleFieldSchema = '';
 
+	const RelationshipName = '';
+
 	const DefaultUploadFolderName = 'incoming';
 
 	const ValidationRulesConfigVarName = 'validation';
@@ -69,7 +71,7 @@ abstract class Field extends ModelExtension {
 		$fields = [];
 
 		if (static::SingleFieldName && static::SingleFieldSchema) {
-			if ($dbField = $this->owner->dbObject(static::SingleFieldName)) {
+			if ($dbField = $this()->dbObject(static::SingleFieldName)) {
 				if ($formField = $dbField->scaffoldFormField()) {
 					$fields[ static::SingleFieldName ] = $formField;
 				}
@@ -162,6 +164,7 @@ abstract class Field extends ModelExtension {
 
 	/**
 	 * Return the value of the implemented SingleField on the extended model.
+	 *
 	 * @return mixed
 	 */
 	public function singleFieldValue() {
@@ -213,12 +216,17 @@ abstract class Field extends ModelExtension {
 	}
 
 	/**
-	 * A dummy helper so we can try to get field decorations from a relationship instead of just a field name.
+	 * Returns the RelationshipName for this field if set, optionally appended with the fieldName as for a relationship.
 	 *
+	 * @param string $fieldName if supplied will be added on to RelationshipName with a '.' prefix
 	 * @return string
 	 */
-	public static function relationship_name() {
-		return '';
+	public static function relationship_name($fieldName = '') {
+		return static::RelationshipName ? (static::RelationshipName . ($fieldName ? ".$fieldName" : '')) : '';
+	}
+
+	public static function field_name($suffix = '') {
+		return static::SingleFieldName  ? (static::SingleFieldName . $suffix) : '';
 	}
 
 	/**

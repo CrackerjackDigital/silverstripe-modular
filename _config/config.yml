@@ -9,4 +9,5 @@ ContentController:
     - Modular\ContentControllerExtension
 Injector:
   Application: Modular\Application
+  Debugger: Modular\Debugger
 

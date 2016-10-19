@@ -17,7 +17,8 @@ trait debugging {
 				$debugger->level($level);
 			}
 		} else {
-			$debugger = \Injector::inst()->get('Modular\Debugger', $level);
+			// 'Debugger' is a service name set on Injector
+			$debugger = \Injector::inst()->get('Debugger', $level);
 		}
 		return $debugger;
 	}
