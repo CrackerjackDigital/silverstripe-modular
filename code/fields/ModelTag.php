@@ -49,6 +49,19 @@ class ModelTag extends Field {
 	}
 
 	/**
+	 * Encode a value as it would be for a ModelTag (basically a URLSegment)
+	 * @param $value
+	 * @return String
+	 */
+	public static function encode($value) {
+		static $urlSegmentFilter;
+		if (!$urlSegmentFilter) {
+			$urlSegmentFilter = new \URLSegmentFilter();
+		}
+		return $urlSegmentFilter->filter($value);
+	}
+
+	/**
 	 * Returns the name of the field on the model used to generate the tag, e.g. the 'Title' field.
 	 *
 	 * @return string
@@ -139,11 +152,9 @@ class ModelTag extends Field {
 	 * @return string
 	 */
 	public function generateValue($increment = null) {
-		$filter = new URLSegmentFilter();
-
 		$sourceValue = $this()->{$this->sourceFieldName};
 
-		$urlSegment = $filter->filter($sourceValue);
+		$urlSegment = static::encode($sourceValue);
 
 		if (is_int($increment)) {
 			$urlSegment .= '-' . $increment;
