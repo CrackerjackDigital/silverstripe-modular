@@ -10,4 +10,6 @@ ContentController:
 Injector:
   Application: Modular\Application
   Debugger: Modular\Debugger
+  GridListService:
+    class: Modular\GridList\Service
 

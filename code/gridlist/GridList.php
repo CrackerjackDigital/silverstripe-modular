@@ -1,8 +1,10 @@
 <?php
 namespace Modular\GridList;
 
+use Modular\Application;
 use Modular\config;
 use Modular\ContentControllerExtension;
+use Modular\Controller;
 use Modular\Fields\ModelTag;
 use Modular\Model;
 use Modular\Models\GridListFilter;
@@ -24,6 +26,8 @@ class GridList extends ContentControllerExtension {
 	const PaginatorServiceName = 'GridListPaginator';
 	const DefaultPageLength    = 12;
 
+	private static $gridlist_service = 'GridListService';
+
 	private static $default_page_length = self::DefaultPageLength;
 
 	private static $default_mode = self::ModeGrid;
@@ -38,14 +42,18 @@ class GridList extends ContentControllerExtension {
 
 		if (!$gridlist) {
 			$extraData = [];
+
+			$provider = $this->provider();
+
 			// get extra data such as for pagination PageLength, GridList Mode etc
-			foreach ($this()->extend('provideGridListTemplateData', $extraData) as $extendedData) {
+			foreach ($provider->extend('provideGridListTemplateData', $extraData) as $extendedData) {
 				$extraData = array_merge(
 					$extraData,
 					$extendedData
 				);
 			}
-			$firstItem = $this->service()->firstItem();
+			$firstItem = $this->service()->Filters()->start();
+
 			$pageLength = isset($extraData['PageLength'])
 				? $extraData['PageLength']
 				: $this->config()->get('default_page_length');
@@ -56,7 +64,7 @@ class GridList extends ContentControllerExtension {
 
 			$totalCount = $items->count();
 
-			$this()->extend('groupGridListItems', $items, $mode);
+			$provider->extend('groupGridListItems', $items, $mode);
 
 			$paginated = $this->paginator($items, $firstItem, $pageLength);
 
@@ -73,7 +81,7 @@ class GridList extends ContentControllerExtension {
 					'Filters'       => $this->filters($mode),
 					'Mode'          => $mode,
 					'Sort'          => $this->service()->sort(),
-					'DefaultFilter' => $this->service()->defaultFilter(),
+					'DefaultFilter' => $this->service()->Filters()->defaultFilter(),
 					'LoadMore'      => $loadMore,
 				],
 				$extraData
@@ -81,6 +89,28 @@ class GridList extends ContentControllerExtension {
 			$gridlist = new \ArrayData($data);
 		}
 		return $gridlist;
+	}
+
+	/**
+	 * Return the model (e.g. Page or GridListBlock) who provides items, filters etc. This is keyed
+	 * off the current page config.gridlist_provider or otherwise the owner of this
+	 * extension.
+	 *
+	 * @return \DataObject|\SiteTree
+	 */
+	protected function provider() {
+		$provider = $this();
+
+		$page = null;
+
+		$page = Application::get_current_page();
+
+		if ($page) {
+			if ($page->config()->get('gridlist_provider')) {
+				$provider = $page;
+			}
+		}
+		return $provider;
 	}
 
 	/**
@@ -99,10 +129,18 @@ class GridList extends ContentControllerExtension {
 	/**
 	 * Return instance of service that this gridlist is using
 	 *
-	 * @return \GridListService
+	 * @return Service
 	 */
 	public static function service() {
-		return \Injector::inst()->get('GridListService');
+		/** @var \Page $page */
+		$service = '';
+
+		if ($page = Application::get_current_page()) {
+			$service = $page->config()->get('gridlist_service');
+		}
+		$service = $service ?: static::config()->get('gridlist_service');
+
+		return \Injector::inst()->get($service);
 	}
 
 	/**
@@ -111,13 +149,16 @@ class GridList extends ContentControllerExtension {
 	protected function items($mode) {
 		static $items;
 		if (!$items) {
-			$items = new \ArrayList();
+			$provider = $this->provider();
 
-			$currentFilterID = $this->service()->currentFilterID();
+			$items = new \ArrayList();
+			$service = $this->service();
+
+			$currentFilterID = $service->Filters()->currentFilterID();
 
 			// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
 			// this will return an array of SS_Lists
-			$lists = $this()->extend('provideGridListItems');
+			$lists = $provider->extend('provideGridListItems');
 			/** @var \ManyManyList $list */
 			foreach ($lists as $itemList) {
 				// filter to current filter if set
@@ -131,9 +172,9 @@ class GridList extends ContentControllerExtension {
 
 			$items->removeDuplicates();
 
-			$this()->extend('constrainGridListItems', $items);
+			$provider->extend('constrainGridListItems', $items);
 
-			$this()->extend('sequenceGridListItems', $items, $mode);
+			$provider->extend('sequenceGridListItems', $items, $mode);
 		}
 		return $items;
 	}
@@ -147,11 +188,14 @@ class GridList extends ContentControllerExtension {
 	protected function filters($mode) {
 		static $filters;
 		if (!$filters) {
+			$provider = $this->provider();
+
 			$filters = new \ArrayList();
 
 			// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
 			// this will return an array of SS_Lists
-			$lists = $this()->extend('provideGridListFilters');
+			$lists = $provider->extend('provideGridListFilters');
+
 			foreach ($lists as $list) {
 				$filters->merge($list);
 			}
@@ -159,7 +203,7 @@ class GridList extends ContentControllerExtension {
 
 			$items = $this->items($mode);
 
-			$this()->extend('constrainGridListFilters', $items, $filters);
+			$provider->extend('constrainGridListFilters', $items, $filters);
 		}
 		return $filters;
 	}

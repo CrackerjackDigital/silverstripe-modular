@@ -1,43 +1,56 @@
 <?php
 namespace Modular\GridList;
 
+use Modular\Application;
+use Modular\Exceptions\Exception;
 use Modular\Object;
-use Modular\Exception;
+use Modular\Fields\ModelTag;
+use Modular\Models\GridListFilter;
 
 /**
  * Filters limit what models are displayed on page depending on user selection, they can further restrict models after Constraints are applied.
  *
  * @package Modular\GridList
  */
-class Filters extends Object {
+class Constraints extends Object {
 	const ModeGetVar       = 'mode';
 	const SortGetVar       = 'sort';
 	const StartIndexGetVar = 'start';
 	const PageLengthGetVar = 'limit';
-	// this could be hardwired instead of using generated value
+	const FilterVar        = 'filter';
+
+	// differentiate the constraint persistance sessions vars somehow if required.
 	const SessionKeyPrefix = '';
-	// session key is broken into tokens, mainly for debugging
+	// session key is built with segments, mainly for debugging, seperate them as a string with this
 	const SessionPathSeparator = ':';
+
+	// the following constants govern how the current filters etc are saved across
+	// multiple accesses to search.
 	// don't save any incoming values to session at all
-	const SessionNone = 0;
+	const PersistNever = 0;
 	// save for all pages
-	const SessionSaveGlobal = 1;
+	const PersistEverywhere = 1;
 	// save into session including url
-	const SessionSaveURLParams = 2;
+	const PersisForURLParams = 2;
 	// save into session including query string get vars
-	const SessionSaveGetVars = 4;
+	const PersistForGetVars = 4;
 	// save both url and query string
-	const SessionSaveAll = 7;
+	const PersistExact = 7;
 
-	/** @var \NullHTTPRequest|\SS_HTTPRequest */
-	protected $request;
+	// just don't persist by default
+	const DefaultPersistance = self::PersistNever;
 
+	/** @var array of parameters this filter deals with, add more in derived classes to handle them */
 	private static $params = [
 		self::ModeGetVar,
 		self::SortGetVar,
 		self::StartIndexGetVar,
 		self::PageLengthGetVar,
+		self::FilterVar
 	];
+
+	/** @var \NullHTTPRequest|\SS_HTTPRequest */
+	protected $request;
 
 	private static $default_mode = 'grid';
 
@@ -48,7 +61,47 @@ class Filters extends Object {
 		$this->request = \Controller::curr()->getRequest();
 	}
 
-	public function constraint($name, $sessionPersistance = self::SessionSaveAll) {
+	public function constraint($name, $sessionPersistence = null) {
+		$sessionPersistence = is_null($sessionPersistence) ? static::DefaultPersistance : $sessionPersistence;
+		return $this->getVarOrParam($name, $sessionPersistence);
+	}
+
+	/**
+	 * Default filter is just a field = value
+	 *
+	 * @param $className
+	 * @param $term
+	 * @param $field
+	 * @return array
+	 */
+	public function filter($className, $term, $field) {
+		return [
+			"$className.$field" => $term,
+		];
+	}
+
+	/**
+	 * Return the ID of the current filter.
+	 *
+	 * @return int|null
+	 */
+	public function currentFilterID() {
+		if ($filterTag = $this->constraint(static::FilterVar)) {
+			if ($filter = GridListFilter::get()->filter(ModelTag::SingleFieldName, $filterTag)->first()) {
+				return $filter->ID;
+			}
+		}
+	}
+
+	public function defaultFilter() {
+		if ($page = Application::get_current_page()) {
+			if ($page->hasMethod('DefaultFilter')) {
+				return $page->DefaultFilter();
+			}
+		}
+	}
+
+	public function getVarOrParam($name, $sessionPersistance = self::PersistExact) {
 		return $this->getVar($name, $sessionPersistance) ?: $this->urlParam($name, $sessionPersistance);
 	}
 
@@ -58,11 +111,12 @@ class Filters extends Object {
 
 	/**
 	 * Return array of mode strings in preference order from query string or configuration.
+	 *
 	 * @return mixed
 	 */
 	public function modes() {
 		$options = [
-			$this->getVar(static::ModeGetVar, self::SessionSaveAll),
+			$this->getVar(static::ModeGetVar, self::PersistExact),
 			\Director::get_current_page()->config()->get('gridlist_default_mode'),
 			$this->config()->get('default_mode'),
 		];
@@ -70,7 +124,7 @@ class Filters extends Object {
 	}
 
 	public function sort() {
-		return $this->getVar(static::SortGetVar, self::SessionSaveAll) ?: $this->config()->get('default_sort');
+		return $this->getVar(static::SortGetVar, self::PersistExact) ?: $this->config()->get('default_sort');
 	}
 
 	/**
@@ -79,7 +133,7 @@ class Filters extends Object {
 	 * @return int|null
 	 */
 	public function start() {
-		return $this->getVar(self::StartIndexGetVar, self::SessionSaveAll);
+		return $this->getVar(self::StartIndexGetVar, self::PersistExact);
 	}
 
 	/**
@@ -88,7 +142,7 @@ class Filters extends Object {
 	 * @return int|null
 	 */
 	public function limit() {
-		return $this->getVar(self::PageLengthGetVar, self::SessionSaveAll);
+		return $this->getVar(self::PageLengthGetVar, self::PersistExact);
 	}
 
 	/**
@@ -140,7 +194,7 @@ class Filters extends Object {
 	 * @param bool        $includeGetVars
 	 * @return string
 	 */
-	protected function key($key, $url = null, $includeGetVars = false) {
+	protected function persistKey($key, $url = null, $includeGetVars = false) {
 		$url = is_null($url)
 			? $this->url()
 			: $url;
@@ -148,10 +202,10 @@ class Filters extends Object {
 		if ($includeGetVars) {
 			$url .= '?' . http_build_query($this->getVars());
 		}
-		return static::session_key_prefix() . $key . static::SessionPathSeparator . md5(strtolower($url));
+		return static::persist_key_prefix() . $key . static::SessionPathSeparator . md5(strtolower($url));
 	}
 
-	public function session_key_prefix() {
+	public static function persist_key_prefix() {
 		return strtoupper(static::SessionKeyPrefix ?: basename(get_called_class())) . static::SessionPathSeparator;
 	}
 
@@ -303,17 +357,17 @@ class Filters extends Object {
 
 			if ($sessionPersistance) {
 
-				if (self::SessionSaveAll === ($sessionPersistance & self::SessionSaveAll)) {
+				if (self::PersistExact === ($sessionPersistance & self::PersistExact)) {
 					// key is for urlParams and getVars (so page and query string)
-					$key = $this->key($name, $this->url(), true);
+					$key = $this->persistKey($name, $this->url(), true);
 
-				} elseif (self::SessionSaveURLParams === ($sessionPersistance & self::SessionSaveURLParams)) {
+				} elseif (self::PersisForURLParams === ($sessionPersistance & self::PersisForURLParams)) {
 					// key is for urlParams only, not getVars (so page path only)
-					$key = $this->key($name, $this->url(), false);
+					$key = $this->persistKey($name, $this->url(), false);
 
-				} elseif (self::SessionSaveGetVars === ($sessionPersistance & self::SessionSaveGetVars)) {
+				} elseif (self::PersistForGetVars === ($sessionPersistance & self::PersistForGetVars)) {
 					// key is for getVars only, not urlParams (so query string only)
-					$key = $this->key($name, '', true);
+					$key = $this->persistKey($name, '', true);
 
 				} else {
 					throw new Exception("Unknown persistance mode: $sessionPersistance");
