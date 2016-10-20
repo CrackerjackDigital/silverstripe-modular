@@ -4,6 +4,9 @@ namespace Modular;
 trait reflection {
 	/**
 	 * Return an map of subclasses of the called class.
+	 *
+	 * TODO: implement 'depthFirst' flag to get the 'leaf' classes of heirarchy first
+	 *
 	 * @param bool $excludeThisClass if true then don't include the called class in the list
 	 * @return array with [ 'namespaced class name' => 'no-namespaced class name' ] for each subclass
 	 */

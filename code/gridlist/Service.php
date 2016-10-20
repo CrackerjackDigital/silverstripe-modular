@@ -8,6 +8,11 @@ use Modular\Object;
 class Service extends Object {
 	const FiltersClassName = 'Modular\GridList\Filters';
 
+
+	public function constraint($name, $persistance = Filters::SessionSaveGlobal) {
+		return $this->Filters()->constraint($name, $persistance);
+	}
+
 	public function mode() {
 		return $this->Filters()->mode();
 	}
@@ -16,9 +21,10 @@ class Service extends Object {
 	}
 
 	/**
+	 * Allow calls statically through to Filters as it's easier then
 	 * @return Filters
 	 */
-	protected function Filters() {
+	public static function Filters() {
 		return \Injector::inst()->get(static::FiltersClassName);
 	}
 }

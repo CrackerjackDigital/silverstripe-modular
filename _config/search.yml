@@ -1,0 +1,33 @@
+---
+Name: modular-search-config
+---
+Injector:
+  SearchService: Modular\Search\Service
+
+# copy to app config and add classes which are to searchable (as with extension below)
+# Modular\Search\ItemsProvider:
+#  search_classes:
+#    - SiteTree
+#    - File
+
+# to enable searching on SiteTree copy to app config:
+# SiteTree:
+#  extensions:
+#    - Modular\Search\SiteTreeExtension
+
+# to enable searching on File (Title field) copy to app config:
+# File:
+#  extensions:
+#    - Modular\Search\FileExtension
+
+# to enable search results in a grid on a page on your site, then include GridList on that page
+# SearchPage:
+#  extensions:
+#    - Modular\Search\GridList
+#    - Modular\Search\ItemsProvider
+
+# to enable searching a block (and have results link to the found blocks pages)
+# ContentBlock:
+#  extensions:
+#    - Modular\Search\BlockExtension
+

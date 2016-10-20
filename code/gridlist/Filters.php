@@ -32,6 +32,7 @@ class Filters extends Object {
 	/** @var \NullHTTPRequest|\SS_HTTPRequest */
 	protected $request;
 
+	/** @var array of parameters this filter deals with */
 	private static $params = [
 		self::ModeGetVar,
 		self::SortGetVar,
@@ -49,6 +50,10 @@ class Filters extends Object {
 	}
 
 	public function constraint($name, $sessionPersistance = self::SessionSaveAll) {
+		return $this->getVarOrParam($name, $sessionPersistance);
+	}
+
+	public function getVarOrParam($name, $sessionPersistance = self::SessionSaveAll) {
 		return $this->getVar($name, $sessionPersistance) ?: $this->urlParam($name, $sessionPersistance);
 	}
 

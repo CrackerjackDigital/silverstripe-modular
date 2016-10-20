@@ -17,4 +17,17 @@ trait owned {
 	public function owner() {
 		return $this->owner;
 	}
+
+	/**
+	 * Return the current page (being viewed in the frontend or from CMSMain in the CMS)
+	 * @return \DataObject|\SiteTree
+	 */
+	public function currentPage() {
+		if ($page = \Director::get_current_page()) {
+			if ($page instanceof \CMSMain) {
+				$page = $page->currentPage();
+			}
+		}
+		return $page;
+	}
 }

@@ -16,11 +16,16 @@ class ModeForPage extends ModelExtension implements GridListTempleDataProvider {
 	 */
 	public function provideGridListTemplateData($existingData = []) {
 		$page = \Director::get_current_page();
+		$mode = '';
+
 		if ($page instanceof \LeftAndMain) {
 			// if we're in CMS then get the CMS current editing page
 			$page = $page->currentPage();
 		}
-		$mode = $page->config()->get('gridlist_default_mode') ?: '';
+		// page may be null if it's a new page
+		if ($page) {
+			$mode = $page->config()->get('gridlist_default_mode') ?: '';
+		}
 		return [
 			'Mode' => $mode
 	    ];
