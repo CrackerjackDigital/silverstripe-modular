@@ -61,6 +61,7 @@ class GridList extends ContentControllerExtension {
 
 				$mode = $this->mode();
 
+				// TODO fix only one provider is providing as items is reset in the loop each time. should merge
 				$items = $this->items($mode);
 
 				$totalCount = $items->count();

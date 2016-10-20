@@ -1,6 +1,7 @@
 <?php
 namespace Modular\GridList\Layout;
 
+use Modular\Application;
 use Modular\GridList\Interfaces\GridListTempleDataProvider;
 use Modular\ModelExtension;
 
@@ -15,15 +16,10 @@ class ModeForPage extends ModelExtension implements GridListTempleDataProvider {
 	 * @return array [ 'Mode' => mode e.g. 'grid' or 'list' (or empty if none set)
 	 */
 	public function provideGridListTemplateData($existingData = []) {
-		$page = \Director::get_current_page();
 		$mode = '';
 
-		if ($page instanceof \LeftAndMain) {
-			// if we're in CMS then get the CMS current editing page
-			$page = $page->currentPage();
-		}
 		// page may be null if it's a new page
-		if ($page) {
+		if ($page = Application::get_current_page()) {
 			$mode = $page->config()->get('gridlist_default_mode') ?: '';
 		}
 		return [

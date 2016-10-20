@@ -12,4 +12,3 @@ Injector:
   Debugger: Modular\Debugger
   GridListService:
     class: Modular\GridList\Service
-

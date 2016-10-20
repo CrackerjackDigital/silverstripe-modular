@@ -1,9 +1,6 @@
 ---
 Name: modular-blocks
 ---
-Modular\Blocks\Block:
-  belongs_many_many:
-    Pages: Page
 Modular\Blocks\Download:
   extensions:
     - Modular\Fields\Download

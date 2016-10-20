@@ -2,6 +2,7 @@
 namespace Modular\Search;
 
 use Modular\Fields\Field;
+use Modular\Models\Tag;
 use Modular\reflection;
 
 class ItemsProvider extends Field implements \Modular\GridList\Interfaces\ItemsProvider {
@@ -41,7 +42,11 @@ class ItemsProvider extends Field implements \Modular\GridList\Interfaces\ItemsP
 
 					}
 				}
-				$count = $results->count();
+			}
+		}
+		if ($tags = array_filter(explode(',', $service->constraint(Constraints::TagsVar)))) {
+			foreach ($tags as $tag) {
+								
 			}
 		}
 
