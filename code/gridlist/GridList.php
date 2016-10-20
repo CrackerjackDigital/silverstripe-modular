@@ -26,6 +26,8 @@ class GridList extends ContentControllerExtension {
 	const PaginatorServiceName = 'GridListPaginator';
 	const DefaultPageLength    = 12;
 
+	private static $gridlist_service = 'GridListService';
+
 	private static $default_page_length = self::DefaultPageLength;
 
 	private static $default_mode = self::ModeGrid;
@@ -50,7 +52,8 @@ class GridList extends ContentControllerExtension {
 					$extendedData
 				);
 			}
-			$firstItem = $this->service()->firstItem();
+			$firstItem = $this->service()->Filters()->start();
+
 			$pageLength = isset($extraData['PageLength'])
 				? $extraData['PageLength']
 				: $this->config()->get('default_page_length');
@@ -78,7 +81,7 @@ class GridList extends ContentControllerExtension {
 					'Filters'       => $this->filters($mode),
 					'Mode'          => $mode,
 					'Sort'          => $this->service()->sort(),
-					'DefaultFilter' => $this->service()->defaultFilter(),
+					'DefaultFilter' => $this->service()->Filters()->defaultFilter(),
 					'LoadMore'      => $loadMore,
 				],
 				$extraData
@@ -100,13 +103,7 @@ class GridList extends ContentControllerExtension {
 
 		$page = null;
 
-		if (\Director::is_ajax()) {
-			if ($path = Application::path_for_request(\Controller::curr()->getRequest())) {
-				$page = Application::page_for_path($path);
-			}
-		} else {
-			$page = $this->currentPage();
-		}
+		$page = Application::get_current_page();
 
 		if ($page) {
 			if ($page->config()->get('gridlist_provider')) {
@@ -132,10 +129,18 @@ class GridList extends ContentControllerExtension {
 	/**
 	 * Return instance of service that this gridlist is using
 	 *
-	 * @return \GridListService
+	 * @return Service
 	 */
 	public static function service() {
-		return \Injector::inst()->get('GridListService');
+		/** @var \Page $page */
+		$service = '';
+
+		if ($page = Application::get_current_page()) {
+			$service = $page->config()->get('gridlist_service');
+		}
+		$service = $service ?: static::config()->get('gridlist_service');
+
+		return \Injector::inst()->get($service);
 	}
 
 	/**
@@ -147,8 +152,9 @@ class GridList extends ContentControllerExtension {
 			$provider = $this->provider();
 
 			$items = new \ArrayList();
+			$service = $this->service();
 
-			$currentFilterID = $this->service()->currentFilterID();
+			$currentFilterID = $service->Filters()->currentFilterID();
 
 			// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
 			// this will return an array of SS_Lists

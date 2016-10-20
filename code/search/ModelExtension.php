@@ -7,7 +7,7 @@ namespace Modular\Search;
  * @package Modular\Search
  */
 abstract class ModelExtension extends \Modular\ModelExtension {
-	const SearchIndex = 'SearchFields';
+	const SearchIndex = 'FulltextSearchIndex';
 
 	private static $create_table_options = array(
 		'MySQLDatabase' => 'ENGINE=MyISAM',

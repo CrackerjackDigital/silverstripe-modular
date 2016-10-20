@@ -8,7 +8,7 @@ class BlockExtension extends ModelExtension {
 
 	/**
 	 * Search results for a Block are the pages which have this block.
-	 * 
+	 *
 	 * @return \SS_List
 	 */
 	public function SearchTargets() {

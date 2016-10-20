@@ -28,6 +28,36 @@ class Application extends Module {
 	// use this
 	private static $default_theme = self::ThemeDefault;
 
+
+	/**
+	 * Try to get page from Director and if in CMS then get it from CMS page, fallback to
+	 * Controller url via page_for_path.
+	 *
+	 * @return \DataObject|\Page|\SiteTree
+	 */
+	public static function get_current_page() {
+		$page = null;
+		if (\Director::is_ajax()) {
+			if ($path = self::path_for_request(\Controller::curr()->getRequest()->getVar('path'))) {
+				$page = self::page_for_path($path);
+			}
+		} else {
+			if ($page = \Director::get_current_page()) {
+				if ($page instanceof \CMSMain) {
+					$page = $page->currentPage();
+				}
+			}
+			if (!$page && $controller = Controller::curr()) {
+				if ($controller = Controller::curr()) {
+					if ($request = $controller->getRequest()) {
+						$page = Application::page_for_path($request->getURL());
+					}
+				}
+			}
+		}
+		return $page;
+	}
+
 	/**
 	 * Override to provide current theme folder if requirements_path not set.
 	 *

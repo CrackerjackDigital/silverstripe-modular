@@ -2,7 +2,8 @@
 Name: modular-search-config
 ---
 Injector:
-  SearchService: Modular\Search\Service
+  SearchService:
+    class: Modular\Search\Service
 
 # copy to app config and add classes which are to searchable (as with extension below)
 # Modular\Search\ItemsProvider:
