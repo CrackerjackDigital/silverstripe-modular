@@ -33,6 +33,23 @@ class Video extends File {
 		}
 	}
 
+	public function LinkType() {
+		return 'Video';
+	}
+
+	/**
+	 * Return text to show in a link to this block (or more likely a link this block contains, such as a File via the HasLinks interface).
+	 *
+	 * Gets different text either 'ExternalLinkText' or 'InternalLinkText' or 'LinkText' if they are not set.
+	 *
+	 * @return mixed
+	 */
+	public function LinkText() {
+		$blockClass = get_class($this);
+		$type = $this->IsExternalLink() ? 'ExternalLinkText' : 'InternalLinkText';
+		return _t("$blockClass.$type", _t("$blockClass.LinkText", 'More'));
+	}
+
 	/**
 	 * Returns a list of video's with the one associated video as the first item.
 	 *

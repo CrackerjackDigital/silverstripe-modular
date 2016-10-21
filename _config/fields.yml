@@ -1,6 +1,10 @@
 ---
 Name: modular-models-config
 ---
+Modular\Blocks\GridList:
+  extensions:
+    - Modular\GridList\Fields\Mode
+    - Modular\GridList\Layout\ModeForPage
 Modular\Models\GridListFilter:
   extensions:
     - Modular\Fields\Title
@@ -12,6 +16,7 @@ Modular\Models\Slide:
     - Modular\Behaviours\InternalOrExternalLink
     - Modular\Fields\InternalLink
     - Modular\Fields\ExternalLink
+    - Modular\Fields\LinkTitle
     - Modular\Fields\Image
 Modular\Models\Tag:
   extensions:

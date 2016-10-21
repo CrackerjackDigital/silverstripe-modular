@@ -7,7 +7,8 @@ trait lang {
 	abstract public function __invoke();
 
 	function lang($key, $default = '', array $tokens = []) {
-		return _t(get_called_class(), ".$key", $default ?: $key, $tokens);
+		$calledClass = get_called_class();
+		return _t($calledClass, ".$key", $default ?: $calledClass, $tokens);
 	}
 
 	/**
@@ -26,10 +27,13 @@ trait lang {
 	 * @return string
 	 */
 	public function fieldDecoration($fieldName, $decoration = 'Label', $default = '', array $tokens = [], $field = null) {
+		$extraTokens = $this->fieldDecorationTokens();
+
 		$tokens = array_merge(
+			$extraTokens,
 			[
 				'singular' => $this->singularName(),
-				'plural'   => $this->pluralName()
+				'plural'   => $this->pluralName(),
 			],
 			($field instanceof \FormField)
 				? ['label' => $field->Title()]
@@ -59,6 +63,17 @@ trait lang {
 			}
 		}
 		return $value;
+	}
+
+	/**
+	 * Override to provide specific tokens for replacement in field decorations
+	 * as [ 'token-name' => value ]
+	 * will be filled into decoration text placeholder {token-name}
+	 *
+	 * @return array
+	 */
+	protected function fieldDecorationTokens() {
+		return [];
 	}
 
 	protected function singularName() {

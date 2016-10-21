@@ -1,21 +1,33 @@
 <?php
 namespace Modular\Relationships;
 
+use Modular\GridList\Interfaces\ItemsSequencer;
+
 /**
- * Add manually curated blocks to a grid list.
+ * Add blocks manually to a grid list items at the start.
  *
  * @package Modular\GridList
  */
-class HasGridListBlocks extends HasBlocks {
-	const RelationshipName = 'GridListBlocks';
+class HasGridListBlocks extends HasBlocks implements ItemsSequencer {
+	const RelationshipName    = 'GridListBlocks';
 	const GridFieldConfigName = 'Modular\GridField\HasGridListBlocksGridFieldConfig';
 
 	/**
-	 * Provides Blocks for the GridList via GridListBlocks relationship
+	 * Inserts manually added blocks at front of list.
 	 *
-	 * @return \SS_List
+	 * @param \ArrayList|\DataList $items
 	 */
-	public function provideGridListItems() {
-		return $this->related();
+	public function sequenceGridListItems(&$items, $mode = null) {
+		$out = new \ArrayList();
+
+		// reverse sort so insertFirst works
+		$blocks = $this->related()->Sort('Sort desc');
+		foreach ($blocks as $block) {
+			$out->push($block);
+		}
+		foreach ($items as $item) {
+			$out->push($item);
+		}
+		$items = $out;
 	}
 }

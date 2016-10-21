@@ -24,7 +24,7 @@ class GridListFilter extends \Modular\Model {
 	 * @return string
 	 */
 	public function Filter() {
-		return $this->{static::TagFieldName};
+		return $this()->{static::TagFieldName};
 	}
 
 	public function FilterLink() {

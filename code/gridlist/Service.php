@@ -1,6 +1,8 @@
 <?php
 namespace Modular\GridList;
 
+use Modular\Admin\GridListFilters;
+use Modular\Models\GridListFilter;
 use Modular\Object;
 
 class Service extends Object {
@@ -12,6 +14,10 @@ class Service extends Object {
 	public function sort() {
 		return $this->Filters()->sort();
 	}
+
+	/**
+	 * @return Filters
+	 */
 	protected function Filters() {
 		return \Injector::inst()->get(static::FiltersClassName);
 	}

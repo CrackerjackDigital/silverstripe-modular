@@ -1,7 +1,8 @@
 <?php
 namespace Modular;
 
-use Quaff\Exceptions\Exception;
+use Modular\Interfaces\Exception as ExceptionInterface;
+use Modular\Exceptions\Exception;
 
 trait debugging {
 	/**
@@ -16,7 +17,7 @@ trait debugging {
 				$debugger->level($level);
 			}
 		} else {
-			$debugger = \Injector::inst()->get('Debugger', $level);
+			$debugger = \Injector::inst()->get('Modular\Debugger', $level);
 		}
 		return $debugger;
 	}
@@ -37,20 +38,19 @@ trait debugging {
 		static::debugger()->warn($message, get_called_class());
 	}
 
+	/**
+	 * @param string $message
+	 * @throws null
+	 */
 	public static function debug_error($message) {
 		static::debugger()->error($message, get_called_class());
 	}
-	
-	public function debug_fail($message, $httpResponceCode = null) {
-		$this->debugger()->error($message, get_called_class());
-		if ($httpResponceCode && !\Director::is_cli()) {
-			if (\Director::isLive()) {
-				Controller::curr()->httpError($httpResponceCode, get_called_class());
-			} else {
-				Controller::curr()->httpError($httpResponceCode, get_called_class() . ":" . $message);
-			}
-		} else {
-			throw new Exception($message, $httpResponceCode);
-		}
+
+	/**
+	 * @param ExceptionInterface $exception to log message from
+	 * @throws Exception
+	 */
+	public function debug_fail(ExceptionInterface $exception) {
+		$this->debugger()->fail($exception->getMessage(), $exception->getFile() . ':' . $exception->getLine(), $exception);
 	}
 }

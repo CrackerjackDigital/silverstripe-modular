@@ -1,9 +1,11 @@
 <?php
 namespace Modular;
 
+use Controller;
+use \Modular\Interfaces\Debugger as DebugInterface;
 use Filesystem;
-use Modular\Exceptions\Debug as Exception;
-use Modular\Interfaces\Debugger as DebugInterface;
+use Modular\Exceptions\Debug;
+use Modular\Exceptions\Exception;
 use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
@@ -15,6 +17,22 @@ class Debugger extends Object implements DebugInterface
 
 	const DefaultSendEmailsFrom = 'servers@moveforward.co.nz';
 
+	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
+	const DebugNone   = -1;
+	const DebugErr    = SS_Log::ERR;        // 3
+	const DebugWarn   = SS_Log::WARN;       // 4
+	const DebugNotice = SS_Log::NOTICE;     // 5
+	const DebugInfo   = SS_Log::INFO;       // 6
+	const DebugTrace  = SS_Log::DEBUG;      // 7
+	const DebugAll    = self::DebugTrace;   // easier to remember
+
+	// disable all debugging
+	const DebugOff = 16;
+	
+	const DebugFile   = 32;
+	const DebugScreen = 64;
+	const DebugEmail  = 128;
+	
 	private static $levels = [
 		self::DebugErr    => 'ERROR',
 		self::DebugWarn   => 'WARN',
@@ -34,15 +52,15 @@ class Debugger extends Object implements DebugInterface
 	private static $send_emails_from = self::DefaultSendEmailsFrom;
 
 	// name of log file to create if none supplied to toFile
-	private static $log_file = 'silverstripe.log';
+	private static $log_file = '';
 
 	// path to create log file in relative to base folder
-	private static $log_path = '../logs';
+	private static $log_path = '';
 
 	// set when toFile is called.
 	private $logFilePathName;
 
-	// set by emailLog, when destructor is called on the Debugger instance email the log file to this address
+	// when destructor is called on the logger email the log file to this address
 	private $emailLogFileTo;
 
 	// where are messages coming from?
@@ -50,9 +68,6 @@ class Debugger extends Object implements DebugInterface
 
 	// what level will we trigger at
 	private $level;
-
-	// what level is on-screen trigger, generally pemissive
-	private $screenLevel = self::DebugTrace;
 
 	public function __construct($level = self::DefaultDebugLevel, $source = '') {
 		parent::__construct();
@@ -81,9 +96,28 @@ class Debugger extends Object implements DebugInterface
 		return new $class($level, $source);
 	}
 	
-	
+	public function level($level = null)
+	{
+		if (func_num_args()) {
+			$this->level = $level;
+			return $this;
+		} else {
+			return $this->level;
+		}
+	}
+
+	public function source($source = null) {
+		if (func_num_args()) {
+			$this->source = $source;
+			return $this;
+		} else {
+			return $this->source;
+		}
+	}
+
 	/**
 	 * Set levels and source and if flags indicate debugging to file screen or email initialise those aspects of debugging using defaults from config.
+	 *
 	 * @param      $level
 	 * @param null $source
 	 * @return $this
@@ -93,7 +127,7 @@ class Debugger extends Object implements DebugInterface
 		
 		$this->level($level);
 		$this->source($source);
-		
+
 		if ($this->bitfieldTest($level, self::DebugFile)) {
 			if ($logFile = $this->makeLogFileName()) {
 				$this->toFile($level, $logFile);
@@ -110,37 +144,6 @@ class Debugger extends Object implements DebugInterface
 		
 		return $this;
 	}
-	
-	/**
-	 * Get or set level.
-	 *
-	 * @param null $level
-	 * @return $this
-	 */
-	public function level($level = null)
-	{
-		if (func_num_args()) {
-			$this->level = $level;
-			return $this;
-		} else {
-			return $this->level;
-		}
-	}
-	
-	/**
-	 * Get or set source.
-	 *
-	 * @param null $source
-	 * @return $this
-	 */
-	public function source($source = null) {
-		if (func_num_args()) {
-			$this->source = $source;
-			return $this;
-		} else {
-			return $this->source;
-		}
-	}
 
 	/**
 	 *
@@ -156,7 +159,7 @@ class Debugger extends Object implements DebugInterface
 			"$severity:",
 			$source,
 			$message,
-		]);
+		]) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 	}
 
 	/**
@@ -173,17 +176,10 @@ class Debugger extends Object implements DebugInterface
 	}
 
 	public function log($message, $facilities, $source = '') {
-		$levels = $this->config()->get('levels');
-		$level = $this->lvl($facilities);
 		$source = $source ?: $this->source();
 
-		if ($level) {
-			SS_Log::log("$source: $message" . PHP_EOL, $level);
-		}
-		$toScreen = $this->lvl($facilities, $this->screenLevel);
-		if ($toScreen) {
-			$str = isset($levels[$toScreen]) ? $levels[$toScreen] : '???';
-			echo $this->formatMessage($message, $str, $source) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
+		if ($level = $this->lvl($facilities)) {
+			SS_Log::log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
 		}
 		return $this;
 	}
@@ -215,40 +211,37 @@ class Debugger extends Object implements DebugInterface
 		
 		return $this;
 	}
-	
+
 	public function error($message, $source = '') {
 		$this->log($message, self::DebugErr, $source);
 		
 		return $this;
 	}
-	
-	public function fail($message, $source = '') {
+
+	public function fail($message, $source = '', Exception $exception) {
 		$this->log($message, self::DebugErr, $source);
-		throw new Exception($this->formatMessage($message, self::DebugErr));
-	}
-	
-	/**
-	 * Set the screen level.
-	 * @param int $level
-	 * @return $this
-	 */
-	public function toScreen($level) {
-		$this->screenLevel = $level;
+		if ($exception) {
+			$exception->setMessage($message);
+			throw $exception;
+		}
 		return $this;
 	}
 
 	/**
-	 * Set the level and email address to send emails to for every event.
+	 * Set the email address to send emails to
 	 *
+	 * @param $address
 	 * @param $level
-	 * @param $emailAddress
 	 * @return $this
 	 */
-	public function toEmail($level, $emailAddress) {
-		SS_Log::add_writer(
-			new SS_LogEmailWriter($emailAddress),
-			$level
-		);
+	public function toEmail($address, $level) {
+		if ($address) {
+			SS_Log::add_writer(
+				new SS_LogEmailWriter($address),
+				$level
+			);
+		};
+		
 		return $this;
 	}
 
@@ -262,20 +255,17 @@ class Debugger extends Object implements DebugInterface
 	 */
 	public function toFile($level, $filePathName = '') {
 		if ($filePathName) {
-			$filePathName = Application::make_safe_path($filePathName, true) . '/' . basename($filePathName);
-
-			if (Application::is_safe_path(dirname($filePathName))) {
-				// ok
-				$this->logFilePathName = $filePathName;
-			} else {
-				$this->logFilePathName = $this->makeLogFileName();
+			if (substr($filePathName, -4) != '.log') {
+				$filePathName .= ".log";
 			}
-
+			if ($path = Application::make_safe_path(dirname($filePathName))) {
+				$this->logFilePathName = Controller::join_links(
+					$path,
+					$this->config()->get('log_path'),
+					basename($filePathName)
+				);
+			};
 		} else {
-			$this->logFilePathName = $this->makeLogFileName();
-		}
-		if (!is_dir(dirname($this->logFilePathName))) {
-			$filePathName = $this->logFilePathName;
 			$this->logFilePathName = $this->makeLogFileName();
 		}
 
@@ -285,7 +275,7 @@ class Debugger extends Object implements DebugInterface
 		);
 
 		// log an warning if we got an invalid path above so we know this and can fix
-		if ($filePathName && !Application::is_safe_path(dirname($filePathName))) {
+		if ($filePathName && !Application::make_safe_path(dirname($filePathName))) {
 			$this->warn("Invalid file path outside of web root '$filePathName' using '$this->logFilePathName' instead");
 		}
 		if ($filePathName && !is_dir(dirname($filePathName))) {
@@ -295,13 +285,21 @@ class Debugger extends Object implements DebugInterface
 	}
 	
 	/**
-	 * At end of Debugger lifecycle file set by toFile will be sent to this email address. This is independent of
-	 * toEmail which logs every event.
+	 * @param $level
+	 * @return $this
+	 */
+	public function toScreen($level) {
+		SS_Log::add_writer(new \LogOutputWriter($level));
+		return $this;
+	}
+
+	/**
+	 * At end of Debugger lifecycle file set by toFile will be sent to this email address.
 	 *
 	 * @param $emailAddress
 	 * @return $this
 	 */
-	public function emailLog($emailAddress) {
+	public function sendFile($emailAddress) {
 		$this->emailLogFileTo = $emailAddress;
 		return $this;
 	}
@@ -326,19 +324,11 @@ class Debugger extends Object implements DebugInterface
 			$path = static::config()->get('log_path');
 			$date = date('Ymd_his');
 
-			$prefix = $this->source
-				? ("{$this->source}-$date-")
-				: ("$date-");
+			$prefix = $this->source ?: "$date-";
 
-			$fileName = basename(tempnam($path, $prefix));
+			$fileName = basename(tempnam($path, "silverstripe-$prefix")) . ".log";
 		}
 		$path = Application::make_safe_path($path, false);
-
-		if (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH) {
-			// we only try and make a logging directory if we are inside the assets folder
-			Filesystem::makeFolder($path);
-		}
-
 		return "$path/$fileName.log";
 	}
 }

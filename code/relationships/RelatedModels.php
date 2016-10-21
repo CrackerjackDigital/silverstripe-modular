@@ -2,7 +2,7 @@
 namespace Modular\Relationships;
 
 use Modular\Fields\Field;
-use Modular\GridField\GridFieldOrderableRows;
+use Modular\Model;
 
 class RelatedModels extends Field {
 	const ShowAsGridField = 'grid';
@@ -143,6 +143,7 @@ class RelatedModels extends Field {
 			?: static::GridFieldConfigName
 				?: get_class($this) . 'GridFieldConfig';
 
+		/** @var GridFieldConfig $config */
 		$config = $configClassName::create();
 		$config->setSearchPlaceholder(
 
