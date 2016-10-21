@@ -24,33 +24,34 @@ class ItemsProvider extends Field implements \Modular\GridList\Interfaces\ItemsP
 		/** @var Service $service */
 		$service = \Injector::inst()->get('SearchService');
 
-		$searchClasses = $this()->config()->get('search_classes') ?: [];
-
-		foreach ($searchClasses as $className) {
-			$filter = $service->Filters()->filter($className, Constraints::FullTextVar, ModelExtension::SearchIndex);
-			if ($filter) {
-				// this is a list of e.g. pages, blocks, we next need to
-				// ask each page/block for it's actual hits
-				// e.g. ask blocks for their pages
-				$intermediates = \DataObject::get($className)
-					->filter($filter);
-
-				/** @var ModelExtension|\DataObject $intermediate */
-				foreach ($intermediates as $intermediate) {
-					if ($intermediate->hasMethod('SearchTargets')) {
-
-						$results->merge($intermediate->SearchTargets());
-
-					}
-				}
-			}
-		}
-		$allTags = Tag::get();
-
+		// we don't search by tags and fulltext at the same time, try tags first as probably quicker
 		if ($tags = array_filter(explode(',', $service->constraint(Constraints::TagsVar)))) {
+			$allTags = Tag::get();
 			foreach ($tags as $tag) {
 				if ($tag = $allTags->find(ModelTag::field_name(), $tag)) {
 					$results->merge($tag->RelatedByClassName('*Page'));
+				}
+			}
+		} else {
+			$searchClasses = $this()->config()->get('search_classes') ?: [];
+
+			foreach ($searchClasses as $className) {
+				$filter = $service->Filters()->filter($className, Constraints::FullTextVar, ModelExtension::SearchIndex);
+				if ($filter) {
+					// this is a list of e.g. pages, blocks, we next need to
+					// ask each page/block for it's actual hits
+					// e.g. ask blocks for their pages
+					$intermediates = \DataObject::get($className)
+						->filter($filter);
+
+					/** @var ModelExtension|\DataObject $intermediate */
+					foreach ($intermediates as $intermediate) {
+						if ($intermediate->hasMethod('SearchTargets')) {
+
+							$results->merge($intermediate->SearchTargets());
+
+						}
+					}
 				}
 			}
 		}
