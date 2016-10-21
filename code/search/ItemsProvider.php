@@ -2,6 +2,7 @@
 namespace Modular\Search;
 
 use Modular\Fields\Field;
+use Modular\Fields\ModelTag;
 use Modular\Models\Tag;
 use Modular\reflection;
 
@@ -44,9 +45,13 @@ class ItemsProvider extends Field implements \Modular\GridList\Interfaces\ItemsP
 				}
 			}
 		}
+		$allTags = Tag::get();
+
 		if ($tags = array_filter(explode(',', $service->constraint(Constraints::TagsVar)))) {
 			foreach ($tags as $tag) {
-								
+				if ($tag = $allTags->find(ModelTag::field_name(), $tag)) {
+					$results->merge($tag->RelatedByClassName('*Page'));
+				}
 			}
 		}
 

@@ -31,7 +31,7 @@ class Constraints extends Object {
 	// save for all pages
 	const PersistEverywhere = 1;
 	// save into session including url
-	const PersisForURLParams = 2;
+	const PersistForURLParams = 2;
 	// save into session including query string get vars
 	const PersistForGetVars = 4;
 	// save both url and query string
@@ -361,7 +361,7 @@ class Constraints extends Object {
 					// key is for urlParams and getVars (so page and query string)
 					$key = $this->persistKey($name, $this->url(), true);
 
-				} elseif (self::PersisForURLParams === ($sessionPersistance & self::PersisForURLParams)) {
+				} elseif (self::PersistForURLParams === ($sessionPersistance & self::PersistForURLParams)) {
 					// key is for urlParams only, not getVars (so page path only)
 					$key = $this->persistKey($name, $this->url(), false);
 

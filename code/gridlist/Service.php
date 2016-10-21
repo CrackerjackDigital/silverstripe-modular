@@ -10,7 +10,7 @@ class Service extends Object implements ServiceInterface {
 
 	const FiltersClassName = 'Modular\GridList\Constraints';
 
-	public function constraint($name, $persistance = Constraints::PersistEverywhere) {
+	public function constraint($name, $persistance = null) {
 		return $this->Filters()->constraint($name, $persistance);
 	}
 

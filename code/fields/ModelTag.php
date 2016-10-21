@@ -49,6 +49,20 @@ class ModelTag extends Field {
 	}
 
 	/**
+	 * Return all the page models related to this tag (there may be multiple Page Classe attached so iterate through them all)
+	 */
+	public function RelatedByClassName($classNamePattern) {
+		$pages = new \ArrayList();
+		foreach ($this()->config()->get('belongs_many_many') as $relationship => $className) {
+			// not a nice test
+			if (fnmatch($classNamePattern, $className)) {
+				$pages->merge($this()->$relationship());
+			}
+		}
+		return $pages;
+	}
+
+	/**
 	 * Encode a value as it would be for a ModelTag (basically a URLSegment)
 	 * @param $value
 	 * @return String
