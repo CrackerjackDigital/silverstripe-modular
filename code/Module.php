@@ -1,7 +1,8 @@
 <?php
 namespace Modular;
 
-use \Director;
+use Director;
+use Modular\Exceptions\Exception;
 
 abstract class Module extends Object {
 	use config;
@@ -81,6 +82,131 @@ abstract class Module extends Object {
 	private static $decode_depth = 512;
 
 	/**
+	 * Check the path is inside the base folder or relative to base folder when safe paths are appended and the real path is resolved.
+	 *
+	 * e.g. if  config.allow_paths = [ '../logs' ]
+	 *      and web root is /var/sites/website/htdocs
+	 *
+	 *      then
+	 *          is_safe_path('/var/sites/website/logs') will return true
+	 *      but
+	 *          is_safe_path('/var/sites/website/conf') will return false
+	 *
+	 * by default configuration the assets folder is always a safe path.
+	 *
+	 * @param string $path              (no filename)
+	 * @param bool   $fail              throw an exception if test fails
+	 * @param bool   $createIfNotExists create the directory if it doesn't exist (and is in assets folder only).
+	 * @return bool|string path or false if not safe
+	 * @throws \Modular\Exceptions\Application
+	 */
+	public static function make_safe_path($path, $fail = false, $createIfNotExists = true) {
+		$path = rtrim($path, '.');
+
+		if ($fail && !$path) {
+			throw new Exception("Empty path passed");
+		}
+		// output this path in errors before realpath etc
+		$originalPath = $path;
+
+		$basePath = rtrim(BASE_PATH, PATH_SEPARATOR);
+		$assetsPath = rtrim(ASSETS_PATH, PATH_SEPARATOR);
+		if (false !== strpos($path, '.')) {
+
+			$path = realpath($basePath . '/' . $path);
+
+		} elseif (substr($path, 0, 1) == '/') {
+			// absolute from server root (not web root), but up one so e.g. '../logs' will work
+			// TODO: this is not nice, seems arbitrary, fix
+			$rpath = dirname(realpath($path));
+
+			if (substr($rpath, 0, strlen(dirname($basePath))) != dirname($basePath)) {
+				// we are absolute from assets folder
+				$path = "$assetsPath/$path";
+			} else {
+				$path = "$rpath/" . basename($path);
+			}
+		} else {
+			// relative to assets folder
+			$path = "$assetsPath/$path";
+		}
+
+		$safePaths = static::config()->get('safe_paths') ?: [];
+
+		// rebuild path with parent 'realnamed' so we can at least be one path segment out ok (realpath fails if a dir doesn't exist)
+		if ($parentPath = realpath(dirname($path))) {
+			// parent exists so use that with the last bit of the
+			$path = rtrim($parentPath, PATH_SEPARATOR) . '/' . basename($path);
+		} else {
+			// choose the first safe path
+			$path = realpath($basePath . "/" . current($safePaths));
+		}
+
+		$found = false;
+
+		// loop through each candidate path and append to the web root or use if absolute path to test against the passed path
+		// paths are normalised to exclude trailing '/'
+		foreach ($safePaths as $candidate) {
+			$candidate = rtrim($candidate, PATH_SEPARATOR);
+
+			if (realpath($candidate) == $candidate) {
+				// if it's a real path then try that
+				$test = rtrim($candidate, PATH_SEPARATOR);
+			} else {
+				// else treat as relative to base folder try that
+				$test = rtrim(realpath($basePath . "/$candidate"), PATH_SEPARATOR);
+			}
+			// e.g. "/var/sites/website/logs"
+			if (substr($path, 0, strlen($test)) == $test) {
+				// it matches one of the registered config.safe_paths so break;
+				$found = true;
+				break;
+			}
+		}
+		$path = rtrim(realpath($path), PATH_SEPARATOR);
+
+		// create if requested and in assets folder
+		if (!is_dir($path) && $createIfNotExists && (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH)) {
+			\Filesystem::makeFolder($path);
+		}
+		if ($fail && !($found && is_dir($path))) {
+			throw new Exception("Not a safe path or path doesn't exist: '$originalPath");
+		}
+		return $found ? $path : false;
+	}
+
+	/**
+	 * Return a directory to put logs in.
+	 *
+	 * @param null $className
+	 * @return string
+	 */
+	public static function log_path($className = null) {
+		if (!$path = static::config($className)->get('log_path')) {
+			if (defined('SS_ERROR_LOG')) {
+				$path = \Director::baseFolder() . '/' . dirname(SS_ERROR_LOG);
+			} else {
+				$path = ASSETS_DIR;
+			}
+        }
+		return static::make_safe_path($path, true, true);
+	}
+
+	/**
+	 * Return a filename without a path to use for logging.
+	 */
+	public static function log_file($className = null) {
+		if (!$fileName = static::config($className)->get('log_file')) {
+			if (defined('SS_ERROR_LOG')) {
+				$fileName = basename(SS_ERROR_LOG);
+			} else {
+				$fileName = 'silverstripe.log';
+			}
+		}
+		return $fileName;
+	}
+
+	/**
 	 * Adds javascript files to requirements based on them ending in '.js'
 	 * using config.install_dir as base path.
 	 *
@@ -142,12 +268,9 @@ abstract class Module extends Object {
 			$required = array_merge(
 				$scriptTypes,
 				[
-					self::FileTypeCSS                => Requirements::backend()
-						->get_css(),
-					self::FileTypeJavascript         => Requirements::backend()
-						->get_javascript(),
-					self::FileTypeJavascriptTemplate => Requirements::backend()
-						->get_custom_scripts(),
+					self::FileTypeCSS                => \Requirements::backend()->get_css(),
+					self::FileTypeJavascript         => \Requirements::backend()->get_javascript(),
+					self::FileTypeJavascriptTemplate => \Requirements::backend()->get_custom_scripts(),
 				]
 			);
 
@@ -162,7 +285,7 @@ abstract class Module extends Object {
 
 							$blocked[ $fileType ][] = $require;
 
-							Requirements::block(
+							\Requirements::block(
 								$required
 							);
 						}
@@ -244,7 +367,7 @@ abstract class Module extends Object {
 	 * @param $path
 	 */
 	protected static function css($controller, $path) {
-		Requirements::css($path);
+		\Requirements::css($path);
 	}
 
 	/**
@@ -254,7 +377,7 @@ abstract class Module extends Object {
 	 * @param $path
 	 */
 	protected static function js($controller, $path) {
-		Requirements::javascript($path);
+		\Requirements::javascript($path);
 	}
 
 	/**
@@ -267,7 +390,7 @@ abstract class Module extends Object {
 	 * @param null $info
 	 */
 	protected static function jst($controller, $path, $info = null) {
-		Requirements::javascriptTemplate(
+		\Requirements::javascriptTemplate(
 			$path,
 			self::requirements_template_data(
 				$controller,
@@ -303,7 +426,7 @@ abstract class Module extends Object {
 						);
 					}
 					if (!empty($requirements[ $fileType ])) {
-						Requirements::combine_files(
+						\Requirements::combine_files(
 							"{$moduleName}.$fileType",
 							$requirements[ $fileType ]
 						);

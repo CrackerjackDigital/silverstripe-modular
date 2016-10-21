@@ -6,12 +6,12 @@ use \Modular\Interfaces\Debugger as DebugInterface;
 use Filesystem;
 use Modular\Exceptions\Debug;
 use Modular\Exceptions\Exception;
+use Modular\Interfaces\Logger;
 use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
 
-class Debugger extends Object implements DebugInterface
-{
+class Debugger extends Object implements Logger {
 	use bitfield;
 	use enabler;
 
@@ -32,22 +32,31 @@ class Debugger extends Object implements DebugInterface
 	const DebugFile   = 32;
 	const DebugScreen = 64;
 	const DebugEmail  = 128;
-	
+
+	const DebugEnvDev  = 103;      // screen | file | trace
+	const DebugEnvTest = 165;      // file | email | notice
+	const DebugEnvLive = 132;      // email | warn
+
+	const LevelFromEnv = null;
+
+	private static $environment_levels = [
+		'dev'  => self::DebugEnvDev,
+		'test' => self::DebugEnvTest,
+		'live' => self::DebugEnvLive,
+	];
+
 	private static $levels = [
-		self::DebugErr    => 'ERROR',
-		self::DebugWarn   => 'WARN',
+		self::DebugErr    => 'ERROR ',
+		self::DebugWarn   => 'WARN  ',
 		self::DebugNotice => 'NOTICE',
-		self::DebugInfo   => 'INFO',
-		self::DebugTrace  => 'TRACE',
+		self::DebugInfo   => 'INFO  ',
+		self::DebugTrace  => 'TRACE ',
 	];
 	
 	// TODO implement writing a log file per class as well as global log, may need to move this into trait
 	// as we need to get the class name for the file maybe, though SS_Log already handles backtrace it doesn't
 	// og back far enough
 	const DebugPerClass = 256;
-
-	// debug warning level and debug to file and screen
-	const DefaultDebugLevel = 102;
 
 	private static $send_emails_from = self::DefaultSendEmailsFrom;
 
@@ -69,7 +78,7 @@ class Debugger extends Object implements DebugInterface
 	// what level will we trigger at
 	private $level;
 
-	public function __construct($level = self::DefaultDebugLevel, $source = '') {
+	public function __construct($level = self::LevelFromEnv, $source = '') {
 		parent::__construct();
 		$this->init($level, $source);
 	}
@@ -91,15 +100,21 @@ class Debugger extends Object implements DebugInterface
 		}
 	}
 
-	public static function debugger($level = self::DefaultDebugLevel, $source = '') {
+	public static function debugger($level = self::LevelFromEnv, $source = '') {
 		$class = get_called_class();
 		return new $class($level, $source);
 	}
-	
-	public function level($level = null)
-	{
+
+	/**
+	 * @inheritdoc
+	 */
+	public function level($level = null) {
 		if (func_num_args()) {
-			$this->level = $level;
+			if ($level === self::LevelFromEnv) {
+				$this->env();
+			} else {
+				$this->level = $level;
+			}
 			return $this;
 		} else {
 			return $this->level;
@@ -113,6 +128,17 @@ class Debugger extends Object implements DebugInterface
 		} else {
 			return $this->source;
 		}
+	}
+
+	/**
+	 * Set level from config.environment_levels for passed type
+	 * @param string $env 'dev', 'test', 'live'
+	 * @return $this
+	 * @fluent
+	 */
+	public function env($env = SS_ENVIRONMENT_TYPE) {
+		$this->level = $this->config()->get('environment_levels')[ $env ];
+		return $this;
 	}
 
 	/**
@@ -175,8 +201,12 @@ class Debugger extends Object implements DebugInterface
 		return $level <= $compareToLevel ? $level : false;
 	}
 
+	/**
+	 * @inheritdoc
+	 *
+	 */
 	public function log($message, $facilities, $source = '') {
-		$source = $source ?: $this->source();
+		$source = $source ?: ($this->source() ?: get_called_class());
 
 		if ($level = $this->lvl($facilities)) {
 			SS_Log::log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
@@ -191,10 +221,6 @@ class Debugger extends Object implements DebugInterface
 	}
 
 	public function trace($message, $source = '') {
-		if ($this->lvl(self::DebugTrace)) {
-			echo $message . (\Director::is_cli() ? '' : "<br/>") . PHP_EOL;
-			ob_flush();
-		}
 		$this->log($message, self::DebugTrace, $source);
 		
 		return $this;
@@ -254,19 +280,26 @@ class Debugger extends Object implements DebugInterface
 	 * @return $this
 	 */
 	public function toFile($level, $filePathName = '') {
+		$originalFilePathName = $filePathName;
+
 		if ($filePathName) {
 			if (substr($filePathName, -4) != '.log') {
 				$filePathName .= ".log";
 			}
-			if ($path = Application::make_safe_path(dirname($filePathName))) {
-				$this->logFilePathName = Controller::join_links(
-					$path,
-					$this->config()->get('log_path'),
-					basename($filePathName)
-				);
-			};
 		} else {
-			$this->logFilePathName = $this->makeLogFileName();
+			$filePathName = $this->config()->get('log_file') ?: Application::log_file();
+		}
+		if (trim(dirname($filePathName), '.') == '') {
+			$filePathName = ($this->config()->get('log_path') ?: Application::log_path()) . '/' . $filePathName;
+		}
+		if ($path = Application::make_safe_path(dirname($filePathName))) {
+			$this->logFilePathName = Controller::join_links(
+				$path,
+				basename($filePathName)
+			);
+		};
+		if (!$this->logFilePathName) {
+			$this->logFilePathName = Application::log_path() . '/' . Application::log_file();
 		}
 
 		SS_Log::add_writer(
@@ -275,10 +308,10 @@ class Debugger extends Object implements DebugInterface
 		);
 
 		// log an warning if we got an invalid path above so we know this and can fix
-		if ($filePathName && !Application::make_safe_path(dirname($filePathName))) {
+		if ($filePathName && !Application::make_safe_path(dirname($originalFilePathName))) {
 			$this->warn("Invalid file path outside of web root '$filePathName' using '$this->logFilePathName' instead");
 		}
-		if ($filePathName && !is_dir(dirname($filePathName))) {
+		if ($filePathName && !is_dir(dirname($originalFilePathName))) {
 			$this->warn("Path for '$filePathName' does not exist, using '$this->logFilePathName' instead");
 		}
 		return $this;
@@ -288,7 +321,10 @@ class Debugger extends Object implements DebugInterface
 	 * @param $level
 	 * @return $this
 	 */
-	public function toScreen($level) {
+	public function toScreen($level = self::LevelFromEnv) {
+		if (is_null($level) || $level === self::LevelFromEnv) {
+			$level = $this->config()->get('environment_levels')[ SS_ENVIRONMENT_TYPE ];
+		}
 		SS_Log::add_writer(new \LogOutputWriter($level));
 		return $this;
 	}

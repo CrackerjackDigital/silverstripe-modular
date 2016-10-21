@@ -1,6 +1,7 @@
 <?php
 namespace Modular\GridList\Controllers;
 
+use Modular\Application;
 use Modular\GridList\GridList;
 use Modular\Relationships\HasBlocks;
 
@@ -41,35 +42,10 @@ class Standalone extends \ContentController {
 	 * @return string
 	 */
 	protected function pathForRequest(\SS_HTTPRequest $request) {
-		if (!$path = $request->getVar('path')) {
-			if (isset($_SERVER['HTTP_REFERER'])) {
-				$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
-			} else {
-				$path = $request->getURL();
-			}
-		}
-		return $path;
+		return Application::path_for_request($request);
 	}
 
 	protected function findPageForPath($path) {
-		$path = trim($path, '/');
-
-		if ($path == '') {
-			return \HomePage::get()->first();
-		}
-		/** @var \Page $page */
-		$page = null;
-
-		$parts = explode('/', $path);
-		$children = \Page::get()->filter('ParentID', 0);
-
-		while ($segment = array_shift($parts)) {
-			if (!$page = $children->find('URLSegment', $segment)) {
-				break;
-			}
-			$children = $page->Children();
-		}
-
-		return $page;
+		return Application::page_for_path($path);
 	}
 }

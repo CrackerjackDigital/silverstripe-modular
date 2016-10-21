@@ -2,7 +2,8 @@
 namespace Modular\Extensions\Controller;
 
 use Controller;
-use GridListService;
+use Modular\ContentControllerExtension;
+use Modular\GridList\Interfaces\Service\Service;
 use Injector;
 
 /**
@@ -12,7 +13,7 @@ use Injector;
  *
  * GridListLinks
  */
-class GridListLinks extends \Modular\ContentControllerExtension {
+class GridListLinks extends ContentControllerExtension {
 
 	/**
 	 * Provide a link back to the template for the current 'page' augmented
@@ -33,7 +34,7 @@ class GridListLinks extends \Modular\ContentControllerExtension {
 		while ($name = array_shift($args)) {
 			$params[ $name ] = array_shift($args);
 		}
-		/** @var GridListService $service */
+		/** @var Service $service */
 		$service = Injector::inst()->get('GridListService');
 		return $service->filterLink($params);
 	}
@@ -54,7 +55,7 @@ class GridListLinks extends \Modular\ContentControllerExtension {
 		// set to search mode
 		$params['mode'] = 'search';
 
-		/** @var GridListService $service */
+		/** @var Service $service */
 		$service = Injector::inst()->get('GridListService');
 		return $service->filterLink($params);
 

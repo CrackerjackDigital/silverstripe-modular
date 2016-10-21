@@ -14,7 +14,9 @@ class LogOutputWriter extends Zend_Log_Writer_Abstract {
 	 * @return void
 	 */
 	protected function _write($event) {
-		echo @$event['message']['errstr'] . (Director::is_cli() ? '' : '<br/>') . PHP_EOL;
+		if ($event['priority'] <= $this->messageType) {
+			echo @$event['message']['errstr'] . (Director::is_cli() ? '' : '<br/>') . PHP_EOL;
+		}
 	}
 
 	/**

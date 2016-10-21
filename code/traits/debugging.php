@@ -9,7 +9,7 @@ trait debugging {
 	 * @param int $level create debugger with this log level, or set the current log level if already created
 	 * @return \Modular\Debugger
 	 */
-	public static function debugger($level = Debugger::DefaultDebugLevel) {
+	public static function debugger($level = Debugger::LevelFromEnv) {
 		/** @var Debugger $debugger */
 		static $debugger;
 		if ($debugger) {
@@ -17,7 +17,8 @@ trait debugging {
 				$debugger->level($level);
 			}
 		} else {
-			$debugger = \Injector::inst()->get('Modular\Debugger', $level);
+			// 'Debugger' is a service name set on Injector
+			$debugger = \Injector::inst()->get('Debugger', $level);
 		}
 		return $debugger;
 	}

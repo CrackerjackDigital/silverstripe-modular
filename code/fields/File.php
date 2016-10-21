@@ -35,11 +35,11 @@ class File extends HasOne {
 	/**
 	 * Files are always without ID as use UploadField which breaks convention.
 	 *
-	 * @param string $append
+	 * @param string $suffix
 	 * @return string
 	 */
-	public static function field_name($append = '') {
-		return static::RelationshipName . $append;
+	public static function field_name($suffix = '') {
+		return static::RelationshipName . $suffix;
 	}
 
 	public static function allowed_files() {

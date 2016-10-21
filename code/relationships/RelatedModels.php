@@ -75,8 +75,8 @@ class RelatedModels extends Field {
 		return static::config()->get('sortable');
 	}
 
-	public static function field_name($append = '') {
-		return static::RelationshipName . $append;
+	public static function field_name($suffix = '') {
+		return static::RelationshipName . $suffix;
 	}
 
 	/**

@@ -28,6 +28,36 @@ class Application extends Module {
 	// use this
 	private static $default_theme = self::ThemeDefault;
 
+
+	/**
+	 * Try to get page from Director and if in CMS then get it from CMS page, fallback to
+	 * Controller url via page_for_path.
+	 *
+	 * @return \DataObject|\Page|\SiteTree
+	 */
+	public static function get_current_page() {
+		$page = null;
+		if (\Director::is_ajax()) {
+			if ($path = self::path_for_request(\Controller::curr()->getRequest()->getVar('path'))) {
+				$page = self::page_for_path($path);
+			}
+		} else {
+			if ($page = \Director::get_current_page()) {
+				if ($page instanceof \CMSMain) {
+					$page = $page->currentPage();
+				}
+			}
+			if (!$page && $controller = Controller::curr()) {
+				if ($controller = Controller::curr()) {
+					if ($request = $controller->getRequest()) {
+						$page = Application::page_for_path($request->getURL());
+					}
+				}
+			}
+		}
+		return $page;
+	}
+
 	/**
 	 * Override to provide current theme folder if requirements_path not set.
 	 *
@@ -43,6 +73,51 @@ class Application extends Module {
 	 */
 	public static function device_mode() {
 		return static::domain_theme();
+	}
+
+	/**
+	 * Return a path from the request using a getVar or HTTP_REFERER or the request URL.
+	 * @param \SS_HTTPRequest $request
+	 * @param string          $getVar
+	 * @return mixed|string
+	 */
+	public static function path_for_request(\SS_HTTPRequest $request = null, $getVar = 'path') {
+		$request = $request ?: Controller::curr()->getRequest();
+		
+		if (!$path = $request->getVar($getVar)) {
+			if (isset($_SERVER['HTTP_REFERER'])) {
+				$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+			} else {
+				$path = $request->getURL();
+			}
+		}
+		return $path;
+	}
+
+	/**
+	 * Walk the site-tree to find a page given a nested path.
+	 * @param $path
+	 * @return \DataObject|\Page
+	 */
+	public static function page_for_path($path) {
+		$path = trim($path, '/');
+
+		if ($path == '') {
+			return \HomePage::get()->first();
+		}
+		/** @var \Page $page */
+		$page = null;
+
+		$parts = explode('/', $path);
+		$children = \Page::get()->filter('ParentID', 0);
+
+		while ($segment = array_shift($parts)) {
+			if (!$page = $children->find('URLSegment', $segment)) {
+				break;
+			}
+			$children = $page->Children();
+		}
+		return $page;
 	}
 
 	/**
