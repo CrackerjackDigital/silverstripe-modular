@@ -81,7 +81,9 @@ class Application extends Module {
 	 * @param string          $getVar
 	 * @return mixed|string
 	 */
-	public static function path_for_request(\SS_HTTPRequest $request, $getVar = 'path') {
+	public static function path_for_request(\SS_HTTPRequest $request = null, $getVar = 'path') {
+		$request = $request ?: Controller::curr()->getRequest();
+		
 		if (!$path = $request->getVar($getVar)) {
 			if (isset($_SERVER['HTTP_REFERER'])) {
 				$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
