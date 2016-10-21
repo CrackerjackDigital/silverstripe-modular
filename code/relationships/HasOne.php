@@ -84,9 +84,9 @@ class HasOne extends Field
 		return static::RelationshipName . ($fieldName ? ".$fieldName" : '');
 	}
 	
-	public static function related_class_name()
+	public static function related_class_name($fieldName = '')
 	{
-		return static::RelatedClassName;
+		return static::RelatedClassName . ($fieldName ? ".$fieldName" : '');
 	}
 	
 }

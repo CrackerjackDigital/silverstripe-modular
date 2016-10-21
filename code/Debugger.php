@@ -15,20 +15,6 @@ class Debugger extends Object implements DebugInterface
 
 	const DefaultSendEmailsFrom = 'servers@moveforward.co.nz';
 
-	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
-	const DebugErr    = SS_Log::ERR;        // 3
-	const DebugWarn   = SS_Log::WARN;       // 4
-	const DebugNotice = SS_Log::NOTICE;     // 5
-	const DebugInfo   = SS_Log::INFO;       // 6
-	const DebugTrace  = SS_Log::DEBUG;      // 7
-
-	// disable all debugging
-	const DebugOff = 16;
-	
-	const DebugFile   = 32;
-	const DebugScreen = 64;
-	const DebugEmail  = 128;
-	
 	private static $levels = [
 		self::DebugErr    => 'ERROR',
 		self::DebugWarn   => 'WARN',

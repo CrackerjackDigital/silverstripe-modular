@@ -1,24 +1,8 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\GridField\GridField;
-
-class HasManyMany extends GridField {
-	const ShowAsTagsField = 'tags';
+class HasManyMany extends RelatedModels {
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
-
-	/**
-	 * Customise if shows as a GridField or a TagField depending on config.show_as
-	 * @return array
-	 */
-	public function cmsFields() {
-		if ($this->config()->get('show_as') == self::ShowAsTagsField) {
-			$fields = $this->tagFields();
-		} else {
-			$fields = $this->gridFields();
-		}
-		return $fields;
-	}
 
 	/**
 	 * Return all related items. Optionally (for convenience more than anything) provide a relationship name to dereference otherwise this classes
@@ -39,23 +23,6 @@ class HasManyMany extends GridField {
 	 */
 	public function relatedIDs($relationshipName = '') {
 		return $this->related($relationshipName)->column('ID');
-	}
-
-	/**
-	 * Returns a field array using a tag field which can be used in derived classes instead of a GridField which is the default returned by cmsFields().
-	 * @return array
-	 */
-	protected function tagFields() {
-		$multipleSelect = (bool) $this->config()->get('multiple_select');
-		$relatedClassName = static::RelatedClassName;
-
-		return [
-			(new \TagField(
-				static::relationship_name(),
-				null,
-				$relatedClassName::get()
-			))->setIsMultiple($multipleSelect)->setCanCreate(false),
-		];
 	}
 
 	public function extraStatics($class = null, $extension = null) {

@@ -223,15 +223,10 @@ abstract class Field extends ModelExtension {
 		// default does nothing, this is mainly here for the method template when deriving classes
 	}
 
-	/**
-	 * A dummy helper so we can try to get field decorations from a relationship instead of just a field name.
-	 *
-	 * @return string
-	 */
-	public static function relationship_name() {
-		return '';
+	public static function field_name() {
+		return static::SingleFieldName;
 	}
-
+	
 	/**
 	 * Set field decorations, e.g. label, guide information etc
 	 *

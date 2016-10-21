@@ -19,7 +19,7 @@ class GridListFilters extends ModelAdmin {
 	private static $default_sort = 'Sort';
 
 	/**
-	 * Add GridFieldOrderableRows to the GridField
+	 * Add GridFieldOrderableRows to the RelatedModels
 	 * @param null $request
 	 * @return \Form
 	 */

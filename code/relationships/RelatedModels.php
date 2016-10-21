@@ -1,18 +1,19 @@
 <?php
-namespace Modular\GridField;
+namespace Modular\Relationships;
 
 use Modular\Fields\Field;
 use Modular\GridField\GridFieldOrderableRows;
 
-class GridField extends Field {
+class RelatedModels extends Field {
 	const ShowAsGridField = 'grid';
+	const ShowAsTagsField = 'tags';
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
 	const GridFieldOrderableRowsFieldName = GridFieldOrderableRows::SortFieldName;
 
-	// wether to show the field as a GridField or a TagField
+	// wether to show the field as a RelatedModels or a TagField
 	private static $show_as = self::ShowAsGridField;
 
 	// can related models be in an order so a GridFieldOrderableRows component is added?
@@ -23,16 +24,40 @@ class GridField extends Field {
 
 	// show autocomplete existing filter
 	private static $autocomplete = true;
-
+	
+	private static $can_create_tags = false;
+	
+	private static $multiple_select = true;
+	
+	
 	/**
-	 * Return a gridfield
-	 *
+	 * Customise if shows as a RelatedModels or a TagField depending on config.show_as
 	 * @return array
 	 */
 	public function cmsFields() {
-		return $this->gridFields();
+		if ($this->config()->get('show_as') == self::ShowAsTagsField) {
+			$fields = $this->tagFields();
+		} else {
+			$fields = $this->gridFields();
+		}
+		return $fields;
 	}
-
+	
+	
+	
+	/**
+	 * Returns a field array using a tag field which can be used in derived classes instead of a RelatedModels which is the default returned by cmsFields().
+	 * @return array
+	 */
+	protected function tagFields() {
+		
+		return [
+			static::RelationshipName =>  $this()->isInDB()
+		        ? $this->tagField()
+				: $this->saveMasterHint()
+		];
+	}
+	
 	/**
 	 * Return field(s) to show a gridfield in the CMS, or a 'please save...' prompt if the model hasn't been saved
 	 *
@@ -40,7 +65,7 @@ class GridField extends Field {
 	 */
 	protected function gridFields() {
 		return [
-			$this()->isInDB()
+			static::RelationshipName => $this()->isInDB()
 				? $this->gridField()
 				: $this->saveMasterHint(),
 		];
@@ -69,8 +94,20 @@ class GridField extends Field {
 		return static::RelationshipName . ($fieldName ? ".$fieldName" : '');
 	}
 
+	protected function tagField() {
+		return (new \TagField(
+			static::relationship_name(),
+			null,
+			\DataObject::get(static::RelatedClassName)
+		))->setIsMultiple(
+			(bool) $this->config()->get('multiple_select')
+		)->setCanCreate(
+			(bool) $this->config()->get('can_create_tags')
+		);
+	}
+	
 	/**
-	 * Return a GridField configured for editing attached MediaModels. If the master record is in the database
+	 * Return a RelatedModels configured for editing attached MediaModels. If the master record is in the database
 	 * then also add GridFieldOrderableRows (otherwise complaint re UnsavedRelationList not being a DataList happens).
 	 *
 	 * @param string|null $relationshipName
@@ -83,7 +120,7 @@ class GridField extends Field {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
-		/** @var GridField $gridField */
+		/** @var RelatedModels $gridField */
 		$gridField = \GridField::create(
 			$relationshipName,
 			$relationshipName,
