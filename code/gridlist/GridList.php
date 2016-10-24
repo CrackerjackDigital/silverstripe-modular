@@ -45,6 +45,12 @@ class GridList extends ContentControllerExtension {
 
 			$providers = $this->providers();
 
+			$items = new \ArrayList();
+
+			$mode = $this->mode();
+
+			$totalCount = 0;
+
 			foreach ($providers as $provider) {
 				// get extra data such as for pagination PageLength, GridList Mode etc
 				foreach ($provider->extend('provideGridListTemplateData', $extraData) as $extendedData) {
@@ -53,21 +59,19 @@ class GridList extends ContentControllerExtension {
 						$extendedData
 					);
 				}
-				$firstItem = $this->service()->Filters()->start();
+				$items->merge($this->items($mode));
 
-				$pageLength = isset($extraData['PageLength'])
-					? $extraData['PageLength']
-					: $this->config()->get('default_page_length');
-
-				$mode = $this->mode();
-
-				// TODO fix only one provider is providing as items is reset in the loop each time. should merge
-				$items = $this->items($mode);
-
+				// get this before we group
 				$totalCount = $items->count();
 
 				$provider->extend('groupGridListItems', $items, $mode);
+
 			}
+			$firstItem = $this->service()->Filters()->start();
+
+			$pageLength = isset($extraData['PageLength'])
+				? $extraData['PageLength']
+				: $this->config()->get('default_page_length');
 
 			$paginated = $this->paginator($items, $firstItem, $pageLength);
 
