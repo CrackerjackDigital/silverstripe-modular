@@ -3,15 +3,18 @@ namespace Modular\Search;
 
 use Modular\Fields\Field;
 use Modular\Fields\ModelTag;
+use Modular\GridList\Interfaces\ItemsProvider;
+use Modular\ModelExtension;
 use Modular\Models\Tag;
 use Modular\reflection;
 
-class ItemsProvider extends Field implements \Modular\GridList\Interfaces\ItemsProvider {
-	use reflection;
-
-	const SingleFieldName   = 'ProvideFulltextSearch';
-	const SingleFieldSchema = 'Boolean';
-
+/**
+ * Provides items which match fulltext parameter 'q'
+ *
+ * @package Modular\Search
+ */
+class FulltextProvider extends ModelExtension implements ItemsProvider {
+	// only classes matched here via ModelTag.relatedByClassName will be returned
 	private static $search_classes = [
 		# at least in config, alse add Modular\Search\ModelExtension to the class itselg
 		# 'SiteTree',
@@ -24,23 +27,13 @@ class ItemsProvider extends Field implements \Modular\GridList\Interfaces\ItemsP
 		/** @var Service $service */
 		$service = \Injector::inst()->get('SearchService');
 
-		// we don't search by tags and fulltext at the same time, try tags first as probably quicker
-		if ($tags = array_filter(explode(',', $service->constraint(Constraints::TagsVar)))) {
-			$allTags = Tag::get();
-			foreach ($tags as $tag) {
-				if ($tag = $allTags->find(ModelTag::field_name(), $tag)) {
-					$results->merge($tag->RelatedByClassName('*Page'));
-				}
-			}
-		} else {
+		// check something was passed in 'q' parameter up front to skip processing if we can
+		if ($service->constraint(Constraints::FullTextVar)) {
 			$searchClasses = $this()->config()->get('search_classes') ?: [];
 
 			foreach ($searchClasses as $className) {
-				$filter = $service->Filters()->filter($className, Constraints::FullTextVar, ModelExtension::SearchIndex);
+				$filter = $service->Filters()->filter($className, Constraints::FullTextVar, \Modular\Search\ModelExtension::SearchIndex);
 				if ($filter) {
-					// this is a list of e.g. pages, blocks, we next need to
-					// ask each page/block for it's actual hits
-					// e.g. ask blocks for their pages
 					$intermediates = \DataObject::get($className)
 						->filter($filter);
 
@@ -48,14 +41,18 @@ class ItemsProvider extends Field implements \Modular\GridList\Interfaces\ItemsP
 					foreach ($intermediates as $intermediate) {
 						if ($intermediate->hasMethod('SearchTargets')) {
 
+							// merge in what the intermediate object thinks are it's actual targets,
+							// e.g. for a ContentBlock this is the Pages which are related to that block
 							$results->merge($intermediate->SearchTargets());
 
+						} else {
+							// if no search targets nominated then just add the intermediate as it is the target
+							$results->push($intermediate);
 						}
 					}
 				}
 			}
 		}
-
 		return $results;
 	}
 }

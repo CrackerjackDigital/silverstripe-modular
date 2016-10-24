@@ -6,7 +6,7 @@ Injector:
     class: Modular\Search\Service
 
 # copy to app config and add classes which are to searchable (as with extension below)
-# Modular\Search\ItemsProvider:
+# Modular\Search\FulltextProvider:
 #  search_classes:
 #    - SiteTree
 #    - File
@@ -25,7 +25,7 @@ Injector:
 # SearchPage:
 #  extensions:
 #    - Modular\Search\GridList
-#    - Modular\Search\ItemsProvider
+#    - Modular\Search\FulltextProvider
 
 # to enable searching a block (and have results link to the found blocks pages)
 # ContentBlock:
