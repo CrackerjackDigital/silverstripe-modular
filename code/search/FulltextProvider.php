@@ -2,14 +2,12 @@
 namespace Modular\Search;
 
 use Modular\GridList\Interfaces\ItemsProvider;
-use Modular\ModelExtension;
-
 /**
  * Provides items which match fulltext parameter 'q'
  *
  * @package Modular\Search
  */
-class FulltextProvider extends ModelExtension implements ItemsProvider {
+class FulltextProvider extends \Modular\ModelExtension implements ItemsProvider {
 	// only classes matched here via ModelTag.relatedByClassName will be returned
 	private static $search_classes = [
 		# at least in config, alse add Modular\Search\ModelExtension to the class itselg
