@@ -1,19 +1,16 @@
 <?php
 namespace Modular\Search;
 
-use Modular\Fields\Field;
 use Modular\Fields\ModelTag;
 use Modular\GridList\Interfaces\ItemsProvider;
-use Modular\ModelExtension;
 use Modular\Models\Tag;
-use Modular\reflection;
 
 /**
  * Provides items which match 'tags' query paramter as ModelTags - tags can be a csv list of ModelTags.
  *
  * @package Modular\Search
  */
-class TaggedItemsProvider extends ModelExtension implements ItemsProvider {
+class TaggedItemsProvider extends \Modular\ModelExtension implements ItemsProvider {
 	// only classes matching here by ModelTag.relatedByClassName will be included
 	private static $search_classes = [
 		# at least in config, alse add Modular\Search\ModelExtension to the class itselg
