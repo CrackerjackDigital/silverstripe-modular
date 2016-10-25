@@ -80,6 +80,9 @@ class GridList extends ContentControllerExtension {
 			// this will be sent back as a header X-Load-More
 			$loadMore = ($totalCount > $paginatedLast) ? 1 : 0;
 
+			// set the load more header used by client to show/hide load more button
+			Controller::curr()->getResponse()->addHeader('X-Load-More', $loadMore);
+
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[

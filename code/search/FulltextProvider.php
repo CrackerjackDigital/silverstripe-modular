@@ -1,12 +1,8 @@
 <?php
 namespace Modular\Search;
 
-use Modular\Fields\Field;
-use Modular\Fields\ModelTag;
 use Modular\GridList\Interfaces\ItemsProvider;
 use Modular\ModelExtension;
-use Modular\Models\Tag;
-use Modular\reflection;
 
 /**
  * Provides items which match fulltext parameter 'q'
