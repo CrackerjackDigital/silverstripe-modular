@@ -50,6 +50,36 @@ abstract class Field extends ModelExtension {
 
 	private static $cms_tab_name = '';
 
+	const ViewPermissions = 'can_view';
+	const EditPermissions = 'can_edit';
+
+	// psuedo group code add to can_view or can_edit config arrays to allow that permission for not-logged in visitors to site.
+	const FrontEndPermissionGroup = 'PUBLIC';
+	// if this is added as a key then the value overrides all other checks, e.g. add as false to hide a field form all cms users and the public
+	const EveyonePermissionsGroups = 'EVERYONE';
+
+	// filter these out from member group check as not real security groups
+	// add additional psuedo groups in config derived classes config if required
+	private static $psuedo_groups = [
+		self::FrontEndPermissionGroup,
+	    self::EveyonePermissionsGroups
+	];
+
+	// map of groups who can view this field, see checkPermissions for details
+	// a default of empty means fully permissive, all users and front-end can see the field
+	private static $can_view = [
+		#   'EVERYONE'  => false                        // remove this field for everyone, including front-end
+		#   'EVERYONE'  => true                         // skip other rules, show this field in all cases
+		#   self::FrontEndPermissionGroup => true       // show this field in front-end forms
+	    #   'ADMIN'     => true                         // check user is in ADMIN group
+	    #   'ADMIN'     => false                        // don't check admin = disable this check
+	];
+
+	// map of groups who can edit this field, see config.can_view and check_permissions for details
+	// a default of empty means fully permissive, all users and front-end can edit the field
+	private static $can_edit = [
+	];
+
 	/**
 	 * If we use invocation we can type-cast the result to a ModularModel
 	 *
@@ -57,6 +87,64 @@ abstract class Field extends ModelExtension {
 	 */
 	public function __invoke() {
 		return $this->owner;
+	}
+
+	/**
+	 * Checks if current member can view the field in CMS, or if not-logged in member can in front-end.
+	 *
+	 * @param FormField $field
+	 * @return bool true if yes, false if no
+	 */
+	public function canViewField($field) {
+		return $this->check_permissions(self::ViewPermissions);
+	}
+
+	/**
+	 * Checks if current member can edit the field in CMS, or if not-logged in member can in front-end.
+	 *
+	 * @param FormField $field
+	 * @return bool true if yes, false if no
+	 */
+	public function canEditField($field) {
+		return $this->check_permissions(self::EditPermissions);
+	}
+
+	/**
+	 * Check the requested config variable for the field class against member or 'visitor' permissions as follows:
+	 *  -   the 'EVERYONE' psuedo group is not present or its present and value is false means field is hidden.
+	 *  -   empty config means everyone can view and edit, including front end and CMS
+	 *  -   a group code as key with a 'true' value will enforce a check member is in that group
+	 *  -   a group code as key with a 'false' value will not force a check on that group
+	 *  -   set the value to false on a particular derived field for a particular field to override if required
+	 *
+	 * Permissions are atomic, i.e. can view does not imply can edit as there may be 'write-only' fields.
+	 *
+	 * @param string $what config to check, e.g. 'can_view' or 'can_edit'
+	 * @return bool true for success, false for fail
+	 */
+	public static function check_permissions($what) {
+		if ($groups = static::config()->get($what) ?: []) {
+			if (array_key_exists(self::EveyonePermissionsGroups, $groups)) {
+				return $groups[self::EveyonePermissionsGroups];
+			}
+			$psuedoGroups = static::config()->get('psuedo_groups');
+
+			if ($member = \Member::currentUser()) {
+				// filter out psuedo groups and those with a value of false
+				$groups = array_filter(
+					array_keys(array_filter($groups)),
+					function($groupCode) use ($psuedoGroups) {
+						return !in_array($groupCode, $psuedoGroups);
+					}
+				);
+				return $member->inGroups($groups);
+			} else {
+				// check that 'PUBLIC' key if present has true value or fail
+				return array_key_exists(self::FrontEndPermissionGroup, $groups)
+					? $groups[ self::FrontEndPermissionGroup ]
+					: false;
+			}
+		}
 	}
 
 	/**
@@ -138,8 +226,15 @@ abstract class Field extends ModelExtension {
 		$allFieldsConstraints = $this->config()->get(static::ValidationRulesConfigVarName) ?: [];
 
 		if ($cmsFields = $this->cmsFields()) {
+			// fields are copied to here at end of decoration etc and if they are viewable.
+			$viewable = [];
+
 			/** @var FormField $field */
-			foreach ($cmsFields as $field) {
+			foreach ($cmsFields as $key => $field) {
+				if (!$this->canViewField($field)) {
+					continue;
+				}
+
 				$fieldName = $field->getName();
 
 				if ($fieldName) {
@@ -153,10 +248,16 @@ abstract class Field extends ModelExtension {
 				}
 				// add any extra constraints, display-logic etc on a per-field basis
 				$this()->extend('customFieldConstraints', $field, $allFieldsConstraints);
+
+				if (!$this->canEditField($field)) {
+					$field->performReadonlyTransformation();
+				}
+				$viewable[ $key ] = $field;
 			}
+			// add all the viewable fields
 			$fields->addFieldsToTab(
 				$this->cmsTab(),
-				$cmsFields
+				$viewable
 			);
 		}
 
@@ -226,7 +327,7 @@ abstract class Field extends ModelExtension {
 	}
 
 	public static function field_name($suffix = '') {
-		return static::SingleFieldName  ? (static::SingleFieldName . $suffix) : '';
+		return static::SingleFieldName ? (static::SingleFieldName . $suffix) : '';
 	}
 
 	/**
