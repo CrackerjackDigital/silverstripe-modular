@@ -33,31 +33,34 @@ class HideUnmatchedFilters extends Field implements FilterConstraints {
 		if ($this()->{self::SingleFieldName}) {
 			$ids = $filters->column('ID');
 
-			// this is where we keep track of GridListFilters which have been found on items where ID is the key
-			$foundFilters = array_combine(
-				$ids,
-				array_fill(0, count($ids), false)
-			);
+			if (count($ids)) {
+				// this is where we keep track of GridListFilters which have been found on items where ID is the key
+				$foundFilters = array_combine(
+					$ids,
+					array_fill(0, count($ids), false)
+				);
 
-			foreach ($foundFilters as $filterID => &$found) {
-				/** @var \Page|Model $item */
-				foreach ($items as $item) {
-					if ($item->hasExtension(HasGridListFilters::class_name())) {
-						if ($itemFilters = $item->{HasGridListFilters::relationship_name()}()->column('ID')) {
-							if (in_array($filterID, $itemFilters)) {
-								$found = true;
-								break;
+				foreach ($foundFilters as $filterID => &$found) {
+					/** @var \Page|Model $item */
+					foreach ($items as $item) {
+						if ($item->hasExtension(HasGridListFilters::class_name())) {
+							if ($itemFilters = $item->{HasGridListFilters::relationship_name()}()->column('ID')) {
+								if (in_array($filterID, $itemFilters)) {
+									$found = true;
+									break;
+								}
 							}
 						}
 					}
 				}
-			}
-			foreach ($filters as $filter) {
-				if (isset($foundFilters[ $filter->ID ])) {
-					$out->push($filter);
+				foreach ($filters as $filter) {
+					if (isset($foundFilters[ $filter->ID ])) {
+						$out->push($filter);
+					}
 				}
+				$filters = $out;
 			}
-			$filters = $out;
+
 		}
 	}
 }

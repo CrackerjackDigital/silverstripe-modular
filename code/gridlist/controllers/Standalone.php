@@ -22,9 +22,6 @@ class Standalone extends \ContentController {
 
 					/** @var \GridListBlock $gridList */
 					if ($gridListBlock = $page->Blocks()->find('ClassName', 'GridListBlock')) {
-						$gridList = $gridListBlock->GridList();
-						// set the load more header sued by client to show/hide laod more button
-						$this->getResponse()->addHeader('X-Load-More', $gridList->LoadMore);
 						return $gridListBlock->renderWith("GridListItems");
 					}
 				}

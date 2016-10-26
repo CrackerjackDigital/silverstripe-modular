@@ -1,6 +1,7 @@
 <?php
 namespace Modular\Fields;
 
+use Modular\reflection;
 use URLSegmentFilter;
 use DataList;
 use Permission;
@@ -10,6 +11,8 @@ use Permission;
  * format as a URLSegment. Does not change if the source field changes, only if it is empty.
  */
 class ModelTag extends Field {
+	use reflection;
+
 	const SingleFieldName   = 'ModelTag';
 	const SingleFieldSchema = 'Varchar(64)';
 
@@ -50,13 +53,19 @@ class ModelTag extends Field {
 
 	/**
 	 * Return all the page models related to this tag (there may be multiple Page Classe attached so iterate through them all)
+	 *
+	 * @param string|array $matchClassNames and array of classnames, a class name or a pattern as used by fnmatch, eg. '*Page'
+	 * @return \ArrayList
 	 */
-	public function RelatedByClassName($classNamePattern) {
+	public function relatedByClassName($matchClassNames) {
+		$matchClassNames = is_array($matchClassNames) ? $matchClassNames : [$matchClassNames ];
+
 		$pages = new \ArrayList();
 		foreach ($this()->config()->get('belongs_many_many') as $relationship => $className) {
-			// not a nice test
-			if (fnmatch($classNamePattern, $className)) {
-				$pages->merge($this()->$relationship());
+			foreach ($matchClassNames as $pattern) {
+				if (fnmatch($pattern, $className)) {
+					$pages->merge($this()->$relationship());
+				}
 			}
 		}
 		return $pages;
