@@ -5,6 +5,12 @@ use ArrayList;
 use FormField;
 use Modular\Interfaces\Imagery;
 
+/**
+ * Image represents a single attached image, this is a relationship so use RelationshipName and RelationshipClassName
+ * not SingleFieldName and SingleFieldSchema.
+ *
+ * @package Modular\Fields
+ */
 class Image extends File implements Imagery {
 	const RelationshipName = 'Image';
 	const RelatedClassName = 'Image';
