@@ -23,7 +23,7 @@ class FulltextProvider extends \Modular\ModelExtension implements ItemsProvider 
 
 		// check something was passed in 'q' parameter up front to skip processing if we can
 		if ($service->constraint(Constraints::FullTextVar)) {
-			$searchClasses = $this()->config()->get('search_classes') ?: [];
+			$searchClasses = $this->config()->get('search_classes') ?: [];
 
 			foreach ($searchClasses as $className) {
 				$filter = $service->Filters()->filter($className, Constraints::FullTextVar, \Modular\Search\ModelExtension::SearchIndex);

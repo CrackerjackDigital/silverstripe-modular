@@ -45,40 +45,59 @@ class GridList extends ContentControllerExtension {
 
 			$providers = $this->providers();
 
-			$items = new \ArrayList();
-
 			$mode = $this->mode();
 
-			$totalCount = 0;
+			// now get the items, this will loop through providers also internally
+			$items = $this->items($mode);
 
+			// get this before we re-sequence (eg group)
+			// raw item count shouldn't change in sequencing
+			$itemCountHere = $items->count();
+
+			// now do any constraints to filter out unwanted items
+			foreach ($providers as $provider) {
+				$provider->extend('constrainGridListItems', $items);
+			}
+
+			$itemCountHere = $items->count();
+
+			$items->removeDuplicates();
+
+			// get this before we re-sequence (eg group), raw item count shouldn't change in
+			// sequencing
+			$rawItemCount = $itemCountHere = $items->count();
+
+			// now do any grouping, direct manipulation of items such as fixed ordering
+			foreach ($providers as $provider) {
+				$provider->extend('sequenceGridListItems', $items, $mode);
+			}
+			$itemCountHere = $items->count();
+
+			// now get any extra data
 			foreach ($providers as $provider) {
 				// get extra data such as for pagination PageLength, GridList Mode etc
-				foreach ($provider->extend('provideGridListTemplateData', $extraData) as $extendedData) {
+				foreach ($provider->extend('provideGridListTemplateData', $extraData, $items) as $extendedData) {
 					$extraData = array_merge(
 						$extraData,
 						$extendedData
 					);
 				}
-				$items->merge($this->items($mode));
-
-				// get this before we group
-				$totalCount = $items->count();
-
-				$provider->extend('groupGridListItems', $items, $mode);
-
 			}
-			$firstItem = $this->service()->Filters()->start();
+			// TODO move pagination into an extension
+			$firstItem = $this->service()->Filters()->start() ?: 0;
 
 			$pageLength = isset($extraData['PageLength'])
 				? $extraData['PageLength']
 				: $this->config()->get('default_page_length');
 
-			$paginated = $this->paginator($items, $firstItem, $pageLength);
+			$items = $this->paginator($items, $firstItem, $pageLength);
 
 			$paginatedLast = $firstItem + $pageLength;
 
+			$itemCountHere = $items->count();
+
 			// this will be sent back as a header X-Load-More
-			$loadMore = ($totalCount > $paginatedLast) ? 1 : 0;
+			$loadMore = ($itemCountHere > $paginatedLast) ? 1 : 0;
 
 			// set the load more header used by client to show/hide load more button
 			Controller::curr()->getResponse()->addHeader('X-Load-More', $loadMore);
@@ -86,8 +105,8 @@ class GridList extends ContentControllerExtension {
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[
-					'Items'         => $paginated,
-					'TotalItems'    => $totalCount,
+					'Items'         => $items,
+					'TotalItems'    => $rawItemCount,
 					'Filters'       => $this->filters($mode),
 					'Mode'          => $mode,
 					'Sort'          => $this->service()->sort(),
@@ -99,58 +118,6 @@ class GridList extends ContentControllerExtension {
 			$gridlist = new \ArrayData($data);
 		}
 		return $gridlist;
-	}
-
-	/**
-	 * Returns an array of providers of items, filters etc to show in on-page grids. Starts with
-	 * the current extended model, but may add the current page if it has config.gridlist_provider set
-	 *
-	 * @return \DataObject|\SiteTree
-	 */
-	protected function providers() {
-		$providers = [
-			$this()
-		];
-
-		$page = null;
-
-		$page = Application::get_current_page();
-		if ($page) {
-			if ($page->config()->get('gridlist_provider')) {
-				$providers[] = $page;
-			}
-		}
-		return $providers;
-	}
-
-	/**
-	 * Returns first mode from:
-	 *  -   template parameter
-	 *  -   url query string via service
-	 *  -   extended models config.gridlist_mode (a GridListBlock not a page)
-	 *  -   this config.default_mode
-	 *
-	 * @return string mode chosen, e.g. 'grid' or 'list'
-	 */
-	public function Mode() {
-		return $this->service()->mode();
-	}
-
-	/**
-	 * Return instance of service that this gridlist is using
-	 *
-	 * @return Service
-	 */
-	public static function service() {
-		/** @var \Page $page */
-		$service = '';
-
-		if ($page = Application::get_current_page()) {
-			$service = $page->config()->get('gridlist_service');
-		}
-		$service = $service ?: static::config()->get('gridlist_service');
-
-		return \Injector::inst()->get($service);
 	}
 
 	/**
@@ -180,13 +147,8 @@ class GridList extends ContentControllerExtension {
 					}
 					$items->merge($itemList);
 				}
-
-				$items->removeDuplicates();
-
-				$provider->extend('constrainGridListItems', $items);
-
-				$provider->extend('sequenceGridListItems', $items, $mode);
 			}
+			$items->removeDuplicates();
 		}
 		return $items;
 	}
@@ -223,6 +185,28 @@ class GridList extends ContentControllerExtension {
 	}
 
 	/**
+	 * Returns an array of providers of items, filters etc to show in on-page grids. Starts with
+	 * the current extended model, but may add the current page if it has config.gridlist_provider set
+	 *
+	 * @return \DataObject|\SiteTree
+	 */
+	protected function providers() {
+		$providers = [
+			$this()
+		];
+
+		$page = null;
+
+		$page = Application::get_current_page();
+		if ($page) {
+			if ($page->config()->get('gridlist_provider')) {
+				$providers[] = $page;
+			}
+		}
+		return $providers;
+	}
+
+	/**
 	 * Given a list of items return a paginated version.
 	 *
 	 * @param \SS_List $items
@@ -242,6 +226,36 @@ class GridList extends ContentControllerExtension {
 		$paginated->setPageStart($firstItem);
 		$paginated->setPageLength($pageLength);
 		return $paginated;
+	}
+
+	/**
+	 * Returns first mode from:
+	 *  -   template parameter
+	 *  -   url query string via service
+	 *  -   extended models config.gridlist_mode (a GridListBlock not a page)
+	 *  -   this config.default_mode
+	 *
+	 * @return string mode chosen, e.g. 'grid' or 'list'
+	 */
+	public function Mode() {
+		return $this->service()->mode();
+	}
+
+	/**
+	 * Return instance of service that this gridlist is using
+	 *
+	 * @return Service
+	 */
+	public static function service() {
+		/** @var \Page $page */
+		$service = '';
+
+		if ($page = Application::get_current_page()) {
+			$service = $page->config()->get('gridlist_service');
+		}
+		$service = $service ?: static::config()->get('gridlist_service');
+
+		return \Injector::inst()->get($service);
 	}
 
 }

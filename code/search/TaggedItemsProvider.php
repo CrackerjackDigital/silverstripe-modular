@@ -12,8 +12,8 @@ use Modular\Models\Tag;
  */
 class TaggedItemsProvider extends \Modular\ModelExtension implements ItemsProvider {
 	// only classes matching here by ModelTag.relatedByClassName will be included
+	// e.g. '*Page' will be all classes ending in 'Page'
 	private static $search_classes = [
-		# at least in config, alse add Modular\Search\ModelExtension to the class itselg
 		# 'SiteTree',
 		# 'File',
 	];
@@ -26,7 +26,7 @@ class TaggedItemsProvider extends \Modular\ModelExtension implements ItemsProvid
 
 		if ($tags = array_filter(explode(',', $service->constraint(Constraints::TagsVar)))) {
 			$allTags = Tag::get();
-			$searchClasses = $this()->config()->get('search_classes');
+			$searchClasses = $this->config()->get('search_classes');
 
 			foreach ($tags as $tag) {
 				/** @var ModelTag $tag */
