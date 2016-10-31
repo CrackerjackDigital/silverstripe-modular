@@ -34,121 +34,101 @@ class GridList extends ContentControllerExtension {
 
 	/**
 	 * Return data for templates, accessible via e.g. GridList.Items and GridList.Mode
+	 *
 	 * @param string $overrideMode one of the self.ModeABC constants, will force gridlist to be in this mode always
 	 * @return \ArrayData
 	 */
-	public function GridList() {
-		static $gridlist;
+	public function GridList($mode = null) {
+		static $gridlist = [];
 
-		if (!$gridlist) {
-			$extraData = [];
+		if (!isset($gridlist[$mode])) {
+			$items = $this->GridListItems($mode);
 
-			$providers = $this->providers();
+			$itemCount = $items->count();
 
-			$mode = $this->mode();
-
-			// now get the items, this will loop through providers also internally
-			$items = $this->items($mode);
-
-			// get this before we re-sequence (eg group)
-			// raw item count shouldn't change in sequencing
-			$itemCountHere = $items->count();
-
-			// now do any constraints to filter out unwanted items
-			foreach ($providers as $provider) {
-				$provider->extend('constrainGridListItems', $items);
-			}
-
-			$itemCountHere = $items->count();
-
-			$items->removeDuplicates();
-
-			// get this before we re-sequence (eg group), raw item count shouldn't change in
-			// sequencing
-			$rawItemCount = $itemCountHere = $items->count();
-
-			// now do any grouping, direct manipulation of items such as fixed ordering
-			foreach ($providers as $provider) {
-				$provider->extend('sequenceGridListItems', $items, $mode);
-			}
-			$itemCountHere = $items->count();
-
-			// now get any extra data
-			foreach ($providers as $provider) {
-				// get extra data such as for pagination PageLength, GridList Mode etc
-				foreach ($provider->extend('provideGridListTemplateData', $extraData, $items) as $extendedData) {
-					$extraData = array_merge(
-						$extraData,
-						$extendedData
-					);
-				}
-			}
-			// TODO move pagination into an extension
-			$firstItem = $this->service()->Filters()->start() ?: 0;
-
-			$pageLength = isset($extraData['PageLength'])
-				? $extraData['PageLength']
-				: $this->config()->get('default_page_length');
-
-			$items = $this->paginator($items, $firstItem, $pageLength);
-
-			$paginatedLast = $firstItem + $pageLength;
-
-			$itemCountHere = $items->count();
-
-			// this will be sent back as a header X-Load-More
-			$loadMore = ($itemCountHere > $paginatedLast) ? 1 : 0;
-
-			// set the load more header used by client to show/hide load more button
-			Controller::curr()->getResponse()->addHeader('X-Load-More', $loadMore);
+			$extraData = $this->extraData($mode);
 
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[
 					'Items'         => $items,
-					'TotalItems'    => $rawItemCount,
-					'Filters'       => $this->filters($mode),
-					'Mode'          => $mode,
+					'TotalItems'    => $itemCount,
+					'Filters'       => $this->filters(),
 					'Sort'          => $this->service()->sort(),
-					'DefaultFilter' => $this->service()->Filters()->defaultFilter(),
-					'LoadMore'      => $loadMore,
+					'DefaultFilter' => $this->service()->Filters()->defaultFilter()
 				],
 				$extraData
 			);
-			$gridlist = new \ArrayData($data);
+			$gridlist[$mode] = new \ArrayData($data);
 		}
-		return $gridlist;
+		return $gridlist[$mode];
+	}
+
+	protected function extraData($mode = null) {
+		$mode = $mode ?: $this->mode();
+
+		$providers = $this->providers();
+
+		$extraData = [
+			'Mode' => $mode
+		];
+
+		// now get any extra data
+		foreach ($providers as $provider) {
+			// get extra data such as for pagination PageLength, GridList Mode etc
+			foreach ($provider->extend('provideGridListTemplateData', $extraData) as $extendedData) {
+				$extraData = array_merge(
+					$extraData,
+					$extendedData
+				);
+			}
+		}
+		return $extraData;
 	}
 
 	/**
+	 * Return all items unpaginated though may be limited as to how many items in each filter are returned.
+	 *
 	 * @return \ArrayList
 	 */
-	protected function items($mode) {
+	public function gridListItems($mode = null) {
 		static $items;
 		if (!$items) {
-			$providers = $this->providers();
+			$extraData = $this->extraData($mode);
 
 			$items = new \ArrayList();
-			$service = $this->service();
+			$provided = [];
 
-			$currentFilterID = $service->Filters()->currentFilterID();
+			$providers = $this->providers();
 
+			// get all the lists from all the providers e.g. related pages, associated filters etc
 			foreach ($providers as $provider) {
-				// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
-				// this will return an array of SS_Lists
-				$lists = $provider->extend('provideGridListItems');
-				/** @var \ManyManyList $list */
-				foreach ($lists as $itemList) {
-					// filter to current filter if set
-					if ($currentFilterID) {
-						$itemList = $itemList->filter([
-							HasGridListFilters::relationship_name('ID') => $currentFilterID,
-						]);
-					}
-					$items->merge($itemList);
+				$providerItems = $provider->extend('provideGridListItems', $extraData);
+				$provided = array_merge(
+					$provided,
+					$providerItems
+				);
+			}
+			// apply constraints to each list of items and merge into the 'master' list
+			// this is where e.g. limits would be applied to total number of items for each partial list returned
+			foreach ($provided as $providerItems) {
+				if ($numProvided = $providerItems->count()) {
+					$items->merge($providerItems);
 				}
 			}
+			// now we need to go through and limit items by filters to blocks of 12 by filterID
+			// from page start to limit
+			$start = GridList::service()->Filters()->start();
+			$limit = $extraData['PageLength'];
+
+			$filterIDs = $this->filters()->column('ID');
+
 			$items->removeDuplicates();
+
+			// now do any grouping, direct manipulation of items such as fixed ordering
+			foreach ($providers as $provider) {
+				$provider->extend('sequenceGridListItems', $items, $extraData);
+			}
 		}
 		return $items;
 	}
@@ -159,7 +139,7 @@ class GridList extends ContentControllerExtension {
 	 *
 	 * @return \ArrayList
 	 */
-	protected function filters($mode) {
+	protected function filters() {
 		static $filters;
 		if (!$filters) {
 			$providers = $this->providers();
@@ -176,9 +156,7 @@ class GridList extends ContentControllerExtension {
 				}
 				$filters->removeDuplicates();
 
-				$items = $this->items($mode);
-
-				$provider->extend('constrainGridListFilters', $items, $filters);
+				$provider->extend('constrainGridListFilters', $filters);
 			}
 		}
 		return $filters;
@@ -192,7 +170,7 @@ class GridList extends ContentControllerExtension {
 	 */
 	protected function providers() {
 		$providers = [
-			$this()
+			$this(),
 		];
 
 		$page = null;

@@ -36,10 +36,9 @@ class PageCustomFilters extends ModelExtension implements FiltersProvider, Filte
 
 	/**
 	 * Make sure only the custom filters are in there.
-	 * @param $items
 	 * @param $filters
 	 */
-	public function constrainGridListFilters($items, &$filters) {
+	public function constrainGridListFilters(&$filters) {
 		if ($customFilters = $this->provideGridListFilters()) {
 			if ($customFilters->count()) {
 				$filters = $customFilters;

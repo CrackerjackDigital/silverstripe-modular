@@ -28,10 +28,12 @@ class HideUnmatchedFilters extends Field implements FilterConstraints {
 	 * @param \DataList $items   list of Pages and other models which could appear in a grid.
 	 * @return \ArrayList
 	 */
-	public function constrainGridListFilters($items, &$filters) {
+	public function constrainGridListFilters(&$filters) {
 		$out = new \ArrayList();
 		if ($this()->{self::SingleFieldName}) {
 			$ids = $filters->column('ID');
+
+			$items = $this()->GridListItems();
 
 			if (count($ids)) {
 				// this is where we keep track of GridListFilters which have been found on items where ID is the key

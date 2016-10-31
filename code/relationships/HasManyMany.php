@@ -118,7 +118,7 @@ class HasManyMany extends GridField {
 			$extra = [
 				'many_many_extraFields' => [
 					static::relationship_name() => [
-						static::GridFieldOrderableRowsFieldName => 'Int',
+						static::SortFieldName => 'Int',
 					],
 				],
 			];
