@@ -3,7 +3,6 @@ namespace Modular\Blocks;
 
 use Modular\Interfaces\LinkType;
 use Modular\Model;
-use Modular\Relationships\HasBlocks;
 
 /**
  * Class which represents a block which can be added to an Article, of types ( in display order ). The types in the grid dropdown are determined by
