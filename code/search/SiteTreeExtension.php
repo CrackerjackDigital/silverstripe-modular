@@ -2,7 +2,7 @@
 namespace Modular\Search;
 
 class SiteTreeExtension extends ModelExtension {
-	private static $searchable_fields = [
+	private static $fulltext_fields = [
 		'Title'   => 'PartialMatchFilter',
 		'Content' => 'PartialMatchFilter',
 	];
