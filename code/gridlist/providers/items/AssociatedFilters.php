@@ -42,7 +42,9 @@ class AssociatedFilters extends Field implements ItemsProvider {
 	 * @return array
 	 */
 	protected function filterIDs() {
-		return $this()->{HasGridListFilters::relationship_name()}()->column('ID');
+		$filters = $this()->{HasGridListFilters::relationship_name()}();
+		
+		return $filters->column('ID');
 	}
 
 	/**
@@ -56,28 +58,15 @@ class AssociatedFilters extends Field implements ItemsProvider {
 
 				$filterIDs = $this->filterIDs();
 
-				$start = isset($parameters['Start']) ? $parameters['Start'] : 0;
-				$limit = isset($parameters['PageLength']) ? $parameters['PageLength'] : 0;
-
 				// name of the field on Pages
 				$filterField = HasGridListFilters::relationship_name('ID');
 
-				return \Page::get()->filter([
+				$pages = \Page::get()->filter([
 					$filterField => $filterIDs
 				]);
-
-
-				$items = new \ArrayList();
-
-				// pre-limit to page length starting from first item requested
-				foreach ($filterIDs as $filterID) {
-					$items->merge(
-						\Page::get()->filter([
-							$filterField => $filterID,
-						])->limit($limit, $start)
-					);
-				}
-				return $items;
+				// debug help
+				$count = $pages->count();
+				return $pages;
 			}
 		}
 	}

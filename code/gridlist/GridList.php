@@ -41,27 +41,35 @@ class GridList extends ContentControllerExtension {
 	public function GridList($mode = null) {
 		static $gridlist = [];
 
-		if (!isset($gridlist[$mode])) {
+		if (!isset($gridlist[ $mode ])) {
 			$items = $this->GridListItems($mode);
 
 			$itemCount = $items->count();
 
+			$filters = $this->filters($items);
+
 			$extraData = $this->extraData($mode);
+
+			$providers = $this->providers();
+			// now do any grouping, direct manipulation of items such as fixed ordering
+			foreach ($providers as $provider) {
+				$provider->extend('sequenceGridListItems', $items, $extraData);
+			}
 
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[
 					'Items'         => $items,
-					'TotalItems'    => $itemCount,
-					'Filters'       => $this->filters(),
+					'ItemCount'     => $itemCount,
+					'Filters'       => $filters,
 					'Sort'          => $this->service()->sort(),
-					'DefaultFilter' => $this->service()->Filters()->defaultFilter()
+					'DefaultFilter' => $this->service()->Filters()->defaultFilter(),
 				],
 				$extraData
 			);
-			$gridlist[$mode] = new \ArrayData($data);
+			$gridlist[ $mode ] = new \ArrayData($data);
 		}
-		return $gridlist[$mode];
+		return $gridlist[ $mode ];
 	}
 
 	public function CacheHash() {
@@ -93,6 +101,7 @@ class GridList extends ContentControllerExtension {
 					$providerItems
 				);
 			}
+
 			// apply constraints to each list of items and merge into the 'master' list
 			// this is where e.g. limits would be applied to total number of items for each partial list returned
 			foreach ($provided as $providerItems) {
@@ -100,16 +109,11 @@ class GridList extends ContentControllerExtension {
 					$items->merge($providerItems);
 				}
 			}
-			$items->removeDuplicates();
-
 			// apply constraints
 			foreach ($providers as $provider) {
 				$provider->extend('constrainGridListItems', $items, $extraData);
 			}
-			// now do any grouping, direct manipulation of items such as fixed ordering
-			foreach ($providers as $provider) {
-				$provider->extend('sequenceGridListItems', $items, $extraData);
-			}
+			$items->removeDuplicates();
 		}
 		return $items;
 	}
@@ -120,7 +124,7 @@ class GridList extends ContentControllerExtension {
 	 *
 	 * @return \ArrayList
 	 */
-	protected function filters() {
+	protected function filters($items) {
 		static $filters;
 		if (!$filters) {
 			$providers = $this->providers();
@@ -138,6 +142,18 @@ class GridList extends ContentControllerExtension {
 				$filters->removeDuplicates();
 
 				$provider->extend('constrainGridListFilters', $filters);
+
+				/** @var HasGridListFilters|Model $item */
+				foreach ($filters as $filter) {
+					$filter->ItemCount = 0;
+					foreach ($items as $item) {
+						if ($item->hasExtension(HasGridListFilters::class_name())) {
+							if ($item->GridListFilters()->find('ID', $filter->ID)) {
+								$filter->ItemCount++;
+							}
+						}
+					}
+				}
 			}
 		}
 		return $filters;
@@ -149,7 +165,7 @@ class GridList extends ContentControllerExtension {
 		$providers = $this->providers();
 
 		$extraData = [
-			'Mode' => $mode
+			'Mode' => $mode,
 		];
 
 		// now get any extra data

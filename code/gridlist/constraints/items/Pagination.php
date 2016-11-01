@@ -22,7 +22,7 @@ class Pagination extends ModelExtension implements ItemsConstraints {
 		// filter to current requested length
 		if ($limit) {
 			$start = GridList::service()->Filters()->start();
-			$items = $items->limit($limit, $start);
+//			$items = $items->limit($limit, $start);
 		}
 	}
 
