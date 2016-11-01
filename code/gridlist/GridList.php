@@ -64,6 +64,11 @@ class GridList extends ContentControllerExtension {
 		return $gridlist[$mode];
 	}
 
+	public function CacheHash() {
+		$hash = md5(Controller::curr()->getRequest()->getURL(true));
+		return $hash . (isset($_GET['clr']) ? $_GET['clr'] : '');
+	}
+
 	/**
 	 * Return all items unpaginated though may be limited as to how many items in each filter are returned.
 	 *

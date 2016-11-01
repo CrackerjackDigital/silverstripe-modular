@@ -62,6 +62,11 @@ class AssociatedFilters extends Field implements ItemsProvider {
 				// name of the field on Pages
 				$filterField = HasGridListFilters::relationship_name('ID');
 
+				return \Page::get()->filter([
+					$filterField => $filterIDs
+				]);
+
+
 				$items = new \ArrayList();
 
 				// pre-limit to page length starting from first item requested
