@@ -35,12 +35,18 @@ class AssociatedFilters extends Field implements ItemsProvider {
 	}
 
 	/**
-	 * Return the ids of filters defined on the GridList for the current block/page.
+	 * Return the ids of filters defined on the GridList for the current block/page, or if one
+	 * is specified in request just that filter id
 	 *
 	 * @return array
 	 */
 	protected function filterIDs() {
-		return $this()->{HasGridListFilters::relationship_name()}()->column('ID');
+		if ($filterTag = GridList::service()->constraint(Constraints::FilterVar)) {
+			$filterIDs = GridListFilter::get()->filter('ModelTag', $filterTag)->column('ID');
+		} else {
+			$filterIDs = $this()->{HasGridListFilters::relationship_name()}()->column('ID');
+		}
+		return $filterIDs;
 	}
 
 	/**
@@ -52,10 +58,15 @@ class AssociatedFilters extends Field implements ItemsProvider {
 		if ($this()->{self::SingleFieldName}) {
 			if ($this()->hasExtension(HasGridListFilters::class_name())) {
 
+<<<<<<< Updated upstream
 				$filterIDs = $this->filterIDs();
 
+=======
+>>>>>>> Stashed changes
 				// name of the field on Pages
 				$filterField = HasGridListFilters::relationship_name('ID');
+
+				$filterIDs = $this->filterIDs();
 
 				return \Page::get()->filter([
 					$filterField => $filterIDs,

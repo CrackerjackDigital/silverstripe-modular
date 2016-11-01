@@ -7,7 +7,7 @@ use Modular\ModelExtension;
 use Modular\Relationships\HasGridListFilters;
 
 /**
- * Constrain items to only be those for the current filter as set e.g. on url filter= query parameter
+ * Filter down to only the current filter as provided on query string, if no current filter do nothing.
  *
  * @package Modular\GridList\Constraints
  */
@@ -21,7 +21,7 @@ class CurrentFilter extends ModelExtension implements ItemsConstraints {
 		// filter to current filter if set
 		if ($currentFilterID) {
 			$relationship = HasGridListFilters::relationship_name('ID');
-			
+
 			$items = $items->filter([
 				$relationship => $currentFilterID,
 			]);

@@ -36,7 +36,7 @@ class HasGridListFilters extends HasManyMany {
 	}
 
 	/**
-	 * Return filters related to the extended model
+	 * Return filters related to the extended model, ie those added in the 'filters' field
 	 *
 	 * #return \SS_List
 	 */

@@ -46,14 +46,23 @@ class GridList extends ContentControllerExtension {
 
 			$itemCount = $items->count();
 
+			$filters = $this->filters();
+
+			$providers = $this->providers();
+
 			$extraData = $this->extraData($mode);
+
+			// now do any grouping, direct manipulation of items such as fixed ordering
+			foreach ($providers as $provider) {
+				$provider->extend('sequenceGridListItems', $items, $extraData);
+			}
 
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[
 					'Items'         => $items,
 					'TotalItems'    => $itemCount,
-					'Filters'       => $this->filters(),
+					'Filters'       => $filters,
 					'Sort'          => $this->service()->sort(),
 					'DefaultFilter' => $this->service()->Filters()->defaultFilter()
 				],
@@ -125,9 +134,9 @@ class GridList extends ContentControllerExtension {
 
 			$items->removeDuplicates();
 
-			// now do any grouping, direct manipulation of items such as fixed ordering
+			// apply constraints
 			foreach ($providers as $provider) {
-				$provider->extend('sequenceGridListItems', $items, $extraData);
+				$provider->extend('constrainGridListItems', $items, $extraData);
 			}
 		}
 		return $items;
