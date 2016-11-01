@@ -48,10 +48,7 @@ abstract class ModelExtension extends \Modular\ModelExtension {
 							'name'  => static::SearchIndex,
 							'value' => implode(',', $fulltextFields),
 						],
-					],
-				    'searchable_fields' => [
-					    array_keys($fulltextFields)
-				    ]
+					]
 				]
 			);
 		}
