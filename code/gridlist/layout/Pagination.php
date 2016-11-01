@@ -2,12 +2,13 @@
 namespace Modular\GridList\Layout;
 
 use Modular\Fields\Field;
+use Modular\GridList\GridList;
 use Modular\GridList\Interfaces\GridListTempleDataProvider;
 
 /**
  * Return layout GridListColumns to template so can be applied e.g. to bootstrap col-md-{$GridListColumns}
  */
-class PageLength extends Field implements GridListTempleDataProvider {
+class Pagination extends Field implements GridListTempleDataProvider {
 	const SingleFieldName   = 'PageLength';
 	const SingleFieldSchema = 'Int';
 
@@ -17,8 +18,8 @@ class PageLength extends Field implements GridListTempleDataProvider {
 	// map actual page length returned to what is available in CMS incase different in implementation to how it looks.
 	private static $length_map = [
 		12 => 12,
-	    18 => 18,
-	    24 => 24
+		18 => 18,
+		24 => 24,
 	];
 
 	public function cmsFields() {
@@ -42,8 +43,14 @@ class PageLength extends Field implements GridListTempleDataProvider {
 	 * @return array
 	 */
 	public function provideGridListTemplateData($existingData = []) {
+		$start = GridList::service()->Filters()->start();
+		$limit = ($this()->{static::SingleFieldName}
+			?: (GridList::service()->Filters()->limit()
+				?: $this->defaultPageLength()));
+
 		return [
-			self::SingleFieldName => ($this()->{static::SingleFieldName} ?: $this->defaultPageLength())
+			'Start'               => $start,
+			self::SingleFieldName => $limit
 		];
 	}
 

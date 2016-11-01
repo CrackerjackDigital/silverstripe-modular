@@ -64,28 +64,6 @@ class GridList extends ContentControllerExtension {
 		return $gridlist[$mode];
 	}
 
-	protected function extraData($mode = null) {
-		$mode = $mode ?: $this->mode();
-
-		$providers = $this->providers();
-
-		$extraData = [
-			'Mode' => $mode
-		];
-
-		// now get any extra data
-		foreach ($providers as $provider) {
-			// get extra data such as for pagination PageLength, GridList Mode etc
-			foreach ($provider->extend('provideGridListTemplateData', $extraData) as $extendedData) {
-				$extraData = array_merge(
-					$extraData,
-					$extendedData
-				);
-			}
-		}
-		return $extraData;
-	}
-
 	/**
 	 * Return all items unpaginated though may be limited as to how many items in each filter are returned.
 	 *
@@ -104,6 +82,7 @@ class GridList extends ContentControllerExtension {
 			// get all the lists from all the providers e.g. related pages, associated filters etc
 			foreach ($providers as $provider) {
 				$providerItems = $provider->extend('provideGridListItems', $extraData);
+
 				$provided = array_merge(
 					$provided,
 					$providerItems
@@ -116,15 +95,12 @@ class GridList extends ContentControllerExtension {
 					$items->merge($providerItems);
 				}
 			}
-			// now we need to go through and limit items by filters to blocks of 12 by filterID
-			// from page start to limit
-			$start = GridList::service()->Filters()->start();
-			$limit = $extraData['PageLength'];
-
-			$filterIDs = $this->filters()->column('ID');
-
 			$items->removeDuplicates();
 
+			// apply constraints
+			foreach ($providers as $provider) {
+				$provider->extend('constrainGridListItems', $items, $extraData);
+			}
 			// now do any grouping, direct manipulation of items such as fixed ordering
 			foreach ($providers as $provider) {
 				$provider->extend('sequenceGridListItems', $items, $extraData);
@@ -160,6 +136,28 @@ class GridList extends ContentControllerExtension {
 			}
 		}
 		return $filters;
+	}
+
+	protected function extraData($mode = null) {
+		$mode = $mode ?: $this->mode();
+
+		$providers = $this->providers();
+
+		$extraData = [
+			'Mode' => $mode
+		];
+
+		// now get any extra data
+		foreach ($providers as $provider) {
+			// get extra data such as for pagination PageLength, GridList Mode etc
+			foreach ($provider->extend('provideGridListTemplateData', $extraData) as $extendedData) {
+				$extraData = array_merge(
+					$extraData,
+					$extendedData
+				);
+			}
+		}
+		return $extraData;
 	}
 
 	/**

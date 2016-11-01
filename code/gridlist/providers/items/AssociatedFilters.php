@@ -3,7 +3,9 @@ namespace Modular\GridList\Providers\Items;
 
 use Modular\Fields\Field;
 use Modular\Fields\ModelTag;
+use Modular\GridList\Interfaces\ItemsConstraints;
 use Modular\GridList\Interfaces\ItemsProvider;
+use Modular\Models\GridListFilter;
 use Modular\Relationships\HasGridListFilters;
 
 /**
@@ -54,12 +56,23 @@ class AssociatedFilters extends Field implements ItemsProvider {
 
 				$filterIDs = $this->filterIDs();
 
+				$start = isset($parameters['Start']) ? $parameters['Start'] : 0;
+				$limit = isset($parameters['PageLength']) ? $parameters['PageLength'] : 0;
+
 				// name of the field on Pages
 				$filterField = HasGridListFilters::relationship_name('ID');
 
-				return \Page::get()->filter([
-					$filterField => $filterIDs,
-				]);
+				$items = new \ArrayList();
+
+				// pre-limit to page length starting from first item requested
+				foreach ($filterIDs as $filterID) {
+					$items->merge(
+						\Page::get()->filter([
+							$filterField => $filterID,
+						])->limit($limit, $start)
+					);
+				}
+				return $items;
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 <?php
 namespace Modular\GridList\Constraints\Items;
 
+use Modular\GridList\GridList;
 use Modular\GridList\Interfaces\ItemsConstraints;
 use Modular\Search\ModelExtension;
 
@@ -10,7 +11,7 @@ use Modular\Search\ModelExtension;
  *
  * @package Modular\GridList\Constraints\Items
  */
-class PageLength extends ModelExtension implements ItemsConstraints {
+class Pagination extends ModelExtension implements ItemsConstraints {
 	/**
 	 * @param \DataList|\ArrayList $items
 	 * @return void
@@ -20,7 +21,8 @@ class PageLength extends ModelExtension implements ItemsConstraints {
 
 		// filter to current requested length
 		if ($limit) {
-			$items = $items->limit($limit);
+			$start = GridList::service()->Filters()->start();
+			$items = $items->limit($limit, $start);
 		}
 	}
 
