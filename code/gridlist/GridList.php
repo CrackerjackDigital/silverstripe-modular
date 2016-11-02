@@ -51,9 +51,9 @@ class GridList extends ContentControllerExtension {
 			$extraData = $this->extraData($mode);
 
 			$providers = $this->providers();
-			// now do any grouping, direct manipulation of items such as fixed ordering
+			// now do any grouping, direct manipulation of items such as fixed ordering after we have total item count
 			foreach ($providers as $provider) {
-				$provider->extend('sequenceGridListItems', $items, $extraData);
+				$provider->extend('sequenceGridListItems', $items, $filters, $extraData);
 			}
 
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
@@ -143,17 +143,6 @@ class GridList extends ContentControllerExtension {
 
 				$provider->extend('constrainGridListFilters', $filters);
 
-				/** @var HasGridListFilters|Model $item */
-				foreach ($filters as $filter) {
-					$filter->ItemCount = 0;
-					foreach ($items as $item) {
-						if ($item->hasExtension(HasGridListFilters::class_name())) {
-							if ($item->GridListFilters()->find('ID', $filter->ID)) {
-								$filter->ItemCount++;
-							}
-						}
-					}
-				}
 			}
 		}
 		return $filters;

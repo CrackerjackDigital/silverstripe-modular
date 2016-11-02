@@ -25,7 +25,7 @@ class HasGridListBlocks extends HasBlocks implements ItemsSequencer, ItemsProvid
 	 *
 	 * @param \ArrayList|\DataList $items
 	 */
-	public function sequenceGridListItems(&$items, $parameters = []) {
+	public function sequenceGridListItems(&$items, $filters, $parameters = []) {
 		$out = new \ArrayList();
 
 		$blocks = $this->related()->Sort('Sort desc');

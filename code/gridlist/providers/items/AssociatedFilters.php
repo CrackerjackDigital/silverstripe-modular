@@ -43,7 +43,7 @@ class AssociatedFilters extends Field implements ItemsProvider {
 	 */
 	protected function filterIDs() {
 		$filters = $this()->{HasGridListFilters::relationship_name()}();
-		
+
 		return $filters->column('ID');
 	}
 
@@ -64,6 +64,7 @@ class AssociatedFilters extends Field implements ItemsProvider {
 				$pages = \Page::get()->filter([
 					$filterField => $filterIDs
 				]);
+
 				// debug help
 				$count = $pages->count();
 				return $pages;
