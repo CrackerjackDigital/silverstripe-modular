@@ -32,6 +32,11 @@ class GridList extends ContentControllerExtension {
 
 	private static $default_mode = self::ModeGrid;
 
+	public function CacheHash() {
+		$hash = md5(Controller::curr()->getRequest()->getURL(true) . Application::get_current_page()->LastEdited);
+		return $hash;
+	}
+
 	/**
 	 * Return data for templates, accessible via e.g. GridList.Items and GridList.Mode
 	 *
@@ -41,19 +46,21 @@ class GridList extends ContentControllerExtension {
 	public function GridList($mode = null) {
 		static $gridlist = [];
 
+		$mode = $mode ?: $this->service()->mode();
+
 		if (!isset($gridlist[ $mode ])) {
 			$items = $this->GridListItems($mode);
 
 			$itemCount = $items->count();
 
-			$filters = $this->filters($items);
+			$templateData = $this->templateData($mode);
 
-			$extraData = $this->extraData($mode);
+			$filters = $this->filters($items, $templateData);
 
 			$providers = $this->providers();
 			// now do any grouping, direct manipulation of items such as fixed ordering after we have total item count
 			foreach ($providers as $provider) {
-				$provider->extend('sequenceGridListItems', $items, $filters, $extraData);
+				$provider->extend('sequenceGridListItems', $items, $filters, $templateData);
 			}
 
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
@@ -62,19 +69,13 @@ class GridList extends ContentControllerExtension {
 					'Items'         => $items,
 					'ItemCount'     => $itemCount,
 					'Filters'       => $filters,
-					'Sort'          => $this->service()->sort(),
-					'DefaultFilter' => $this->service()->Filters()->defaultFilter(),
+					'Sort'          => $this->service()->sort()
 				],
-				$extraData
+				$templateData
 			);
 			$gridlist[ $mode ] = new \ArrayData($data);
 		}
 		return $gridlist[ $mode ];
-	}
-
-	public function CacheHash() {
-		$hash = md5(Controller::curr()->getRequest()->getURL(true));
-		return $hash . (isset($_GET['clr']) ? $_GET['clr'] : '');
 	}
 
 	/**
@@ -85,7 +86,7 @@ class GridList extends ContentControllerExtension {
 	public function gridListItems($mode = null) {
 		static $items;
 		if (!$items) {
-			$extraData = $this->extraData($mode);
+			$extraData = $this->templateData($mode);
 
 			$items = new \ArrayList();
 			$provided = [];
@@ -124,7 +125,7 @@ class GridList extends ContentControllerExtension {
 	 *
 	 * @return \ArrayList
 	 */
-	protected function filters($items) {
+	protected function filters($items, &$parameters = []) {
 		static $filters;
 		if (!$filters) {
 			$providers = $this->providers();
@@ -141,33 +142,31 @@ class GridList extends ContentControllerExtension {
 				}
 				$filters->removeDuplicates();
 
-				$provider->extend('constrainGridListFilters', $filters);
+				$provider->extend('constrainGridListFilters', $filters, $parameters);
 
 			}
 		}
 		return $filters;
 	}
 
-	protected function extraData($mode = null) {
-		$mode = $mode ?: $this->mode();
-
+	protected function templateData($mode = null) {
 		$providers = $this->providers();
 
-		$extraData = [
-			'Mode' => $mode,
+		$templateData = [
+			'Mode' => $mode
 		];
 
 		// now get any extra data
 		foreach ($providers as $provider) {
 			// get extra data such as for pagination PageLength, GridList Mode etc
-			foreach ($provider->extend('provideGridListTemplateData', $extraData) as $extendedData) {
-				$extraData = array_merge(
-					$extraData,
+			foreach ($provider->extend('provideGridListTemplateData', $templateData) as $extendedData) {
+				$templateData = array_merge(
+					$templateData,
 					$extendedData
 				);
 			}
 		}
-		return $extraData;
+		return $templateData;
 	}
 
 	/**
@@ -216,15 +215,15 @@ class GridList extends ContentControllerExtension {
 
 	/**
 	 * Returns first mode from:
-	 *  -   template parameter
+	 *  -   template parameter if passed
 	 *  -   url query string via service
-	 *  -   extended models config.gridlist_mode (a GridListBlock not a page)
+	 *  -   extended models config.gridlist_default_mode (a GridListBlock not a page)
 	 *  -   this config.default_mode
 	 *
 	 * @return string mode chosen, e.g. 'grid' or 'list'
 	 */
-	public function Mode() {
-		return $this->service()->mode();
+	public function Mode($mode = null) {
+		return $mode ?: $this->service()->mode() ?: $this()->config()->get('gridlist_default_mode') ?: $this->config()->get('default_mode');
 	}
 
 	/**

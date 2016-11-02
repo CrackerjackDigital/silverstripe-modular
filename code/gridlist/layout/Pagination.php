@@ -3,12 +3,12 @@ namespace Modular\GridList\Layout;
 
 use Modular\Fields\Field;
 use Modular\GridList\GridList;
-use Modular\GridList\Interfaces\GridListTempleDataProvider;
+use Modular\GridList\Interfaces\TempleDataProvider;
 
 /**
  * Return layout GridListColumns to template so can be applied e.g. to bootstrap col-md-{$GridListColumns}
  */
-class Pagination extends Field implements GridListTempleDataProvider {
+class Pagination extends Field implements TempleDataProvider {
 	const SingleFieldName   = 'PageLength';
 	const SingleFieldSchema = 'Int';
 

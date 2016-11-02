@@ -20,11 +20,14 @@ class CurrentFilter extends ModelExtension implements ItemsConstraints {
 
 		// filter to current filter if set
 		if ($currentFilterID) {
-			$relationship = HasGridListFilters::relationship_name('ID');
-			
-			$items = $items->filter([
-				$relationship => $currentFilterID,
-			]);
+			$out = new \ArrayList();
+
+			foreach ($items as $item) {
+				if ($item->GridListFilters()->find('ID', $currentFilterID)) {
+					$out->push($item);
+				}
+			}
+			$items = $out;
 		}
 	}
 }

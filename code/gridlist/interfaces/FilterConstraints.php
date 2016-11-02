@@ -2,5 +2,5 @@
 namespace Modular\GridList\Interfaces;
 
 interface FilterConstraints {
-	public function constrainGridListFilters(&$filters);
+	public function constrainGridListFilters(&$filters, &$parameters = []);
 }

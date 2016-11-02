@@ -25,10 +25,10 @@ class HideUnmatchedFilters extends Field implements FilterConstraints {
 	 * If HideUnmatchedFilters is on then remove all filters which are not found in the items by their 'AssociatedFilters' relationship.
 	 *
 	 * @param \DataList $filters list of GridListFilter models
-	 * @param \DataList $items   list of Pages and other models which could appear in a grid.
+	 * @param array     $parameters
 	 * @return \ArrayList
 	 */
-	public function constrainGridListFilters(&$filters) {
+	public function constrainGridListFilters(&$filters, &$parameters = []) {
 		$out = new \ArrayList();
 		if ($this()->{self::SingleFieldName}) {
 			$ids = $filters->column('ID');

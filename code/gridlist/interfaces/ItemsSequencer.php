@@ -12,5 +12,5 @@ interface ItemsSequencer {
 	 * @param array                $parameters (extraData from building gridlist)
 	 * @return
 	 */
-	public function sequenceGridListItems(&$items, $filters, $parameters = []);
+	public function sequenceGridListItems(&$items, $filters, &$parameters = []);
 }

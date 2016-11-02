@@ -2,7 +2,7 @@
 namespace Modular\GridList\Fields;
 
 use Modular\Fields\Field;
-use Modular\GridList\Interfaces\GridListTempleDataProvider;
+use Modular\GridList\Interfaces\TempleDataProvider;
 
 /**
  * Add a field which allows the mode for the gridlist to be selected, if the mode is provided elsewhere then that will be the value instead and
@@ -10,7 +10,7 @@ use Modular\GridList\Interfaces\GridListTempleDataProvider;
  *
  * @package Modular\GridList\Fields
  */
-class Mode extends Field implements GridListTempleDataProvider {
+class Mode extends Field implements TempleDataProvider {
 	const SingleFieldName = 'GridListMode';
 	const SingleFieldSchema = 'enum("Grid,List","Grid")';
 
@@ -36,17 +36,18 @@ class Mode extends Field implements GridListTempleDataProvider {
 	}
 
 	/**
-	 * @param array $existingData
-	 * @param string $source the calling extension so if same we skip providing a value
-	 * @return array [ 'Mode' => mode from dropdown or '' ]
+	 * @param array $existingData already set by other extensions, not altered but new values to add/override returned instead.
+	 * @return array [ 'Mode' => mode from dropdown or '' ] mode is lowercase
 	 */
-	public function provideGridListTemplateData($existingData = [], $source = null) {
-		if ($source != get_class($this)) {
+	public function provideGridListTemplateData($existingData = []) {
+		if ($this()->{static::SingleFieldName}) {
 			return [
 				'Mode' => strtolower($this()->{static::SingleFieldName})
 			];
 		} else {
-			return [];
+			return [
+				'Mode' => isset($existingData['Mode']) ? $existingData['Mode'] : 'grid'
+			];
 		}
 	}
 }

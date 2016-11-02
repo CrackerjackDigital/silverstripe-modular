@@ -12,7 +12,7 @@ use Modular\Models\GridListFilter;
  *
  * @package Modular\GridList\Providers\Filters
  */
-class PageCustomFilters extends ModelExtension implements FiltersProvider, FilterConstraints {
+class CustomFilters extends ModelExtension implements FiltersProvider {
 
 	/**
 	 * Return the current pages config.gridlist_custom_filters if set or empty array.
@@ -32,17 +32,5 @@ class PageCustomFilters extends ModelExtension implements FiltersProvider, Filte
 			]));
 		}
 		return $filters;
-	}
-
-	/**
-	 * Make sure only the custom filters are in there.
-	 * @param $filters
-	 */
-	public function constrainGridListFilters(&$filters) {
-		if ($customFilters = $this->provideGridListFilters()) {
-			if ($customFilters->count()) {
-				$filters = $customFilters;
-			}
-		}
 	}
 }
