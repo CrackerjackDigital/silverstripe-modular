@@ -27,6 +27,16 @@ class Block extends Model implements LinkType {
 
 	private static $link_type = '';
 
+	private $customFilterTags = [];
+
+	public function addCustomFilterTag($tag) {
+		$this->customFilterTags[ $tag ] = $tag;
+	}
+
+	public function customFilterTags() {
+		return $this->customFilterTags;
+	}
+
 	public function BlockType() {
 		return $this->i18n_singular_name();
 	}
