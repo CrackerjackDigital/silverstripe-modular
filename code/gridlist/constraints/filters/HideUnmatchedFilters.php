@@ -33,9 +33,9 @@ class HideUnmatchedFilters extends Field implements FilterConstraints {
 		if ($this()->{self::SingleFieldName}) {
 			$ids = $filters->column('ID');
 
-			$items = $this()->GridListItems();
-
 			if (count($ids)) {
+				$items = $this()->GridListItems();
+
 				// this is where we keep track of GridListFilters which have been found on items where ID is the key
 				$foundFilters = array_combine(
 					$ids,
