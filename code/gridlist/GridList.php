@@ -33,7 +33,11 @@ class GridList extends ContentControllerExtension {
 	private static $default_mode = self::ModeGrid;
 
 	public function CacheHash() {
-		$hash = md5(Controller::curr()->getRequest()->getURL(true) . Application::get_current_page()->LastEdited);
+		if (\Director::isDev()) {
+			$hash = md5(microtime());
+		} else {
+			$hash = md5(Controller::curr()->getRequest()->getURL(true) . Application::get_current_page()->LastEdited);
+		}
 		return $hash;
 	}
 
@@ -128,9 +132,9 @@ class GridList extends ContentControllerExtension {
 	protected function filters($items, &$parameters = []) {
 		static $filters;
 		if (!$filters) {
-			$providers = $this->providers();
-
 			$filters = new \ArrayList();
+
+			$providers = $this->providers();
 
 			foreach ($providers as $provider) {
 				// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
@@ -140,9 +144,9 @@ class GridList extends ContentControllerExtension {
 				foreach ($lists as $list) {
 					$filters->merge($list);
 				}
-				$filters->removeDuplicates();
-
 				$provider->extend('constrainGridListFilters', $filters, $parameters);
+
+				$filters->removeDuplicates();
 
 			}
 		}

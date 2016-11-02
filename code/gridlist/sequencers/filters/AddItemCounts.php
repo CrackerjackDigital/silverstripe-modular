@@ -15,34 +15,34 @@ use Modular\Relationships\HasGridListFilters;
 class AddItemCounts extends ModelExtension implements FilterConstraints {
 
 	public function constrainGridListFilters(&$filters, &$parameters = []) {
+		/** @var \ArrayList $items */
 		$items = $this()->gridListItems();
 
 		$defaultFilter = Application::get_current_page()->DefaultFilter();
 
-		$allCount = 0;
+		$parameters['AllItemCount'] = $items->count();
+
 		$defaultCount = 0;
 
 		/** @var HasGridListFilters|Model $item */
-		foreach ($items as $item) {
+		foreach ($filters as $filter) {
+			$filterItemCount = 0;
+			foreach ($items as $item) {
 
-			$allCount++;
-
-			if ($defaultFilter) {
-				if ($item->GridListFilters()->find('ModelTag', $defaultFilter->ModelTag)) {
-					$defaultCount++;
+				if ($defaultFilter) {
+					if ($item->GridListFilters()->find('ModelTag', $defaultFilter->ModelTag)) {
+						$defaultCount++;
+					}
 				}
-			}
-			foreach ($filters as $filter) {
-				$filter->ItemCount = 0;
 
 				if ($item->hasExtension(HasGridListFilters::class_name())) {
 					if ($item->GridListFilters()->find('ID', $filter->ID)) {
-						$filter->ItemCount++;
+						$filterItemCount++;
 					}
 				}
 			}
+			$filter->ItemCount = $filterItemCount;
 		}
 		$parameters['DefaultItemCount'] = $defaultCount;
-		$parameters['AllItemCount'] = $allCount;
 	}
 }

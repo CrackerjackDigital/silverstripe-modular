@@ -7,7 +7,7 @@ use Modular\ModelExtension;
 use Modular\Models\GridListFilter;
 
 /**
- * Limits filters to only thosed defined on the page
+ * Limits filters to only those defined on the page via config.gridlist_custom_filters (only if defined though otherwise no change)
  *
  * @package Modular\GridList\Constraints\Filter
  */
@@ -23,16 +23,17 @@ class OnlyCustom extends ModelExtension implements FilterConstraints {
 		if ($page instanceof \CMSMain) {
 			$page = $page->currentPage();
 		}
-		$filters = new \ArrayList();
-		$customFilters = $page->config()->get('gridlist_custom_filters') ?: [];
-		foreach ($customFilters as $filter => $title) {
-			if (!$filter = GridListFilter::get()->filter(['ModelTag' => $filter])->first()) {
-				$filter = new GridListFilter([
-					Title::SingleFieldName       => $title,
-					GridListFilter::TagFieldName => $filter
-				]);
+		if ($customFilters = $page->config()->get('gridlist_custom_filters') ?: []) {
+			$filters = new \ArrayList();
+			foreach ($customFilters as $tag => $title) {
+				if (!$filter = GridListFilter::get()->filter(['ModelTag' => $tag])->first()) {
+					$filter = new GridListFilter([
+						Title::SingleFieldName       => $title,
+						GridListFilter::TagFieldName => $tag
+					]);
+				}
+				$filters->push($filter);
 			}
-			$filters->push($filter);
 		}
 	}
 

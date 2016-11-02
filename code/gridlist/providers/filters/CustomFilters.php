@@ -24,12 +24,14 @@ class CustomFilters extends ModelExtension implements FiltersProvider {
 			$page = $page->currentPage();
 		}
 		$filters = new \ArrayList();
-		$customFilters = $page->config()->get('gridlist_custom_filters') ?: [];
-		foreach ($customFilters as $filter => $title) {
-			$filters->push(new GridListFilter([
-				Title::SingleFieldName => $title,
-			    GridListFilter::TagFieldName => $filter
-			]));
+
+		if ($customFilters = $page->config()->get('gridlist_custom_filters') ?: []) {
+			foreach ($customFilters as $filter => $title) {
+				$filters->push(new GridListFilter([
+					Title::SingleFieldName       => $title,
+					GridListFilter::TagFieldName => $filter
+				]));
+			}
 		}
 		return $filters;
 	}
