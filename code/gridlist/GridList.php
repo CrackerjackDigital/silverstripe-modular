@@ -41,37 +41,23 @@ class GridList extends ContentControllerExtension {
 		static $gridlist;
 
 		if (!$gridlist) {
-			$extraData = [];
 
 			$providers = $this->providers();
 
 			$mode = $this->mode();
 
+			$extraData = [
+					'Mode' => $mode
+			];
 			// now get the items, this will loop through providers also internally
 			$items = $this->items($mode);
-
-			// get this before we re-sequence (eg group)
-			// raw item count shouldn't change in sequencing
-			$itemCountHere = $items->count();
 
 			// now do any constraints to filter out unwanted items
 			foreach ($providers as $provider) {
 				$provider->extend('constrainGridListItems', $items);
 			}
 
-			$itemCountHere = $items->count();
-
 			$items->removeDuplicates();
-
-			// get this before we re-sequence (eg group), raw item count shouldn't change in
-			// sequencing
-			$rawItemCount = $itemCountHere = $items->count();
-
-			// now do any grouping, direct manipulation of items such as fixed ordering
-			foreach ($providers as $provider) {
-				$provider->extend('sequenceGridListItems', $items, $mode);
-			}
-			$itemCountHere = $items->count();
 
 			// now get any extra data
 			foreach ($providers as $provider) {
@@ -83,6 +69,15 @@ class GridList extends ContentControllerExtension {
 					);
 				}
 			}
+			// get this before we re-sequence (eg group), raw item count shouldn't change in
+			// sequencing
+			$rawItemCount = $items->count();
+
+			// now do any grouping, direct manipulation of items such as fixed ordering
+			foreach ($providers as $provider) {
+				$provider->extend('sequenceGridListItems', $items, $extraData);
+			}
+
 			// TODO move pagination into an extension
 			$firstItem = $this->service()->Filters()->start() ?: 0;
 
