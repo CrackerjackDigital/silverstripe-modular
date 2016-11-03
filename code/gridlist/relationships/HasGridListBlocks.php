@@ -1,6 +1,7 @@
 <?php
 namespace Modular\Relationships;
 
+use Modular\GridList\Interfaces\ItemsProvider;
 use Modular\GridList\Interfaces\ItemsSequencer;
 
 /**
@@ -8,19 +9,25 @@ use Modular\GridList\Interfaces\ItemsSequencer;
  *
  * @package Modular\GridList
  */
-class HasGridListBlocks extends HasBlocks implements ItemsSequencer {
+class HasGridListBlocks extends HasBlocks implements ItemsSequencer, ItemsProvider {
 	const RelationshipName    = 'GridListBlocks';
 	const GridFieldConfigName = 'Modular\GridField\HasGridListBlocksGridFieldConfig';
 
+	/**
+	 * Returns the Blocks GridListBlocks
+	 * @return mixed
+	 */
+	public function provideGridListItems($parameters = []) {
+		return $this()->{static::RelationshipName}()->Sort(HasBlocks::SortFieldName);
+	}
 	/**
 	 * Inserts manually added blocks at front of list.
 	 *
 	 * @param \ArrayList|\DataList $items
 	 */
-	public function sequenceGridListItems(&$items, $mode = null) {
+	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
 		$out = new \ArrayList();
 
-		// reverse sort so insertFirst works
 		$blocks = $this->related()->Sort('Sort desc');
 		foreach ($blocks as $block) {
 			$out->push($block);

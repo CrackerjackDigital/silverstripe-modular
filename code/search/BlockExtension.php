@@ -2,7 +2,7 @@
 namespace Modular\Search;
 
 class BlockExtension extends ModelExtension {
-	private static $searchable_fields = [
+	private static $fulltext_fields = [
 		'Content' => 'PartialMatchFilter',
 	];
 

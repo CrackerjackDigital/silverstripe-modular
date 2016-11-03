@@ -2,7 +2,7 @@
 namespace Modular\Search;
 
 class FileExtension extends ModelExtension {
-	private static $searchable_fields = [
+	private static $fulltext_fields = [
 		'Title'   => 'PartialMatchFilter',
 	];
 

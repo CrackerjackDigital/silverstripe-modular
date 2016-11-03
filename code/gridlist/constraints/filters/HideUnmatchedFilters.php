@@ -25,39 +25,44 @@ class HideUnmatchedFilters extends Field implements FilterConstraints {
 	 * If HideUnmatchedFilters is on then remove all filters which are not found in the items by their 'AssociatedFilters' relationship.
 	 *
 	 * @param \DataList $filters list of GridListFilter models
-	 * @param \DataList $items   list of Pages and other models which could appear in a grid.
+	 * @param array     $parameters
 	 * @return \ArrayList
 	 */
-	public function constrainGridListFilters($items, &$filters) {
+	public function constrainGridListFilters(&$filters, &$parameters = []) {
 		$out = new \ArrayList();
 		if ($this()->{self::SingleFieldName}) {
 			$ids = $filters->column('ID');
 
-			// this is where we keep track of GridListFilters which have been found on items where ID is the key
-			$foundFilters = array_combine(
-				$ids,
-				array_fill(0, count($ids), false)
-			);
+			if (count($ids)) {
+				$items = $this()->GridListItems();
 
-			foreach ($foundFilters as $filterID => &$found) {
-				/** @var \Page|Model $item */
-				foreach ($items as $item) {
-					if ($item->hasExtension(HasGridListFilters::class_name())) {
-						if ($itemFilters = $item->{HasGridListFilters::relationship_name()}()->column('ID')) {
-							if (in_array($filterID, $itemFilters)) {
-								$found = true;
-								break;
+				// this is where we keep track of GridListFilters which have been found on items where ID is the key
+				$foundFilters = array_combine(
+					$ids,
+					array_fill(0, count($ids), false)
+				);
+
+				foreach ($foundFilters as $filterID => &$found) {
+					/** @var \Page|Model $item */
+					foreach ($items as $item) {
+						if ($item->hasExtension(HasGridListFilters::class_name())) {
+							if ($itemFilters = $item->{HasGridListFilters::relationship_name()}()->column('ID')) {
+								if (in_array($filterID, $itemFilters)) {
+									$found = true;
+									break;
+								}
 							}
 						}
 					}
 				}
-			}
-			foreach ($filters as $filter) {
-				if (isset($foundFilters[ $filter->ID ])) {
-					$out->push($filter);
+				foreach ($filters as $filter) {
+					if (isset($foundFilters[ $filter->ID ])) {
+						$out->push($filter);
+					}
 				}
+				$filters = $out;
 			}
-			$filters = $out;
+
 		}
 	}
 }

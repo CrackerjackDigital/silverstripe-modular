@@ -11,7 +11,7 @@ class RelatedModels extends Field {
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
-	const GridFieldOrderableRowsFieldName = GridFieldOrderableRows::SortFieldName;
+	const SortFieldName = GridFieldOrderableRows::SortFieldName;
 
 	// wether to show the field as a RelatedModels or a TagField
 	private static $show_as = self::ShowAsGridField;
@@ -157,7 +157,7 @@ class RelatedModels extends Field {
 		if ($this()->isInDB()) {
 			// only add if this record is already saved
 			$config->addComponent(
-				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+				new GridFieldOrderableRows(static::SortFieldName)
 			);
 		}
 

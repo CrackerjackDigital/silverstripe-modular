@@ -2,12 +2,12 @@
 namespace Modular\GridList\Layout;
 
 use Modular\Fields\Field;
-use Modular\GridList\Interfaces\GridListTempleDataProvider;
+use Modular\GridList\Interfaces\TempleDataProvider;
 
 /**
  * Return layout GridListColumns to template so can be applied e.g. to bootstrap col-md-{$GridListColumns}
  */
-class ColumnWidth extends Field implements GridListTempleDataProvider {
+class ColumnWidth extends Field implements TempleDataProvider {
 	const SingleFieldName   = 'ColumnWidth';
 	const SingleFieldSchema = 'Int';
 

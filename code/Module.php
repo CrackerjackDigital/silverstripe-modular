@@ -186,7 +186,7 @@ abstract class Module extends Object {
 			if (defined('SS_ERROR_LOG')) {
 				$path = \Director::baseFolder() . '/' . dirname(SS_ERROR_LOG);
 			} else {
-				$path = ASSETS_DIR;
+				$path = ASSETS_PATH;
 			}
         }
 		return static::make_safe_path($path, true, true);

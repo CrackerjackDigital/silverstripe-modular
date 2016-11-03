@@ -78,7 +78,7 @@ class HasBlocks extends HasManyMany {
 			->Blocks()
 			->filter('ClassName', $includes)
 			->exclude('ClassName', $excludes)
-			->sort(\Modular\GridField\RelatedModels::GridFieldOrderableRowsFieldName);
+			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
 	}
 
 	/**

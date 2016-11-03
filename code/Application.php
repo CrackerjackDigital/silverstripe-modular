@@ -38,7 +38,7 @@ class Application extends Module {
 	public static function get_current_page() {
 		$page = null;
 		if (\Director::is_ajax()) {
-			if ($path = self::path_for_request(\Controller::curr()->getRequest()->getVar('path'))) {
+			if ($path = self::path_for_request(\Controller::curr()->getRequest())) {
 				$page = self::page_for_path($path);
 			}
 		} else {
@@ -81,9 +81,9 @@ class Application extends Module {
 	 * @param string          $getVar
 	 * @return mixed|string
 	 */
-	public static function path_for_request(\SS_HTTPRequest $request = null, $getVar = 'path') {
+	public static function path_for_request($request = null, $getVar = 'path') {
 		$request = $request ?: Controller::curr()->getRequest();
-		
+
 		if (!$path = $request->getVar($getVar)) {
 			if (isset($_SERVER['HTTP_REFERER'])) {
 				$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);

@@ -30,7 +30,7 @@ class HasManyMany extends GridField {
 	 * late static binding relationship_name() will be used.
 	 *
 	 * @param string $relationshipName if supplied use this relationship instead of static relationship_name
-	 * @return \SS_List
+	 * @return \ArrayList|\DataList
 	 */
 	public function related($relationshipName = '') {
 		$relationshipName = $relationshipName ?: static::relationship_name();
@@ -118,7 +118,7 @@ class HasManyMany extends GridField {
 			$extra = [
 				'many_many_extraFields' => [
 					static::relationship_name() => [
-						static::GridFieldOrderableRowsFieldName => 'Int',
+						static::SortFieldName => 'Int',
 					],
 				],
 			];

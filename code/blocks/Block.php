@@ -3,7 +3,6 @@ namespace Modular\Blocks;
 
 use Modular\Interfaces\LinkType;
 use Modular\Model;
-use Modular\Relationships\HasBlocks;
 
 /**
  * Class which represents a block which can be added to an Article, of types ( in display order ). The types in the grid dropdown are determined by
@@ -27,6 +26,16 @@ class Block extends Model implements LinkType {
 	];
 
 	private static $link_type = '';
+
+	private $customFilterTags = [];
+
+	public function addCustomFilterTag($tag) {
+		$this->customFilterTags[ $tag ] = $tag;
+	}
+
+	public function customFilterTags() {
+		return $this->customFilterTags;
+	}
 
 	public function BlockType() {
 		return $this->i18n_singular_name();

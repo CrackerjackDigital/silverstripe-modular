@@ -50,7 +50,7 @@ class HasManyManyGridField extends HasManyMany {
 		if ($this()->isInDB()) {
 			// only add if this record is already saved
 			$config->addComponent(
-				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+				new GridFieldOrderableRows(static::SortFieldName)
 			);
 		}
 

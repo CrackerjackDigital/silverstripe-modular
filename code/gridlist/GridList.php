@@ -32,66 +32,145 @@ class GridList extends ContentControllerExtension {
 
 	private static $default_mode = self::ModeGrid;
 
+	public function CacheHash() {
+		if (\Director::isDev()) {
+			$hash = md5(microtime());
+		} else {
+			$hash = md5(Controller::curr()->getRequest()->getURL(true) . Application::get_current_page()->LastEdited);
+		}
+		return $hash;
+	}
+
 	/**
 	 * Return data for templates, accessible via e.g. GridList.Items and GridList.Mode
+	 *
 	 * @param string $overrideMode one of the self.ModeABC constants, will force gridlist to be in this mode always
 	 * @return \ArrayData
 	 */
-	public function GridList() {
-		static $gridlist;
+	public function GridList($mode = null) {
+		static $gridlist = [];
 
-		if (!$gridlist) {
-			$extraData = [];
+		$mode = $mode ?: $this->service()->mode();
+
+		if (!isset($gridlist[ $mode ])) {
+			$items = $this->GridListItems($mode);
+
+			$itemCount = $items->count();
+
+			$templateData = $this->templateData($mode);
+
+			$filters = $this->filters($items, $templateData);
 
 			$providers = $this->providers();
-
+			// now do any grouping, direct manipulation of items such as fixed ordering after we have total item count
 			foreach ($providers as $provider) {
-				// get extra data such as for pagination PageLength, GridList Mode etc
-				foreach ($provider->extend('provideGridListTemplateData', $extraData) as $extendedData) {
-					$extraData = array_merge(
-						$extraData,
-						$extendedData
-					);
-				}
-				$firstItem = $this->service()->Filters()->start();
-
-				$pageLength = isset($extraData['PageLength'])
-					? $extraData['PageLength']
-					: $this->config()->get('default_page_length');
-
-				$mode = $this->mode();
-
-				// TODO fix only one provider is providing as items is reset in the loop each time. should merge
-				$items = $this->items($mode);
-
-				$totalCount = $items->count();
-
-				$provider->extend('groupGridListItems', $items, $mode);
+				$provider->extend('sequenceGridListItems', $items, $filters, $templateData);
 			}
-
-			$paginated = $this->paginator($items, $firstItem, $pageLength);
-
-			$paginatedLast = $firstItem + $pageLength;
-
-			// this will be sent back as a header X-Load-More
-			$loadMore = ($totalCount > $paginatedLast) ? 1 : 0;
 
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[
-					'Items'         => $paginated,
-					'TotalItems'    => $totalCount,
-					'Filters'       => $this->filters($mode),
-					'Mode'          => $mode,
-					'Sort'          => $this->service()->sort(),
-					'DefaultFilter' => $this->service()->Filters()->defaultFilter(),
-					'LoadMore'      => $loadMore,
+					'Items'         => $items,
+					'ItemCount'     => $itemCount,
+					'Filters'       => $filters,
+					'Sort'          => $this->service()->sort()
 				],
-				$extraData
+				$templateData
 			);
-			$gridlist = new \ArrayData($data);
+			$gridlist[ $mode ] = new \ArrayData($data);
 		}
-		return $gridlist;
+		return $gridlist[ $mode ];
+	}
+
+	/**
+	 * Return all items unpaginated though may be limited as to how many items in each filter are returned.
+	 *
+	 * @return \ArrayList
+	 */
+	public function gridListItems($mode = null) {
+		static $items;
+		if (!$items) {
+			$extraData = $this->templateData($mode);
+
+			$items = new \ArrayList();
+			$provided = [];
+
+			$providers = $this->providers();
+
+			// get all the lists from all the providers e.g. related pages, associated filters etc
+			foreach ($providers as $provider) {
+				$providerItems = $provider->extend('provideGridListItems', $extraData);
+
+				$provided = array_merge(
+					$provided,
+					$providerItems
+				);
+			}
+
+			// apply constraints to each list of items and merge into the 'master' list
+			// this is where e.g. limits would be applied to total number of items for each partial list returned
+			foreach ($provided as $providerItems) {
+				if ($numProvided = $providerItems->count()) {
+					$items->merge($providerItems);
+				}
+			}
+			// apply constraints
+			foreach ($providers as $provider) {
+				$provider->extend('constrainGridListItems', $items, $extraData);
+			}
+			$items->removeDuplicates();
+		}
+		return $items;
+	}
+
+	/**
+	 * Returns the filters which should show in-page gathered via provideGridListFilters. These are composed of those specifically set on the GridList first
+	 * and then those for the current page which may have an alternate strategy to provide them, such as most popular filters from child pages.
+	 *
+	 * @return \ArrayList
+	 */
+	protected function filters($items, &$parameters = []) {
+		static $filters;
+		if (!$filters) {
+			$filters = new \ArrayList();
+
+			$providers = $this->providers();
+
+			foreach ($providers as $provider) {
+				// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
+				// this will return an array of SS_Lists
+				$lists = $provider->extend('provideGridListFilters');
+
+				foreach ($lists as $list) {
+					$filters->merge($list);
+				}
+				$provider->extend('constrainGridListFilters', $filters, $parameters);
+
+				$filters->removeDuplicates();
+
+			}
+		}
+		return $filters;
+	}
+
+	protected function templateData($mode = null) {
+		$providers = $this->providers();
+
+		$templateData = [
+			'Mode' => $mode
+		];
+
+		// now get any extra data
+		foreach ($providers as $provider) {
+			// get extra data such as for pagination PageLength, GridList Mode etc
+			foreach ($provider->extend('provideGridListTemplateData', $templateData) as $extendedData) {
+				$templateData = array_merge(
+					$templateData,
+					$extendedData
+				);
+			}
+		}
+		return $templateData;
 	}
 
 	/**
@@ -102,7 +181,7 @@ class GridList extends ContentControllerExtension {
 	 */
 	protected function providers() {
 		$providers = [
-			$this()
+			$this(),
 		];
 
 		$page = null;
@@ -114,105 +193,6 @@ class GridList extends ContentControllerExtension {
 			}
 		}
 		return $providers;
-	}
-
-	/**
-	 * Returns first mode from:
-	 *  -   template parameter
-	 *  -   url query string via service
-	 *  -   extended models config.gridlist_mode (a GridListBlock not a page)
-	 *  -   this config.default_mode
-	 *
-	 * @return string mode chosen, e.g. 'grid' or 'list'
-	 */
-	public function Mode() {
-		return $this->service()->mode();
-	}
-
-	/**
-	 * Return instance of service that this gridlist is using
-	 *
-	 * @return Service
-	 */
-	public static function service() {
-		/** @var \Page $page */
-		$service = '';
-
-		if ($page = Application::get_current_page()) {
-			$service = $page->config()->get('gridlist_service');
-		}
-		$service = $service ?: static::config()->get('gridlist_service');
-
-		return \Injector::inst()->get($service);
-	}
-
-	/**
-	 * @return \ArrayList
-	 */
-	protected function items($mode) {
-		static $items;
-		if (!$items) {
-			$providers = $this->providers();
-
-			$items = new \ArrayList();
-			$service = $this->service();
-
-			$currentFilterID = $service->Filters()->currentFilterID();
-
-			foreach ($providers as $provider) {
-				// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
-				// this will return an array of SS_Lists
-				$lists = $provider->extend('provideGridListItems');
-				/** @var \ManyManyList $list */
-				foreach ($lists as $itemList) {
-					// filter to current filter if set
-					if ($currentFilterID) {
-						$itemList = $itemList->filter([
-							HasGridListFilters::relationship_name('ID') => $currentFilterID,
-						]);
-					}
-					$items->merge($itemList);
-				}
-
-				$items->removeDuplicates();
-
-				$provider->extend('constrainGridListItems', $items);
-
-				$provider->extend('sequenceGridListItems', $items, $mode);
-			}
-		}
-		return $items;
-	}
-
-	/**
-	 * Returns the filters which should show in-page gathered via provideGridListFilters. These are composed of those specifically set on the GridList first
-	 * and then those for the current page which may have an alternate strategy to provide them, such as most popular filters from child pages.
-	 *
-	 * @return \ArrayList
-	 */
-	protected function filters($mode) {
-		static $filters;
-		if (!$filters) {
-			$providers = $this->providers();
-
-			$filters = new \ArrayList();
-
-			foreach ($providers as $provider) {
-				// first get filters which have been added specifically to the GridList, e.g. via a HasGridListFilters extendiong on the extended class
-				// this will return an array of SS_Lists
-				$lists = $provider->extend('provideGridListFilters');
-
-				foreach ($lists as $list) {
-					$filters->merge($list);
-				}
-				$filters->removeDuplicates();
-
-				$items = $this->items($mode);
-
-				$provider->extend('constrainGridListFilters', $items, $filters);
-			}
-		}
-		return $filters;
 	}
 
 	/**
@@ -235,6 +215,36 @@ class GridList extends ContentControllerExtension {
 		$paginated->setPageStart($firstItem);
 		$paginated->setPageLength($pageLength);
 		return $paginated;
+	}
+
+	/**
+	 * Returns first mode from:
+	 *  -   template parameter if passed
+	 *  -   url query string via service
+	 *  -   extended models config.gridlist_default_mode (a GridListBlock not a page)
+	 *  -   this config.default_mode
+	 *
+	 * @return string mode chosen, e.g. 'grid' or 'list'
+	 */
+	public function Mode($mode = null) {
+		return $mode ?: $this->service()->mode() ?: $this()->config()->get('gridlist_default_mode') ?: $this->config()->get('default_mode');
+	}
+
+	/**
+	 * Return instance of service that this gridlist is using
+	 *
+	 * @return Service
+	 */
+	public static function service() {
+		/** @var \Page $page */
+		$service = '';
+
+		if ($page = Application::get_current_page()) {
+			$service = $page->config()->get('gridlist_service');
+		}
+		$service = $service ?: static::config()->get('gridlist_service');
+
+		return \Injector::inst()->get($service);
 	}
 
 }
