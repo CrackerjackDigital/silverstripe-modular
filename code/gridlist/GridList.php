@@ -89,6 +89,8 @@ class GridList extends ContentControllerExtension {
 
 			$paginatedLast = $firstItem + $pageLength;
 
+			$itemCountHere = $items->count();
+
 			// this will be sent back as a header X-Load-More
 			$loadMore = ($itemCountHere > $paginatedLast) ? 1 : 0;
 
