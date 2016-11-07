@@ -86,6 +86,19 @@ class GridList extends ContentControllerExtension {
 		return $gridlist;
 	}
 
+	/**
+	 * Use for partial caching, extensions will provide additional information for cache hash generation.
+	 * @return mixed
+	 */
+	public function CacheHash() {
+		if (\Director::isDev()) {
+			return md5(microtime());
+		} else {
+			$data = implode(':', array_filter($this()->extend('provideGridListCacheHashData')));
+			return md5(Controller::curr()->getRequest()->getURL(true) . ':' . $data);
+		}
+	}
+
 	protected function templateData($items, $mode) {
 		$templateData = [
 			'Mode'                        => $mode,
