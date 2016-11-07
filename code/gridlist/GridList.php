@@ -71,6 +71,10 @@ class GridList extends ContentControllerExtension {
 			foreach ($providers as $provider) {
 				$provider->extend('sequenceGridListItems', $items, $filters, $templateData);
 			}
+			// hook final output for e.g. redirections
+			foreach ($providers as $provider) {
+				$provider->extend('handleGridListItems', $items, $filters, $templateData);
+			}
 
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
