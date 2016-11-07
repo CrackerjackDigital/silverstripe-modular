@@ -28,25 +28,27 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 		$start = $parameters[ Constraints::StartIndexGetVar ];
 		$limit = $parameters[ Constraints::PageLengthGetVar ];
 		if (!is_null($limit)) {
-			$added = $items->count();
+			$added = 0;
 
 			if ($allFilter = Application::get_current_page()->FilterAll()) {
 				// first add 'all filter' items
-				$allTag = $allFilter->Filter;
-				$index = 0;
-				$added = 0;
-				foreach ($items as $item) {
-					$index++;
+				if ($allTag = $allFilter->Filter) {
+					$index = 0;
+					$added = 0;
+					foreach ($items as $item) {
+						$index++;
 
-					if ($index < $start) {
-						continue;
-					}
-					if ($item->GridListFilters()->find('ModelTag', $allTag)) {
-						$out->push($item);
-						$added++;
-					}
-					if ($added >= $limit) {
-						break;
+						if ($index < $start) {
+							continue;
+						}
+						if ($allTag == 'all' || $item->GridListFilters()->find('ModelTag', $allTag)) {
+							// we don't add all, we're just getting the count
+//							$out->push($item);
+							$added++;
+						}
+						if ($added >= $limit) {
+							break;
+						}
 					}
 				}
 			}

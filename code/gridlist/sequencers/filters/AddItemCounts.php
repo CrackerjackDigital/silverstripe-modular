@@ -34,14 +34,12 @@ class AddItemCounts extends ModelExtension implements FiltersSequencer {
 				if ($item->hasExtension(HasGridListFilters::class_name())) {
 					if ($item->GridListFilters()->find('ModelTag', $tag)) {
 						$itemCount++;
-					} else {
-						if ($allTag && $item->GridListFilters()->find('ModelTag', $allTag)) {
-							$allItemCount++;
-						}
+					} else if ($allTag == 'all' || ($allTag && $item->GridListFilters()->find('ModelTag', $allTag))) {
+						$allItemCount++;
 					}
-				}   
+				}
 			}
-			// don't recount 'all filter' second pass
+			// don't recount 'all filter' after first pass
 			$allTag = false;
 
 			$filter->ItemCount = max($itemCount - 1, 0);
