@@ -91,12 +91,8 @@ class GridList extends ContentControllerExtension {
 	 * @return mixed
 	 */
 	public function CacheHash() {
-		if (\Director::isDev()) {
-			return md5(microtime());
-		} else {
-			$data = implode(':', array_filter($this()->extend('provideGridListCacheHashData')));
-			return md5(Controller::curr()->getRequest()->getURL(true) . ':' . $data);
-		}
+		$data = implode(':', array_filter($this()->extend('provideGridListCacheHashData')));
+		return md5(Controller::curr()->getRequest()->getURL(true) . ':' . $data);
 	}
 
 	protected function templateData($items, $mode) {

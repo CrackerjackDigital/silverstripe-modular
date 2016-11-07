@@ -39,13 +39,13 @@ class AddItemCounts extends ModelExtension implements FiltersSequencer {
 							$allItemCount++;
 						}
 					}
-				}
+				}   
 			}
 			// don't recount 'all filter' second pass
 			$allTag = false;
 
-			$filter->ItemCount = $itemCount;
+			$filter->ItemCount = max($itemCount - 1, 0);
 		}
-		$parameters[self::AllItemCountKey] = $allItemCount;
+		$parameters[self::AllItemCountKey] = max($allItemCount - 1, 0);
 	}
 }

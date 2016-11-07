@@ -18,8 +18,8 @@ class PageLength extends Field implements GridListTempleDataProvider {
 	// map actual page length returned to what is available in CMS incase different in implementation to how it looks.
 	private static $length_map = [
 		12 => 12,
-	    18 => 18,
-	    24 => 24
+		18 => 18,
+		24 => 24,
 	];
 
 	public function cmsFields() {
@@ -37,14 +37,16 @@ class PageLength extends Field implements GridListTempleDataProvider {
 	}
 
 	/**
-	 * Provide the 'GridListColumnWidth' field to the GridList template data as 'limit' not the field name on the extended model.
+	 * Provide the 'GridListColumnWidth' field to the GridList template data as 'limit' and 'PageLength' (they may be different eventually)
 	 *
 	 * @param array $existingData
 	 * @return array
 	 */
 	public function provideGridListTemplateData($existingData = []) {
+		$length = ($this()->{static::SingleFieldName} ?: $this->defaultPageLength());
 		return [
-			Constraints::PageLengthGetVar => ($this()->{static::SingleFieldName} ?: $this->defaultPageLength())
+			Constraints::PageLengthGetVar => $length,
+			self::SingleFieldName         => $length,
 		];
 	}
 
