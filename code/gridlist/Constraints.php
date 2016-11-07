@@ -278,19 +278,22 @@ class Constraints extends Object {
 	}
 
 	/**
-	 * Return only the get vars we are interested in, keys are lowercased
+	 * Return only the get vars we are interested in, keys are lowercased, values are trimmed
 	 *
 	 * @return array
 	 */
 	protected function getVars() {
-		$cached = array_intersect_key(
-			array_change_key_case(
-				$this->request()->getVars(),
-				CASE_LOWER
-			),
-			array_change_key_case(
-				array_flip($this->params()),
-				CASE_LOWER
+		$cached = array_map(
+			'trim',
+			array_intersect_key(
+				array_change_key_case(
+					$this->request()->getVars(),
+					CASE_LOWER
+				),
+				array_change_key_case(
+					array_flip($this->params()),
+					CASE_LOWER
+				)
 			)
 		);
 		return $cached;
@@ -324,14 +327,17 @@ class Constraints extends Object {
 		static $cached;
 
 		if (!$cached) {
-			$cached = array_intersect_key(
-				array_change_key_case(
-					$this->request()->postVars(),
-					CASE_LOWER
-				),
-				array_change_key_case(
-					array_flip($this->params()),
-					CASE_LOWER
+			$cached = array_map(
+				'trim',
+				array_intersect_key(
+					array_change_key_case(
+						$this->request()->postVars(),
+						CASE_LOWER
+					),
+					array_change_key_case(
+						array_flip($this->params()),
+						CASE_LOWER
+					)
 				)
 			);
 		}
