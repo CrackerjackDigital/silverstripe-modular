@@ -8,7 +8,9 @@ namespace Modular\GridList\Interfaces;
 interface ItemsSequencer {
 	/**
 	 * @param \ArrayList|\DataList $items
-	 * @param null|string          $mode e.g. 'grid' or 'list'
+	 * @param                      $filters
+	 * @param array                $parameters
+	 * @return
 	 */
-	public function sequenceGridListItems(&$items, $mode = null);
+	public function sequenceGridListItems(&$items, $filters, $parameters = []);
 }

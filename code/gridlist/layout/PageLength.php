@@ -2,6 +2,7 @@
 namespace Modular\GridList\Layout;
 
 use Modular\Fields\Field;
+use Modular\GridList\Constraints;
 use Modular\GridList\Interfaces\GridListTempleDataProvider;
 
 /**
@@ -36,14 +37,14 @@ class PageLength extends Field implements GridListTempleDataProvider {
 	}
 
 	/**
-	 * Provide the 'GridListColumnWidth' field to the GridList template data
+	 * Provide the 'GridListColumnWidth' field to the GridList template data as 'limit' not the field name on the extended model.
 	 *
 	 * @param array $existingData
 	 * @return array
 	 */
 	public function provideGridListTemplateData($existingData = []) {
 		return [
-			self::SingleFieldName => ($this()->{static::SingleFieldName} ?: $this->defaultPageLength())
+			Constraints::PageLengthGetVar => ($this()->{static::SingleFieldName} ?: $this->defaultPageLength())
 		];
 	}
 

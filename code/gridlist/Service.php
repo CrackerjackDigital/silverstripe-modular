@@ -22,6 +22,14 @@ class Service extends Object implements ServiceInterface {
 		return $this->Filters()->sort();
 	}
 
+	public function start() {
+		return $this->Filters()->start();
+	}
+
+	public function limit() {
+		return $this->Filters()->limit();
+	}
+
 	/**
 	 * @param $params
 	 * @return string

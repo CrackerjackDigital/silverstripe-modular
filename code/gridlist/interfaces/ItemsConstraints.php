@@ -4,7 +4,9 @@ namespace Modular\GridList\Interfaces;
 interface ItemsConstraints {
 	/**
 	 * @param \SS_LIst $items
-	 * @return mixed
+	 * @param          $filters
+	 * @param array    $parameters
+	 * @return void
 	 */
-	public function constrainGridListItems(&$items);
+	public function constrainGridListItems(&$items, $filters, $parameters = []);
 }

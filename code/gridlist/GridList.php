@@ -34,6 +34,7 @@ class GridList extends ContentControllerExtension {
 
 	/**
 	 * Return data for templates, accessible via e.g. GridList.Items and GridList.Mode
+	 *
 	 * @param string $overrideMode one of the self.ModeABC constants, will force gridlist to be in this mode always
 	 * @return \ArrayData
 	 */
@@ -46,73 +47,64 @@ class GridList extends ContentControllerExtension {
 
 			$mode = $this->mode();
 
-			$extraData = [
-					'Mode' => $mode
-			];
-			// now get the items, this will loop through providers also internally
 			$items = $this->items($mode);
+
+			$filters = $this->filters($mode);
+
+			$templateData = $this->templateData($items, $mode);
 
 			// now do any constraints to filter out unwanted items
 			foreach ($providers as $provider) {
-				$provider->extend('constrainGridListItems', $items);
+				$provider->extend('constrainGridListItems', $items, $filters, $templateData);
 			}
-
 			$items->removeDuplicates();
 
-			// now get any extra data
-			foreach ($providers as $provider) {
-				// get extra data such as for pagination PageLength, GridList Mode etc
-				foreach ($provider->extend('provideGridListTemplateData', $extraData, $items) as $extendedData) {
-					$extraData = array_merge(
-						$extraData,
-						$extendedData
-					);
-				}
-			}
-			// get this before we re-sequence (eg group), raw item count shouldn't change in
-			// sequencing
+			// get raw item count before we do any more manipulation
 			$rawItemCount = $items->count();
+
+			// re-arrange, decorate etc filters
+			foreach ($providers as $provider) {
+				$provider->extend('sequenceGridListFilters', $filters, $items, $templateData);
+			}
 
 			// now do any grouping, direct manipulation of items such as fixed ordering
 			foreach ($providers as $provider) {
-				$provider->extend('sequenceGridListItems', $items, $extraData);
+				$provider->extend('sequenceGridListItems', $items, $filters, $templateData);
 			}
-
-			// TODO move pagination into an extension
-			$firstItem = $this->service()->Filters()->start() ?: 0;
-
-			$pageLength = isset($extraData['PageLength'])
-				? $extraData['PageLength']
-				: $this->config()->get('default_page_length');
-
-			$items = $this->paginator($items, $firstItem, $pageLength);
-
-			$paginatedLast = $firstItem + $pageLength;
-
-			$itemCountHere = $items->count();
-
-			// this will be sent back as a header X-Load-More
-			$loadMore = ($itemCountHere > $paginatedLast) ? 1 : 0;
-
-			// set the load more header used by client to show/hide load more button
-			Controller::curr()->getResponse()->addHeader('X-Load-More', $loadMore);
 
 			// merge in extra data from provideGridListTemplateData extension call above this takes precedence
 			$data = array_merge(
 				[
-					'Items'         => $items,
-					'TotalItems'    => $rawItemCount,
-					'Filters'       => $this->filters($mode),
-					'Mode'          => $mode,
-					'Sort'          => $this->service()->sort(),
-					'DefaultFilter' => $this->service()->Filters()->defaultFilter(),
-					'LoadMore'      => $loadMore,
+					'Items'      => $items,
+					'TotalItems' => $rawItemCount,
+					'Filters'    => $filters
 				],
-				$extraData
+				$templateData
 			);
 			$gridlist = new \ArrayData($data);
 		}
 		return $gridlist;
+	}
+
+	protected function templateData($items, $mode) {
+		$templateData = [
+			'Mode'                        => $mode,
+			'Sort'                        => $this->service()->sort(),
+			'DefaultFilter'               => $this->service()->Filters()->defaultFilter(),
+			Constraints::StartIndexGetVar => $this->service()->start() ?: 0,
+			Constraints::PageLengthGetVar => $this->service()->limit()          // may be overwritten by e.g PageLength extension
+		];
+		// now get any extra data
+		foreach ($this->providers() as $provider) {
+			// get extra data such as for pagination PageLength, GridList Mode etc
+			foreach ($provider->extend('provideGridListTemplateData', $templateData, $items) as $extendedData) {
+				$templateData = array_merge(
+					$templateData,
+					$extendedData
+				);
+			}
+		}
+		return $templateData;
 	}
 
 	/**
@@ -187,7 +179,7 @@ class GridList extends ContentControllerExtension {
 	 */
 	protected function providers() {
 		$providers = [
-			$this()
+			$this(),
 		];
 
 		$page = null;
