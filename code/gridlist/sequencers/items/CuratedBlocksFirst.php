@@ -8,7 +8,7 @@ class CuratedBlocksFirst extends \Modular\ModelExtension implements \Modular\Gri
 	 * @param array                $parameters
 	 * @return \ArrayList|\DataList
 	 */
-	public function sequenceGridListItems(&$items, $filters, $parameters = []) {
+	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
 		$out = new \ArrayList();
 
 		// push only Block items to output

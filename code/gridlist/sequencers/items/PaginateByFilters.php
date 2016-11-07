@@ -22,12 +22,14 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 	 * @param          $filters
 	 * @param array    $parameters
 	 */
-	public function sequenceGridListItems(&$items, $filters, $parameters = []) {
+	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
 		$out = new \ArrayList();
 
 		$start = $parameters[ Constraints::StartIndexGetVar ];
 		$limit = $parameters[ Constraints::PageLengthGetVar ];
 		if (!is_null($limit)) {
+			$added = $items->count();
+
 			if ($allFilter = Application::get_current_page()->FilterAll()) {
 				// first add 'all filter' items
 				$allTag = $allFilter->Filter;
@@ -46,9 +48,11 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 					if ($added >= $limit) {
 						break;
 					}
-
 				}
 			}
+			// initial number of 'all filter' items loaded in page
+			$parameters['AllLoadCount'] = $added;
+
 			foreach ($filters as $filter) {
 				if ($tag = $filter->ModelTag) {
 					$index = 0;
@@ -70,6 +74,8 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 							break;
 						}
 					}
+					// initial number of items loaded in page
+					$filter->LoadCount = $added;
 				}
 			}
 			$out->removeDuplicates();
