@@ -87,6 +87,17 @@ class HasBlocks extends HasManyMany {
 	}
 
 	/**
+	 * Publish all the blocks after the extended model is published.
+	 */
+	public function onAfterPublish() {
+		/** @var \Versioned|\DataObject $block */
+		foreach ($this->related() as $block) {
+			$block->publish('Stage', 'Live', false);
+			$block->extend('onAfterPublish', $block);
+		}
+	}
+
+	/**
 	 * Parse a string of rules such as '!NotBlockClass, AddBlockClass' int array of includes, excludes for filtering
 	 *
 	 * @param string|array $rules
@@ -107,7 +118,7 @@ class HasBlocks extends HasManyMany {
 		}
 		return [
 			$excludes,
-		    $includes
+		    $includes,
 		];
 	}
 }
