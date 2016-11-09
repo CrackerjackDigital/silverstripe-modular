@@ -92,7 +92,9 @@ class HasBlocks extends HasManyMany {
 	public function onAfterPublish() {
 		/** @var \Versioned|\DataObject $block */
 		foreach ($this->related() as $block) {
-			$block->publish('Stage', 'Live', false);
+			if ($block->hasExtension('Versioned')) {
+				$block->publish('Stage', 'Live', false);
+			}
 			$block->extend('onAfterPublish', $block);
 		}
 	}

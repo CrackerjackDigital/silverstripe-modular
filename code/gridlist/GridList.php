@@ -67,7 +67,7 @@ class GridList extends ContentControllerExtension {
 				$provider->extend('sequenceGridListFilters', $filters, $items, $templateData);
 			}
 
-			// now do any grouping, direct manipulation of items such as fixed ordering
+			// now do any grouping, direct manipulation of items such as fixed ordering, pagination etc
 			foreach ($providers as $provider) {
 				$provider->extend('sequenceGridListItems', $items, $filters, $templateData);
 			}

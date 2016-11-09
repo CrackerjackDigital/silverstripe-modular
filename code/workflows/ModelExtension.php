@@ -19,8 +19,8 @@ class ModelExtension extends \Modular\ModelExtension {
 	];
 
 	public function canDoIt($what, $member = null) {
-		$member = $member ?
-			(is_numeric($member) ? \Member::get()->byID($member) : $member)
+		$member = $member
+			? (is_numeric($member) ? \Member::get()->byID($member) : $member)
 			: \Member::currentUser();
 
 		if ($member) {
