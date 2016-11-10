@@ -43,7 +43,7 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 						}
 						if ($allTag == 'all' || $item->GridListFilters()->find('ModelTag', $allTag)) {
 							// we don't add all, we're just getting the count
-//							$out->push($item);
+							// $out->push($item);
 							$added++;
 						}
 						if ($added >= $limit) {
@@ -76,7 +76,7 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 							break;
 						}
 					}
-					// initial number of items loaded in page
+					// initial number of items loaded in page (may be less than page length)
 					$filter->LoadCount = $added;
 				}
 			}
