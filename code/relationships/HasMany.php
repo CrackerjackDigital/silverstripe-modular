@@ -17,17 +17,4 @@ class HasMany extends GridField {
 			]
 		);
 	}
-
-	/**
-	 * When a page with blocks is published we also need to publish blocks. Blocks should also publish their 'sub' blocks.
-	 */
-	public function onAfterPublish() {
-		/** @var Model|\Versioned $block */
-		foreach ($this()->{static::RelationshipName}() as $block) {
-			if ($block->hasExtension('Versioned')) {
-				$block->publish('Stage', 'Live', false);
-			}
-		}
-	}
-
 }
