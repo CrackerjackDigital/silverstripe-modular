@@ -43,7 +43,7 @@ class AddDefaultBlocks extends Field {
 			/** @var \ManyManyList $existing */
 			$existing = $this()->{HasBlocks::relationship_name()}();
 
-			if ($this->{self::SingleFieldName} || $this()->WasNew) {
+			if ($this()->{self::SingleFieldName} || $this()->WasNew) {
 
 				if ($defaultBlockClasses = $this->getDefaultBlockClasses()) {
 					// get class names along with count of each expected
