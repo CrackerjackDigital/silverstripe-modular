@@ -206,7 +206,7 @@ class Application extends Module {
 			\Filesystem::makeFolder($path);
 		}
 		if ($fail && !($found && is_dir($path))) {
-			throw new Exception("Not a safe path or path doesn't exist: '$originalPath");
+			throw new Exception("Not a safe path or path doesn't exist original: '$originalPath' translated: '$path'");
 		}
 		return $found ? $path: false;
 	}

@@ -32,6 +32,8 @@ class AddDefaultBlocks extends Field {
 		if (!\Controller::curr()->getRequest()->postVar(self::SingleFieldName)) {
 			$this()->{self::SingleFieldName} = 0;
 		}
+		// pick this up in onAfterWrite
+		$this()->WasNew = !$this()->isInDB();
 		parent::onBeforeWrite();
 	}
 
@@ -41,7 +43,7 @@ class AddDefaultBlocks extends Field {
 			/** @var \ManyManyList $existing */
 			$existing = $this()->{HasBlocks::relationship_name()}();
 
-			if ($this->okToAdd($existing->count())) {
+			if ($this()->{self::SingleFieldName} || $this()->WasNew) {
 
 				if ($defaultBlockClasses = $this->getDefaultBlockClasses()) {
 					// get class names along with count of each expected
@@ -91,16 +93,6 @@ class AddDefaultBlocks extends Field {
 				}
 			}
 		}
-	}
-
-	/**
-	 * If there are no blocks or we have checked the 'AddDefaultBlocks' then return true, otherwise false.
-	 * @param $existingCount
-	 * @return bool
-	 */
-	protected function okToAdd($existingCount) {
-		return $this()->{self::SingleFieldName}
-			|| ($existingCount == 0);
 	}
 
 	protected function getDefaultBlockClasses() {

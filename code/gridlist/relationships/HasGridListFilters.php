@@ -6,7 +6,6 @@ use Modular\Fields\Title;
  * Provides a tag field where filters can be added.
  *
  * @package Modular\Fields
- *
  * @method \SS_List GridListFilters()
  */
 class HasGridListFilters extends HasManyMany {

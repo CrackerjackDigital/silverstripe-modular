@@ -2,8 +2,7 @@
 namespace Modular\GridList\Layout;
 
 use Modular\Application;
-use Modular\GridList\GridList;
-use Modular\GridList\Interfaces\TempleDataProvider;
+use Modular\GridList\Interfaces\GridListTempleDataProvider;
 use Modular\ModelExtension;
 
 /**
@@ -12,15 +11,20 @@ use Modular\ModelExtension;
  *
  * @package Modular\GridList\Layout
  */
-class ModeForPage extends ModelExtension implements TempleDataProvider {
+class ModeForPage extends ModelExtension implements GridListTempleDataProvider {
 	/**
+	 *
+	 * Use the current page's gridlist_default_mode if set otherwise whatever we had before.
+	 *
+	 * @param array $templateData
 	 * @return array [ 'Mode' => mode e.g. 'grid' or 'list' (or empty if none set)
 	 */
-	public function provideGridListTemplateData($existingData = []) {
-		$mode = isset($existingData['Mode']) ? $existingData['Mode'] : '';
+	public function provideGridListTemplateData($templateData = []) {
+		$mode = isset($templateData['Mode']) ? $templateData['Mode'] : '';
 
 		// page may be null if it's a new page
 		if ($page = Application::get_current_page()) {
+			// set to page mode if set, otherwise keep what we have already
 			$mode = $page->config()->get('gridlist_default_mode') ?: $mode;
 		}
 		return [
