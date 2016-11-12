@@ -31,6 +31,7 @@ abstract class HasRelatedPages extends HasManyMany {
 		$pageClass = static::related_class_name();
 		/** @var \SS_List $existing */
 		$existing = $this()->{static::relationship_name()}();
+		
 
 		// keep track of all the pages which are added
 		$handled = [];

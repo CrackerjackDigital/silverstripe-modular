@@ -55,6 +55,8 @@ class HasBlocks extends HasManyMany {
 	 * @return \DataList
 	 */
 	public function ZoneBlocks($zone = 'Content', $rules = '') {
+		$this()->extend('preRenderZoneBlocks', $zone, $rules);
+
 		$map = $this()->config()->get('blocks_for_zone')
 			?: $this->config()->get('blocks_for_zone');
 
@@ -74,11 +76,14 @@ class HasBlocks extends HasManyMany {
 			)
 		);
 
-		return $this()
+		$blocks = $this()
 			->Blocks()
 			->filter('ClassName', $includes)
 			->exclude('ClassName', $excludes)
-			->sort(\Modular\GridField\GridField::SortFieldName);
+			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
+
+		$this()->extend('postRenderZoneBlocks', $zone, $rules);
+		return $blocks;
 	}
 
 	/**
@@ -102,7 +107,7 @@ class HasBlocks extends HasManyMany {
 		}
 		return [
 			$excludes,
-		    $includes
+		    $includes,
 		];
 	}
 }

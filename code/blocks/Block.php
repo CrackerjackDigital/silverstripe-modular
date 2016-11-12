@@ -17,7 +17,7 @@ use Modular\Model;
  * 'Download',
  * 'Pull Quote'
  */
-class Block extends Model implements LinkType {
+class Block extends \Modular\VersionedModel implements LinkType {
 	private static $template = '';
 
 	private static $summary_fields = [
