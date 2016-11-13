@@ -9,7 +9,7 @@ interface ItemsSequencer {
 	/**
 	 * @param \ArrayList|\DataList $items
 	 * @param                      $filters
-	 * @param array                $parameters (extraData from building gridlist)
+	 * @param array                $parameters
 	 * @return
 	 */
 	public function sequenceGridListItems(&$items, $filters, &$parameters = []);

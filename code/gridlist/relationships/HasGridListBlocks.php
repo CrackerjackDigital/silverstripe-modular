@@ -24,6 +24,8 @@ class HasGridListBlocks extends HasBlocks implements ItemsSequencer, ItemsProvid
 	 * Inserts manually added blocks at front of list.
 	 *
 	 * @param \ArrayList|\DataList $items
+	 * @param                      $filters
+	 * @param array                $parameters
 	 */
 	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
 		$out = new \ArrayList();

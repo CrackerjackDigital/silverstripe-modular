@@ -1,48 +1,49 @@
 <?php
-namespace Modular\GridList\Sequencers\Filter;
+namespace Modular\GridList\Sequencers\Filters;
 
 use Modular\Application;
-use Modular\GridList\Interfaces\FilterConstraints;
-use Modular\Model;
+use Modular\GridList\Interfaces\FiltersSequencer;
 use Modular\ModelExtension;
 use Modular\Relationships\HasGridListFilters;
+use Modular\Relationships\HasTags;
 
 /**
- * Adds count of items for each filter to the filters for pagination, badging etc, also adds DefaultItemCount and AllItemCount to $parameters
+ * Iterates through filters and adds an item count of items for that filter, for use by pagination, badges etc.
  *
- * @package Modular\GridList\Constraints\Filter
+ * @package Modular\GridList\Providers\Filters
  */
-class AddItemCounts extends ModelExtension implements FilterConstraints {
+class AddItemCounts extends ModelExtension implements FiltersSequencer {
+	const AllItemCountKey = 'AllItemCount';
 
-	public function constrainGridListFilters(&$filters, &$parameters = []) {
-		/** @var \ArrayList $items */
-		$items = $this()->gridListItems();
+	public function sequenceGridListFilters(&$filters, $items, &$parameters = []) {
 
-		$defaultFilter = Application::get_current_page()->DefaultFilter();
+		if ($allFilter = Application::get_current_page()->FilterAll()) {
+			$allTag = $allFilter->Filter;
+			$allItemCount = 0;
+		} else {
+			$allItemCount = $items->count();
+			$allTag = '';
+		}
 
-		$parameters['AllItemCount'] = $items->count();
-
-		$defaultCount = 0;
-
-		/** @var HasGridListFilters|Model $item */
 		foreach ($filters as $filter) {
-			$filterItemCount = 0;
+			$itemCount = 0;
+			$tag = $filter->ModelTag;
+
+			/** @var \DataObject|HasGridListFilters $item */
 			foreach ($items as $item) {
-
-				if ($defaultFilter) {
-					if ($item->GridListFilters()->find('ModelTag', $defaultFilter->ModelTag)) {
-						$defaultCount++;
-					}
-				}
-
 				if ($item->hasExtension(HasGridListFilters::class_name())) {
-					if ($item->GridListFilters()->find('ID', $filter->ID)) {
-						$filterItemCount++;
+					if ($item->GridListFilters()->find('ModelTag', $tag)) {
+						$itemCount++;
+					} else if ($allTag == 'all' || ($allTag && $item->GridListFilters()->find('ModelTag', $allTag))) {
+						$allItemCount++;
 					}
 				}
 			}
-			$filter->ItemCount = $filterItemCount;
+			// don't recount 'all filter' after first pass
+			$allTag = false;
+
+			$filter->ItemCount = max($itemCount - 1, 0);
 		}
-		$parameters['DefaultItemCount'] = $defaultCount;
+		$parameters[self::AllItemCountKey] = max($allItemCount - 1, 0);
 	}
 }

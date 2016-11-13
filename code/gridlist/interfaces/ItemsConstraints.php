@@ -3,8 +3,10 @@ namespace Modular\GridList\Interfaces;
 
 interface ItemsConstraints {
 	/**
-	 * @param \SS_List $items
-	 * @return mixed
+	 * @param \SS_LIst $items
+	 * @param          $filters
+	 * @param array    $parameters
+	 * @return void
 	 */
-	public function constrainGridListItems(&$items);
+	public function constrainGridListItems(&$items, $filters, $parameters = []);
 }
