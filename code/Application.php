@@ -6,9 +6,12 @@ use SSViewer;
 use Director;
 
 class Application extends Module {
+	// set this (rarely) if application name is not the same as the derived application class
+	const Name = 'Application';
 	const ThemeMobile  = 'mobile';
 	const ThemeDesktop = 'desktop';
 	const ThemeDefault = 'default';
+	const FactoryUseEnv = 1;
 
 	// base dir for loading requirements from, if not set then theme folder will be used (e.g. themes/default/)
 	private static $requirements_path;
@@ -24,11 +27,36 @@ class Application extends Module {
 		ASSETS_PATH,
 	    '../logs'
 	];
+	
+	private static $system_admin_email = '';
 
 	// use this
 	private static $default_theme = self::ThemeDefault;
 
-
+	public static function factory($useEnv = true) {
+		if ($useEnv) {
+			$injector = \Injector::inst();
+			
+			if (Director::isDev()) {
+				return $injector->hasService('Dev') ? $injector->get('Dev') : $injector->get(static::name());
+			}
+			if (Director::isTest()) {
+				return $injector->hasService('Test') ? $injector->get('Test') : $injector->get(static::name());
+			}
+			if (Director::isLive()) {
+				return $injector->hasService('Live') ? $injector->get('Live') : $injector->get(static::name());
+			}
+		}
+		return \Injector::inst()->get(static::name());
+	}
+	
+	public static function name() {
+		return static::Name ?: get_called_class();
+	}
+	
+	public static function system_admin_email() {
+		return static::config()->get('system_admin_email') ? \Email::config()->get('admin_email') : 'servers+' . strtolower(static::name()) . '@moveforward.co.nz';
+	}
 	/**
 	 * Try to get page from Director and if in CMS then get it from CMS page, fallback to
 	 * Controller url via page_for_path.

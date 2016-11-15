@@ -6,19 +6,23 @@ use Modular\Exceptions\Exception;
 
 trait debugging {
 	/**
-	 * @param int $level create debugger with this log level, or set the current log level if already created
+	 * @param int|null $level create debugger with this log level, or set the current log level if already created
+	 * @param string   $source used in output, if not provided then the called class is used
 	 * @return \Modular\Debugger
 	 */
-	public static function debugger($level = Debugger::LevelFromEnv) {
+	public static function debugger($level = Debugger::LevelFromEnv, $source = '') {
 		/** @var Debugger $debugger */
 		static $debugger;
 		if ($debugger) {
 			if (func_num_args()) {
 				$debugger->level($level);
+				if (func_num_args() >= 2) {
+					$debugger->source($source);
+				}
 			}
 		} else {
-			// 'Debugger' is a service name set on Injector
-			$debugger = \Injector::inst()->get('Debugger', $level);
+			// 'Debugger' is a service name set on Injector which defaults to Modular\Debugger
+			$debugger = \Injector::inst()->get('Debugger', $level, $source ?: get_called_class());
 		}
 		return $debugger;
 	}

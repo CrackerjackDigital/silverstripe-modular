@@ -9,35 +9,51 @@ abstract class EnumField extends Field {
 	 * If numeric, then values will be used as both key and value in dropdown
 	 * If assoc then key will be value and value will be display in dropdown
 	 *
-	 * First option will be the default
+	 * First option will be the default/empty value
 	 */
 	
 	private static $options = [];
 	
 	public static function field_schema()
 	{
-		$options = array_keys(static::all_options());
+		$options = array_keys(static::options());
 		return "Enum('" . implode(',', $options) . "')";
 	}
 	
 	public function cmsFields()
 	{
 		return [
-			new \DropdownField(
+			(new \DropdownField(
 				static::field_name(),
 				null,
 				$this->dropdownMap()
-			)
+			))->setEmptyString(current($this->options()))
 		];
 	}
 	
+	/**
+	 * Transform options by checking lang file for <FieldName>.Options.<Key> for each option
+	 * @return array
+	 */
 	public function dropdownMap()
 	{
-		return static::all_options();
+		$options = static::options();
+		// now lookup translations as the value
+		return array_map(
+			function($value, $key) {
+				return _t(static::field_name() . '.Options.' . $key, $value);
+			},
+			array_values($options),
+			array_keys($options)
+		);
 	}
 	
-	public static function all_options() {
-		if ($options = static::config()->get('options')) {
+	/**
+	 * Always return an associative map of options even if configured as an array.
+	 * @return array
+	 */
+	public static function options() {
+		if ($options = static::config()->get('options') ?: []) {
 			if (is_numeric(key($options))) {
 				$options = array_combine(
 					array_values($options),

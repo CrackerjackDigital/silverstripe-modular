@@ -77,7 +77,7 @@ class Debugger extends Object implements Logger {
 
 	// what level will we trigger at
 	private $level;
-
+	
 	public function __construct($level = self::LevelFromEnv, $source = '') {
 		parent::__construct();
 		$this->init($level, $source);
@@ -120,7 +120,7 @@ class Debugger extends Object implements Logger {
 			return $this->level;
 		}
 	}
-
+	
 	public function source($source = null) {
 		if (func_num_args()) {
 			$this->source = $source;
@@ -156,7 +156,7 @@ class Debugger extends Object implements Logger {
 
 		if ($this->bitfieldTest($level, self::DebugFile)) {
 			if ($logFile = $this->makeLogFileName()) {
-				$this->toFile($level, $logFile);
+				$this->toFile($logFile, $level);
 			}
 		}
 		if ($this->bitfieldTest($level, self::DebugScreen)) {
@@ -260,7 +260,7 @@ class Debugger extends Object implements Logger {
 	 * @param $level
 	 * @return $this
 	 */
-	public function toEmail($address, $level) {
+	public function toEmail($address, $level = self::LevelFromEnv) {
 		if ($address) {
 			SS_Log::add_writer(
 				new SS_LogEmailWriter($address),
@@ -279,7 +279,7 @@ class Debugger extends Object implements Logger {
 	 * @param  string $filePathName log to this file or if not supplied generate one
 	 * @return $this
 	 */
-	public function toFile($level, $filePathName = '') {
+	public function toFile($filePathName = '', $level = self::LevelFromEnv) {
 		$originalFilePathName = $filePathName;
 
 		if ($filePathName) {
@@ -332,11 +332,11 @@ class Debugger extends Object implements Logger {
 	/**
 	 * At end of Debugger lifecycle file set by toFile will be sent to this email address.
 	 *
-	 * @param $emailAddress
+	 * @param string $emailAddress if empty then Email.admin_email will be used
 	 * @return $this
 	 */
-	public function sendFile($emailAddress) {
-		$this->emailLogFileTo = $emailAddress;
+	public function sendFile($emailAddress = '') {
+		$this->emailLogFileTo = $emailAddress ?: \Email::config()->get('admin_email');
 		return $this;
 	}
 

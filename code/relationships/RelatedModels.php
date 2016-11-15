@@ -2,6 +2,8 @@
 namespace Modular\Relationships;
 
 use Modular\Fields\Field;
+use Modular\GridField\GridFieldConfig;
+use Modular\GridField\GridFieldOrderableRows;
 use Modular\Model;
 
 class RelatedModels extends Field {
@@ -15,7 +17,7 @@ class RelatedModels extends Field {
 
 	// wether to show the field as a RelatedModels or a TagField
 	private static $show_as = self::ShowAsGridField;
-
+	
 	// can related models be in an order so a GridFieldOrderableRows component is added?
 	private static $sortable = true;
 
@@ -31,7 +33,8 @@ class RelatedModels extends Field {
 	
 	
 	/**
-	 * Customise if shows as a RelatedModels or a TagField depending on config.show_as
+	 * Customise if shows as a GridField or a TagField depending on config.show_as
+	 *
 	 * @return array
 	 */
 	public function cmsFields() {
@@ -43,6 +46,27 @@ class RelatedModels extends Field {
 		return $fields;
 	}
 	
+	/**
+	 * Return all related items. Optionally (for convenience more than anything) provide a relationship name to dereference otherwise this classes
+	 * late static binding relationship_name() will be used.
+	 *
+	 * @param string $relationshipName if supplied use this relationship instead of static relationship_name
+	 * @return \ArrayList|\DataList
+	 */
+	public function related($relationshipName = '') {
+		$relationshipName = $relationshipName ?: static::relationship_name();
+		return $this()->$relationshipName();
+	}
+	
+	/**
+	 * Return an array of IDs from the other end of this extendsions Relationship or the supplied relationship name.
+	 *
+	 * @param string $relationshipName
+	 * @return array
+	 */
+	public function relatedIDs($relationshipName = '') {
+		return $this->related($relationshipName)->column('ID');
+	}
 	
 	
 	/**
@@ -120,7 +144,7 @@ class RelatedModels extends Field {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
-		/** @var RelatedModels $gridField */
+		/** @var \GridField $gridField */
 		$gridField = \GridField::create(
 			$relationshipName,
 			$relationshipName,

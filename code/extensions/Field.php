@@ -184,17 +184,6 @@ abstract class Field extends ModelExtension {
 	}
 
 	/**
-	 * Return the value of the implemented SingleField on the extended model.
-	 *
-	 * @return mixed
-	 */
-	public function singleFieldValue() {
-		if (static::SingleFieldName) {
-			return $this()->{static::SingleFieldName};
-		}
-	}
-
-	/**
 	 * Return a map of fieldname => value for data relevant to only this extension.
 	 *
 	 * @return array
