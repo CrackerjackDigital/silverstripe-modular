@@ -2,7 +2,6 @@
 namespace Modular\Fields;
 
 use ArrayList;
-use FormField;
 use Modular\Interfaces\Imagery;
 
 /**
@@ -18,6 +17,8 @@ class Image extends File implements Imagery {
 	private static $base_upload_folder = 'images';
 
 	private static $allowed_files = 'image';
+
+	private static $can_attach_existing = true;
 
 	/**
 	 * Return a list with only item being the single related image.
