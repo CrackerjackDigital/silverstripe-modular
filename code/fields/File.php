@@ -3,15 +3,14 @@ namespace Modular\Fields;
 
 use FormField;
 use Modular\Relationships\HasOne;
-use Modular\Relationships\HasManyMany;
 use Modular\upload;
 use UploadField;
 
 class File extends HasOne {
 	use upload;
 
-	const RelationshipName        = 'File';
-	const RelatedClassName        = 'File';
+	const RelationshipName = 'File';
+	const RelatedClassName = 'File';
 	const DefaultUploadFolderName = 'files';
 
 	// if an array then file extensions, if a string then a category e.g. 'video'
@@ -22,6 +21,8 @@ class File extends HasOne {
 
 	// folder directly under '/assets'
 	private static $base_upload_folder = '';
+
+	private static $can_attach_existing = false;
 
 	// this will be appended to 'base_upload_folder'
 	private static $upload_folder = self::DefaultUploadFolderName;

@@ -2,8 +2,8 @@
 
 namespace Modular;
 
-use UploadField;
 use Modular\Exceptions\Exception;
+use UploadField;
 
 /**
  * Trait adds functionality for dealing with upload fields
@@ -45,14 +45,15 @@ trait upload {
 
 		$field->setAllowedMaxFileNumber($maxlength ?: null);
 		// don't allow existing media to be re-attached it's a has_one so would be messy
-		$field->setCanAttachExisting(false);
+		$allowExistingFiles = $this->config()->get('can_attach_existing');
+		$field->setCanAttachExisting($allowExistingFiles);
 		$field->setFolderName($this->uploadFolderName());
 
 		// could be string for category or an array of extensions
 		// try extension first, then model
 
 		$extensions = $allowedFiles = $this->config()->get($configVarName)
-			?: $this()->config()->get($configVarName);
+		?: $this()->config()->get($configVarName);
 
 		$categories = [];
 		if (!is_array($allowedFiles)) {
@@ -63,8 +64,8 @@ trait upload {
 
 			foreach ($categories as $category) {
 
-				if (isset($allCategoryExtensions[ $category ])) {
-					$extensions = $allCategoryExtensions[ $category];
+				if (isset($allCategoryExtensions[$category])) {
+					$extensions = $allCategoryExtensions[$category];
 				} else {
 					$extensions = [$category];
 				}
@@ -101,10 +102,10 @@ trait upload {
 		// try extension first, then model
 		return \Controller::join_links(
 			$this->config()->get('base_upload_folder')
-				?: $this()->config()->get('base_upload_folder'),
+			?: $this()->config()->get('base_upload_folder'),
 			$this->config()->get('upload_folder')
-				?: ($this()->config()->get('upload_folder')
-					?: static::DefaultUploadFolderName)
+			?: ($this()->config()->get('upload_folder')
+				?: static::DefaultUploadFolderName)
 		);
 	}
 
