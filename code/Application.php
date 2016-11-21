@@ -146,8 +146,8 @@ class Application extends Module {
 		// output this path in errors before realpath etc
 		$originalPath = $path;
 
-		$basePath = rtrim(BASE_PATH, PATH_SEPARATOR);
-		$assetsPath = rtrim(ASSETS_PATH, PATH_SEPARATOR);
+		$basePath = rtrim(BASE_PATH, DIRECTORY_SEPARATOR);
+		$assetsPath = rtrim(ASSETS_PATH, DIRECTORY_SEPARATOR);
 
 		if (false !== strpos($path, '.')) {
 			// any dots treat as relative to base folder, so could go up to '../logs' inside of parent of web root
@@ -172,7 +172,7 @@ class Application extends Module {
 		// rebuild path with parent 'realnamed' so we can at least be one path segment out ok (realpath fails if a dir doesn't exist)
 		if ($parentPath = realpath(dirname($path))) {
 			// parent exists so use that with the last bit of the
-			$path = rtrim($parentPath, PATH_SEPARATOR) . '/' . basename($path);
+			$path = rtrim($parentPath, DIRECTORY_SEPARATOR) . '/' . basename($path);
 		} else {
 			// choose the first safe path
 			$path = realpath($basePath . "/" . current($safePaths));
@@ -183,14 +183,14 @@ class Application extends Module {
 		// loop through each candidate path and append to the web root or use if absolute path to test against the passed path
 		// paths are normalised to exclude trailing '/'
 		foreach ($safePaths as $candidate) {
-			$candidate = rtrim($candidate, PATH_SEPARATOR);
+			$candidate = rtrim($candidate, DIRECTORY_SEPARATOR);
 
 			if (realpath($candidate) == $candidate) {
 				// if it's a real path then try that
-				$test = rtrim($candidate, PATH_SEPARATOR);
+				$test = rtrim($candidate, DIRECTORY_SEPARATOR);
 			} else {
 				// else treat as relative to base folder try that
-				$test = rtrim(realpath($basePath . "/$candidate"), PATH_SEPARATOR);
+				$test = rtrim(realpath($basePath . "/$candidate"), DIRECTORY_SEPARATOR);
 			}
 			// e.g. "/var/sites/website/logs"
 			if (substr($path, 0, strlen($test)) == $test) {
@@ -199,7 +199,7 @@ class Application extends Module {
 				break;
 			}
 		}
-		$path = rtrim(realpath($path), PATH_SEPARATOR);
+		$path = rtrim(realpath($path), DIRECTORY_SEPARATOR);
 
 		// create if requested and in assets folder
 		if (!is_dir($path) && $createIfNotExists && (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH)) {
