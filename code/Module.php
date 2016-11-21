@@ -182,21 +182,21 @@ abstract class Module extends Object {
 	 * @return string
 	 */
 	public static function log_path($className = null) {
-		if (!$path = static::config($className)->get('log_path')) {
+		if (!$path = static::config($className ?: get_called_class())->get('log_path')) {
 			if (defined('SS_ERROR_LOG')) {
 				$path = \Director::baseFolder() . '/' . dirname(SS_ERROR_LOG);
 			} else {
 				$path = ASSETS_PATH;
 			}
         }
-		return static::make_safe_path($path, true, true);
+		return static::make_safe_path($path, false, true);
 	}
 
 	/**
 	 * Return a filename without a path to use for logging.
 	 */
 	public static function log_file($className = null) {
-		if (!$fileName = static::config($className)->get('log_file')) {
+		if (!$fileName = static::config($className ?: get_called_class())->get('log_file')) {
 			if (defined('SS_ERROR_LOG')) {
 				$fileName = basename(SS_ERROR_LOG);
 			} else {

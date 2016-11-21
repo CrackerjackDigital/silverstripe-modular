@@ -205,8 +205,12 @@ class Application extends Module {
 		if (!is_dir($path) && $createIfNotExists && (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH)) {
 			\Filesystem::makeFolder($path);
 		}
-		if ($fail && !($found && is_dir($path))) {
-			throw new Exception("Not a safe path or path doesn't exist original: '$originalPath' translated: '$path'");
+		if (!($found && is_dir($path))) {
+			if ($fail) {
+				throw new Exception("Not a safe path or path doesn't exist original: '$originalPath' translated: '$path'");
+			} else {
+				$path = ASSETS_PATH;
+			}
 		}
 		return $found ? $path: false;
 	}
