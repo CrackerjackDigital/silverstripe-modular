@@ -18,9 +18,9 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 	 * Expects parameters 'start' and 'limit' to be set, limits items by filter to page length
 	 *
 	 *
-	 * @param \SS_LIst $items
-	 * @param          $filters
-	 * @param array    $parameters
+	 * @param \ArrayList|\DataList $items
+	 * @param                      $filters
+	 * @param array                $parameters
 	 */
 	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
 		$out = new \ArrayList();
@@ -81,6 +81,13 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 				}
 			}
 			$out->removeDuplicates();
+
+			// now add the first page length items which don't match any added above by a filter
+			// back in for the 'all' filter
+			$out->merge(
+				$items->exclude('ID', $out->column('ID'))->limit($limit, $start)
+			);
+
 			$items = $out;
 		}
 	}
