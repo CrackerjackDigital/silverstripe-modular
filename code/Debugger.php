@@ -1,9 +1,6 @@
 <?php
 namespace Modular;
 
-use Controller;
-use Filesystem;
-use Modular\Exceptions\Debug;
 use Modular\Exceptions\Exception;
 use Modular\Interfaces\Logger;
 use SS_Log;
@@ -127,6 +124,13 @@ class Debugger extends Object implements Logger {
 		} else {
 			return $this->source;
 		}
+	}
+
+	public function readLog() {
+		if ($this->logFilePathName) {
+			return file_get_contents($this->logFilePathName);
+		}
+		return null;
 	}
 
 	/**
