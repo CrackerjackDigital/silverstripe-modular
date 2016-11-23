@@ -1,0 +1,6 @@
+---
+Name: modular-routes
+---
+Director:
+  rules:
+    'modular/admin/publisher//$Action!/$ID': 'Modular\Admin\Publisher'
