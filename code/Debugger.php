@@ -20,18 +20,19 @@ class Debugger extends Object implements Logger {
 	const DebugNotice = SS_Log::NOTICE;     // 5
 	const DebugInfo   = SS_Log::INFO;       // 6
 	const DebugTrace  = SS_Log::DEBUG;      // 7
-	const DebugAll    = self::DebugTrace;   // easier to remember
+	const DebugAll    = self::DebugTrace;   // 7 alias for trace
 
 	// disable all debugging
 	const DebugOff = 16;
 
-	const DebugFile   = 32;
-	const DebugScreen = 64;
-	const DebugEmail  = 128;
+	const DebugFile     = 32;
+	const DebugScreen   = 64;
+	const DebugEmail    = 128;
+	const DebugTruncate = 256;     // truncate log files
 
 	const DebugEnvDev  = 103;      // screen | file | trace
 	const DebugEnvTest = 165;      // file | email | notice
-	const DebugEnvLive = 132;      // email | warn
+	const DebugEnvLive = 164;      // file | email | warn
 
 	const LevelFromEnv = null;
 
@@ -62,6 +63,8 @@ class Debugger extends Object implements Logger {
 	// path to create log file in relative to base folder
 	private static $log_path = '';
 
+	private $logger;
+
 	// set when toFile is called.
 	private $logFilePathName;
 
@@ -78,6 +81,7 @@ class Debugger extends Object implements Logger {
 
 	public function __construct($level = self::LevelFromEnv, $source = '') {
 		parent::__construct();
+		$this->logger = new \Modular\Logger();
 		$this->init($level, $source);
 	}
 
@@ -86,6 +90,8 @@ class Debugger extends Object implements Logger {
 	 */
 	public function __destruct() {
 		if ($this->emailLogFileTo && $this->logFilePathName) {
+			$this->info("End of logging at " . date('Y-m-d h:i:s'));
+
 			if ($body = file_get_contents($this->logFilePathName)) {
 				$email = new \Email(
 					$this->config()->get('send_emails_from'),
@@ -145,6 +151,7 @@ class Debugger extends Object implements Logger {
 
 	/**
 	 * Set level from config.environment_levels for passed type
+	 *
 	 * @param string $env 'dev', 'test', 'live'
 	 * @return $this
 	 * @fluent
@@ -162,7 +169,7 @@ class Debugger extends Object implements Logger {
 	 * @return $this
 	 */
 	protected function init($level, $source = null) {
-		SS_Log::clear_writers();
+		$this->logger->clearWriters();
 
 		$this->level($level);
 		$this->source($source);
@@ -221,7 +228,7 @@ class Debugger extends Object implements Logger {
 		$source = $source ?: ($this->source() ?: get_called_class());
 
 		if ($level = $this->lvl($facilities)) {
-			SS_Log::log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
+			$this->logger->log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
 		}
 		return $this;
 	}
@@ -269,7 +276,7 @@ class Debugger extends Object implements Logger {
 	 */
 	public function toEmail($address, $level) {
 		if ($address) {
-			SS_Log::add_writer(
+			$this->logger->addWriter(
 				new SS_LogEmailWriter($address),
 				$level
 			);
@@ -309,11 +316,20 @@ class Debugger extends Object implements Logger {
 			$this->logFilePathName = Application::log_path() . '/' . Application::log_file();
 		}
 
-		SS_Log::add_writer(
+		// if truncate is specified then do so on the log file
+		if ($level && self::DebugTruncate) {
+			if (file_exists($this->logFilePathName)) {
+				unlink($this->logFilePathName);
+			}
+		}
+
+		$this->logger->addWriter(
 			new SS_LogFileWriter($this->logFilePathName),
 			$this->lvl($level),
 			"<="
 		);
+
+		$this->info("Start of logging at " . date('Y-m-d h:i:s'));
 
 		// log an warning if we got an invalid path above so we know this and can fix
 		if ($filePathName && !Application::make_safe_path(dirname($originalFilePathName))) {
@@ -322,18 +338,19 @@ class Debugger extends Object implements Logger {
 		if ($filePathName && !is_dir(dirname($originalFilePathName))) {
 			$this->warn("Path for '$filePathName' does not exist, using '$this->logFilePathName' instead");
 		}
+
 		return $this;
 	}
 
 	/**
-	 * @param $level
+	 * @param int $level
 	 * @return $this
 	 */
 	public function toScreen($level = self::LevelFromEnv) {
 		if (is_null($level) || $level === self::LevelFromEnv) {
 			$level = $this->config()->get('environment_levels')[ SS_ENVIRONMENT_TYPE ];
 		}
-		SS_Log::add_writer(new \LogOutputWriter($level));
+		$this->logger->addWriter(new \LogOutputWriter($level));
 		return $this;
 	}
 
