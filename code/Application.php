@@ -6,6 +6,11 @@ use SSViewer;
 use Director;
 
 class Application extends Module {
+	use reflection;
+
+	// the name of the service expected by Injector e.g. in factory method
+	const ServiceName = 'Application';
+
 	const ThemeMobile  = 'mobile';
 	const ThemeDesktop = 'desktop';
 	const ThemeDefault = 'default';
@@ -20,14 +25,24 @@ class Application extends Module {
 		#	self::ThemeMobile => [ 'm.*' ],
 	];
 
-	private static $safe_paths = [
-		ASSETS_PATH,
-	    '../logs'
-	];
+	private static $safe_paths = [];
 
 	// use this
 	private static $default_theme = self::ThemeDefault;
 
+	/**
+	 * Return an instance of Application as registered with Injector or the called class.
+	 * @return Application
+	 */
+	public static function factory() {
+		$injector = \Injector::inst();
+
+		if ($injector->hasService(static::ServiceName)) {
+			return $injector::inst()->get(static::ServiceName, true, func_get_args());
+		} else {
+			return $injector::inst()->get(get_called_class(), true, func_get_args());
+		}
+	}
 
 	/**
 	 * Try to get page from Director and if in CMS then get it from CMS page, fallback to
@@ -118,101 +133,6 @@ class Application extends Module {
 			$children = $page->Children();
 		}
 		return $page;
-	}
-
-	/**
-	 * Check the path is inside the base folder or relative to base folder when safe paths are appended and the real path is resolved.
-	 *
-	 * e.g. if  config.allow_paths = [ '../logs' ]
-	 *      and web root is /var/sites/website/htdocs
-	 *
-	 *      then
-	 *          is_safe_path('/var/sites/website/logs') will return true
-	 *      but
-	 *          is_safe_path('/var/sites/website/conf') will return false
-	 *
-	 * by default configuration the assets folder is always a safe path.
-	 *
-	 * @param string $path (no filename)
-	 * @param bool   $fail throw an exception if test fails
-	 * @param bool   $createIfNotExists create the directory if it doesn't exist (and is in assets folder only).
-	 * @return bool|string path or false if not safe
-	 * @throws \Modular\Exceptions\Application
-	 */
-	public static function make_safe_path($path, $fail = false, $createIfNotExists = true) {
-		if ($fail && !$path) {
-			throw new Exception("Empty path passed");
-		}
-		// output this path in errors before realpath etc
-		$originalPath = $path;
-
-		$basePath = rtrim(BASE_PATH, DIRECTORY_SEPARATOR);
-		$assetsPath = rtrim(ASSETS_PATH, DIRECTORY_SEPARATOR);
-
-		if (false !== strpos($path, '.')) {
-			// any dots treat as relative to base folder, so could go up to '../logs' inside of parent of web root
-			$path = "$basePath/$path";
-
-		} elseif (substr($path, 0, 1) == '/') {
-			// absolute from server root (not web root), but up one so e.g. '../logs' will work
-			// TODO: this is not nice, seems arbitrary, fix
-			$rpath = dirname(realpath($path));
-
-			if (substr($rpath, 0, strlen(dirname($basePath))) != dirname($basePath)) {
-				// we are absolute from assets folder
-				$path = "$assetsPath/$path";
-			}
-		} else {
-			// relative to assets folder
-			$path = "$assetsPath/$path";
-		}
-
-		$safePaths = static::config()->get('safe_paths') ?: [];
-
-		// rebuild path with parent 'realnamed' so we can at least be one path segment out ok (realpath fails if a dir doesn't exist)
-		if ($parentPath = realpath(dirname($path))) {
-			// parent exists so use that with the last bit of the
-			$path = rtrim($parentPath, DIRECTORY_SEPARATOR) . '/' . basename($path);
-		} else {
-			// choose the first safe path
-			$path = realpath($basePath . "/" . current($safePaths));
-		}
-
-		$found = false;
-
-		// loop through each candidate path and append to the web root or use if absolute path to test against the passed path
-		// paths are normalised to exclude trailing '/'
-		foreach ($safePaths as $candidate) {
-			$candidate = rtrim($candidate, DIRECTORY_SEPARATOR);
-
-			if (realpath($candidate) == $candidate) {
-				// if it's a real path then try that
-				$test = rtrim($candidate, DIRECTORY_SEPARATOR);
-			} else {
-				// else treat as relative to base folder try that
-				$test = rtrim(realpath($basePath . "/$candidate"), DIRECTORY_SEPARATOR);
-			}
-			// e.g. "/var/sites/website/logs"
-			if (substr($path, 0, strlen($test)) == $test) {
-				// it matches one of the registered config.safe_paths so break;
-				$found = true;
-				break;
-			}
-		}
-		$path = rtrim(realpath($path), DIRECTORY_SEPARATOR);
-
-		// create if requested and in assets folder
-		if (!is_dir($path) && $createIfNotExists && (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH)) {
-			\Filesystem::makeFolder($path);
-		}
-		if (!($found && is_dir($path))) {
-			if ($fail) {
-				throw new Exception("Not a safe path or path doesn't exist original: '$originalPath' translated: '$path'");
-			} else {
-				$path = ASSETS_PATH;
-			}
-		}
-		return $found ? $path: false;
 	}
 
 	/**

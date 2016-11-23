@@ -23,6 +23,10 @@ trait debugging {
 		return $debugger;
 	}
 
+	public static function debug_read_log($nl2br = false) {
+		return static::debugger()->readLog($nl2br);
+	}
+
 	public static function debug_message($message, $level) {
 		static::debugger()->log($message, $level, get_called_class());
 	}

@@ -65,6 +65,8 @@ class Debugger extends Object implements Logger {
 	// set when toFile is called.
 	private $logFilePathName;
 
+	private $safe_paths = [];
+
 	// when destructor is called on the logger email the log file to this address
 	private $emailLogFileTo;
 
@@ -126,9 +128,17 @@ class Debugger extends Object implements Logger {
 		}
 	}
 
-	public function readLog() {
+	/**
+	 * @param bool $nl2br convert new lines to html breaks
+	 * @return null|string
+	 */
+	public function readLog($nl2br = false) {
 		if ($this->logFilePathName) {
-			return file_get_contents($this->logFilePathName);
+			if ($nl2br) {
+				return nl2br(file_get_contents($this->logFilePathName));
+			} else {
+				return file_get_contents($this->logFilePathName);
+			}
 		}
 		return null;
 	}
@@ -285,6 +295,7 @@ class Debugger extends Object implements Logger {
 		} else {
 			$filePathName = $this->config()->get('log_file') ?: Application::log_file();
 		}
+
 		if (trim(dirname($filePathName), '.') == '') {
 			$filePathName = ($this->config()->get('log_path') ?: Application::log_path()) . '/' . $filePathName;
 		}
@@ -300,7 +311,8 @@ class Debugger extends Object implements Logger {
 
 		SS_Log::add_writer(
 			new SS_LogFileWriter($this->logFilePathName),
-			$this->lvl($level)
+			$this->lvl($level),
+			"<="
 		);
 
 		// log an warning if we got an invalid path above so we know this and can fix

@@ -20,6 +20,11 @@ class Publisher extends \Modular\Controller {
 
 	private static $confirmation_token = '';
 
+	public function __construct() {
+		$this->debugger()->toFile(Debugger::DebugAll, "publisher.log");
+		parent::__construct();
+	}
+
 	protected function options() {
 		// cache it
 		static $options;
@@ -37,7 +42,7 @@ class Publisher extends \Modular\Controller {
 	protected function option($name) {
 		if ($options = $this->options()) {
 			if (array_key_exists($name, $options)) {
-				return $this->options[$name];
+				return $options[$name];
 			}
 		}
 		return null;
@@ -46,9 +51,26 @@ class Publisher extends \Modular\Controller {
 	protected function confirmationToken() {
 		return $this->config()->get('confirmation_token');
 	}
+	/**
+	 * Checks permissions and confirmation token, throws exception if not OK, otherwise returns true.
+	 * @return boolean
+	 * @throws Exception
+	 */
+	protected function canDoItOrFail() {
+		if (!\Permission::check('ADMIN') && !\Director::is_cli()) {
+			$this->debug_fail(new Exception("Not and admin and not cli"));
+		}
+		if (!$confirmationToken = $this->confirmationToken()) {
+			$this->debug_fail(new Exception("No confirmation token configured for Modular\\Admin\\Publisher"));
+		}
+		if ($this->option('confirm') != $confirmationToken) {
+			$this->debug_fail(new Exception("Bad or missing confirmation token"));
+		}
+		return true;
+	}
 
 	public function publishall($request = null) {
-		$this->debugger()->toFile(Debugger::DebugAll, "publisher.log");
+		$this->canDoItOrFail();
 
 		$request = $request ?: $this->getRequest();
 
@@ -59,13 +81,6 @@ class Publisher extends \Modular\Controller {
 		increase_time_limit_to();
 		increase_memory_limit_to();
 
-		if (!$confirmationToken = $this->confirmationToken()) {
-			$this->debug_fail(new Exception("No confirmation token configured for Modular\\Admin\\Publisher"));
-		}
-
-		if ($this->option('confirm') != $confirmationToken) {
-			$this->debug_fail(new Exception("Bad or missing confirmation token"));
-		}
 		$start = $this->option('start');
 		$limit = $this->option('limit');
 		$stop = $this->option('stop');
@@ -99,13 +114,11 @@ class Publisher extends \Modular\Controller {
 			$start += 30;
 			if ($stop == 0 || $start < $stop) {
 				$url = $request->getURL(false);
-
-				$response = $this->redirect("$url?confirm=1&start=$start&limit=$limit&stop=$stop");
+				$confirmationToken = $this->confirmationToken();
+				$response = $this->redirect("$url?confirm=$confirmationToken&start=$start&limit=$limit&stop=$stop");
 			}
-		} else {
-			$response = $this->debug_read_log();
 		}
-
-		return $response;
+		// at the end there will be no redirect response so return the debug log instead
+		return $response ?: $this->debug_read_log(!\Director::is_cli());
 	}
 }

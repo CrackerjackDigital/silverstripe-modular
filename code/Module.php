@@ -14,6 +14,8 @@ abstract class Module extends Object {
 
 	const RequirementsTemplateDataExtensionMethod = 'modularRequirementsTemplateData';
 
+	const DefaultSafePath = ASSETS_PATH;
+
 	const BeforeInit = 'before';
 	const AfterInit  = 'after';
 	const Block      = 'block';
@@ -24,6 +26,18 @@ abstract class Module extends Object {
 
 	/** @var string path to module relative to site root, override in derived class or set in config */
 	private static $module_path;
+
+	/** @var array of class names or injector service names which can provide an array of safe paths which the application can write to
+	 *  Applicaiton and Debugger should be defined in Modular configuration or overridden in application configuration.
+	 *  Each safe path provider can have its own config.safe_paths to add, if none set then DefaultSafePath will be used (see make_safe_path).
+	 */
+	private static $safe_path_providers = [
+		'Modular\Application',
+	    'Modular\Debugger'
+	];
+
+	// should be set in application config or other providers path or self.DefaultSafePath with be used
+	private static $safe_paths = [];
 
 	// what we load and when to load, configure in e.g. a requirements.yml for the module or application.
 	private static $requirements = [
@@ -98,7 +112,7 @@ abstract class Module extends Object {
 	 * @param bool   $fail              throw an exception if test fails
 	 * @param bool   $createIfNotExists create the directory if it doesn't exist (and is in assets folder only).
 	 * @return bool|string path or false if not safe
-	 * @throws \Modular\Exceptions\Application
+	 * @throws \Modular\Exceptions\Exception
 	 */
 	public static function make_safe_path($path, $fail = false, $createIfNotExists = true) {
 		$path = rtrim($path, '.');
@@ -109,52 +123,52 @@ abstract class Module extends Object {
 		// output this path in errors before realpath etc
 		$originalPath = $path;
 
-		$basePath = rtrim(BASE_PATH, PATH_SEPARATOR);
-		$assetsPath = rtrim(ASSETS_PATH, PATH_SEPARATOR);
+		$basePath = rtrim(BASE_PATH, DIRECTORY_SEPARATOR);
+		$assetsPath = rtrim(ASSETS_PATH, DIRECTORY_SEPARATOR);
 		if (false !== strpos($path, '.')) {
 
-			$path = realpath($basePath . '/' . $path);
+			$path = realpath($basePath . DIRECTORY_SEPARATOR . $path);
 
-		} elseif (substr($path, 0, 1) == '/') {
+		} elseif (substr($path, 0, 1) == DIRECTORY_SEPARATOR) {
 			// absolute from server root (not web root), but up one so e.g. '../logs' will work
 			// TODO: this is not nice, seems arbitrary, fix
 			$rpath = dirname(realpath($path));
 
 			if (substr($rpath, 0, strlen(dirname($basePath))) != dirname($basePath)) {
 				// we are absolute from assets folder
-				$path = "$assetsPath/$path";
+				$path = $assetsPath . DIRECTORY_SEPARATOR . $path;
 			} else {
-				$path = "$rpath/" . basename($path);
+				$path = $rpath . DIRECTORY_SEPARATOR . basename($path);
 			}
 		} else {
 			// relative to assets folder
-			$path = "$assetsPath/$path";
+			$path = static::safe_path();
 		}
-
-		$safePaths = static::config()->get('safe_paths') ?: [];
 
 		// rebuild path with parent 'realnamed' so we can at least be one path segment out ok (realpath fails if a dir doesn't exist)
 		if ($parentPath = realpath(dirname($path))) {
 			// parent exists so use that with the last bit of the
-			$path = rtrim($parentPath, PATH_SEPARATOR) . '/' . basename($path);
+			$path = rtrim($parentPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . basename($path);
 		} else {
-			// choose the first safe path
-			$path = realpath($basePath . "/" . current($safePaths));
+			// iterate through safe paths finding one that exists or null
+			$path = static::safe_path();
 		}
 
 		$found = false;
 
 		// loop through each candidate path and append to the web root or use if absolute path to test against the passed path
 		// paths are normalised to exclude trailing '/'
+		$safePaths = static::safe_paths();
+
 		foreach ($safePaths as $candidate) {
-			$candidate = rtrim($candidate, PATH_SEPARATOR);
+			$candidate = rtrim($candidate, DIRECTORY_SEPARATOR);
 
 			if (realpath($candidate) == $candidate) {
 				// if it's a real path then try that
-				$test = rtrim($candidate, PATH_SEPARATOR);
+				$test = rtrim($candidate, DIRECTORY_SEPARATOR);
 			} else {
 				// else treat as relative to base folder try that
-				$test = rtrim(realpath($basePath . "/$candidate"), PATH_SEPARATOR);
+				$test = rtrim(realpath($basePath . DIRECTORY_SEPARATOR . $candidate), DIRECTORY_SEPARATOR);
 			}
 			// e.g. "/var/sites/website/logs"
 			if (substr($path, 0, strlen($test)) == $test) {
@@ -163,7 +177,7 @@ abstract class Module extends Object {
 				break;
 			}
 		}
-		$path = rtrim(realpath($path), PATH_SEPARATOR);
+		$path = rtrim(realpath($path), DIRECTORY_SEPARATOR);
 
 		// create if requested and in assets folder
 		if (!is_dir($path) && $createIfNotExists && (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH)) {
@@ -176,19 +190,56 @@ abstract class Module extends Object {
 	}
 
 	/**
+	 * Returns a path from safe_paths that exists, or self.DefaultSafePath. Any trailing directory separator will be stripped.
+	 * @return mixed|string
+	 */
+	public static function safe_path() {
+		$basePath = rtrim(BASE_PATH, DIRECTORY_SEPARATOR);
+		$safePaths = static::safe_paths();
+		$path = '';
+		foreach ($safePaths as $path) {
+			if ($path = realpath($basePath . DIRECTORY_SEPARATOR . $path)) {
+				break;
+			}
+		}
+		if (!$path) {
+			$path = static::DefaultSafePath;
+		}
+		return rtrim($path, DIRECTORY_SEPARATOR);
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function safe_paths() {
+		$paths = [];
+		$injector = \Injector::inst();
+		foreach (static::config()->get('safe_path_providers') as $serviceOrClassName) {
+			if ($injector->hasService($serviceOrClassName)) {
+
+				$append = $injector->get($serviceOrClassName)->config()->get('safe_paths') ?: [];
+
+			} else if (\ClassInfo::exists($serviceOrClassName)) {
+
+				$append = \Config::inst()->get($serviceOrClassName, 'safe_paths') ?: [];
+
+			} else {
+
+				$append = [];
+			}
+			$paths = array_merge($paths, array_filter($append));
+		}
+		return array_unique($paths);
+	}
+
+	/**
 	 * Return a directory to put logs in.
 	 *
 	 * @param null $className
 	 * @return string
 	 */
 	public static function log_path($className = null) {
-		if (!$path = static::config($className ?: get_called_class())->get('log_path')) {
-			if (defined('SS_ERROR_LOG')) {
-				$path = \Director::baseFolder() . '/' . dirname(SS_ERROR_LOG);
-			} else {
-				$path = ASSETS_PATH;
-			}
-        }
+		$path = static::config($className ?: get_called_class())->get('log_path');
 		return static::make_safe_path($path, false, true);
 	}
 

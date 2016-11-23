@@ -8,7 +8,9 @@ ContentController:
   extensions:
     - Modular\ContentControllerExtension
 Injector:
-  Application: Modular\Application
-  Debugger: Modular\Debugger
   GridListService:
     class: Modular\GridList\Service
+  Application:
+    class: Modular\Application
+  Debugger:
+    class: Modular\Debugger
