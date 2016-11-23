@@ -1,5 +1,6 @@
 <?php
 namespace Modular\Relationships;
+use Modular\Blocks\Block;
 
 /**
  * Add a gridfield to which blocks can be added and managed.
@@ -84,6 +85,22 @@ class HasBlocks extends HasManyMany {
 
 		$this()->extend('postRenderZoneBlocks', $zone, $rules);
 		return $blocks;
+	}
+
+	/**
+	 * Deep publish owned blocks when the owner is published.
+	 */
+	public function onAfterPublish() {
+		if ($blocks = $this->related()) {
+			/** @var Block|\Versioned $block */
+			foreach ($blocks as $block) {
+				if ($block->hasExtension('Versioned')) {
+					$block->publish('Stage', 'Live');
+					// now ask the block to publish it's own blocks.
+					$block->extend('onAfterPublish');
+				}
+			}
+		}
 	}
 
 	/**
