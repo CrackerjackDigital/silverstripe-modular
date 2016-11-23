@@ -88,6 +88,9 @@ class Publisher extends \Modular\Controller {
 			$this->canDoItOrFail();
 
 		}
+		// output some progress feedback
+		$this->debug_output_log();
+
 		// first page index in result set of all pages to publish
 		$start = $this->option('start');
 

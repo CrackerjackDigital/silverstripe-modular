@@ -135,16 +135,11 @@ class Debugger extends Object implements Logger {
 	}
 
 	/**
-	 * @param bool $nl2br convert new lines to html breaks
 	 * @return null|string
 	 */
-	public function readLog($nl2br = false) {
+	public function readLog() {
 		if ($this->logFilePathName) {
-			if ($nl2br) {
-				return nl2br(file_get_contents($this->logFilePathName));
-			} else {
-				return file_get_contents($this->logFilePathName);
-			}
+			return file_get_contents($this->logFilePathName);
 		}
 		return null;
 	}
