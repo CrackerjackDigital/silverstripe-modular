@@ -38,6 +38,21 @@ class ColumnWidth extends Field implements GridListTempleDataProvider {
 		);
 	}
 
+	public function GridListNumColumns() {
+		if ($map = $this->config()->get('width_map')) {
+			if ($colWidth = $this()->{static::SingleFieldName}) {
+				if (isset($map[$colWidth])) {
+					return $map[$colWidth];
+				} else {
+					return $map[$this->defaultColumnCount()];
+				}
+			} else {
+				// just return the first map entry
+				return current($map);
+			}
+		}
+	}
+
 	/**
 	 * Provide the 'GridListColumnWidth' field to the GridList template data
 	 *

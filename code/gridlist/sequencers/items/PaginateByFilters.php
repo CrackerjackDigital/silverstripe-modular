@@ -19,7 +19,7 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 	 *
 	 *
 	 * @param \ArrayList|\DataList $items
-	 * @param                      $filters
+	 * @param \DataList|\ArrayList $filters
 	 * @param array                $parameters
 	 */
 	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
@@ -30,8 +30,10 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 		if (!is_null($limit)) {
 			$added = 0;
 
+			$modelTags = $filters->column('ModelTag');
+
 			if ($allFilter = Application::get_current_page()->FilterAll()) {
-				// first add 'all filter' items
+				// first add first limit 'all filter' items which don't exist in the other filters
 				if ($allTag = $allFilter->Filter) {
 					$index = 0;
 					$added = 0;
@@ -41,9 +43,8 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 						if ($index < $start) {
 							continue;
 						}
-						if ($allTag == 'all' || $item->GridListFilters()->find('ModelTag', $allTag)) {
-							// we don't add all, we're just getting the count
-							// $out->push($item);
+						if ($allTag == 'all' || !$item->GridListFilters()->find('ModelTag', $modelTags)) {
+							$out->push($item);
 							$added++;
 						}
 						if ($added >= $limit) {
@@ -80,13 +81,11 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 					$filter->LoadCount = $added;
 				}
 			}
-			$out->removeDuplicates();
-
 			// now add the first page length items which don't match any added above by a filter
 			// back in for the 'all' filter
-			$out->merge(
-				$items->exclude('ID', $out->column('ID'))->limit($limit, $start)
-			);
+//			$out->merge(
+//				$items->exclude('ID', $out->column('ID'))->limit($limit, $start)
+//			);
 
 			$items = $out;
 		}
