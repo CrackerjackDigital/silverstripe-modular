@@ -51,7 +51,7 @@ class Publisher extends \Modular\Controller {
 	 * Checks permissions to see if we can run a Publisher 'task'. This should only be called first time task is entered (e.g. not on entry do to a redirect).
 	 */
 	protected function canDoItOrFail() {
-		// no Session.InPublishAll set up so check permissions, if we're in cli and that correct confirmation token is given
+		// no Session.PublishAllLogFileName set up so check permissions, if we're in cli and that correct confirmation token is given
 		if (!\Director::is_cli() && !\Permission::check('ADMIN')) {
 			$this->debug_fail(new Exception("Not an admin and not cli"));
 		}
@@ -69,21 +69,23 @@ class Publisher extends \Modular\Controller {
 
 		if ($this->option('reset')) {
 			// force a first-time authentication etc
-			\Session::clear('InPublishAll');
+			\Session::clear('PublishAllLogFileName');
 		}
 
-		if (\Session::get('InPublishAll')) {
+		if ($logFileName = \Session::get('PublishAllLogFileName')) {
 			// clear it so if anything goes wrong we're not stuck, will be set again just before redirect later
-			\Session::clear('InPublishAll');
+			\Session::clear('PublishAllLogFileName');
 
 			// write all output to file
-			$this->debugger()->toFile(Debugger::DebugAll, "publisher.log");
+			static::debugger()->toFile(Debugger::DebugAll, $logFileName);
 			$this->debug_info("Continuing publish all at " . date('Ymdhis'));
 
 		} else {
+			$logFileName = 'publisher-' . date('Ymdhis') . '.log';
+
 			// write all output to file
 			// first time we want to truncate the log
-			$this->debugger()->toFile(Debugger::DebugAll | Debugger::DebugTruncate, "publisher.log");
+			static::debugger()->toFile(Debugger::DebugAll | Debugger::DebugTruncate, $logFileName);
 			$this->debug_info("Starting publish all");
 
 			// first round permission check, will throws exception if can't do it
@@ -106,6 +108,8 @@ class Publisher extends \Modular\Controller {
 
 		// if set during loop then we will be redirecting back to this page, otherwise we are done
 		$response = false;
+
+		\Versioned::set_reading_mode('Stage.Stage');
 
 		/** @var \DataList $pages */
 		$pages = \DataObject::get("SiteTree", "", "ID asc", "", "$start,$limit");
@@ -142,14 +146,14 @@ class Publisher extends \Modular\Controller {
 				$url = $request->getURL(false);
 
 				// set the publishall indicator to be picked up after redirect.
-				\Session::set('InPublishAll', true);
+				\Session::set('PublishAllLogFileName', $logFileName);
 
 				$response = $this->redirect("$url?start=$start&limit=$limit&stop=$stop");
 			}
 		}
 		if (!$response) {
 			// we're done, make sure this is cleared
-			\Session::clear('InPublishAll');
+			\Session::clear('PublishAllLogFileName');
 
 			$this->debug_info("Ending publish all");
 

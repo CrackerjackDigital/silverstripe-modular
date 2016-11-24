@@ -29,6 +29,7 @@ class Debugger extends Object implements Logger {
 	const DebugScreen   = 64;
 	const DebugEmail    = 128;
 	const DebugTruncate = 256;     // truncate log files
+	const DebugShared   = 4096;    // use the shared Application Log (not implemented), truncate is not obeyed in this case
 
 	const DebugEnvDev  = 103;      // screen | file | trace
 	const DebugEnvTest = 165;      // file | email | notice
@@ -49,11 +50,6 @@ class Debugger extends Object implements Logger {
 		self::DebugInfo   => 'INFO  ',
 		self::DebugTrace  => 'TRACE ',
 	];
-
-	// TODO implement writing a log file per class as well as global log, may need to move this into trait
-	// as we need to get the class name for the file maybe, though SS_Log already handles backtrace it doesn't
-	// og back far enough
-	const DebugPerClass = 256;
 
 	private static $send_emails_from = self::DefaultSendEmailsFrom;
 
@@ -112,10 +108,10 @@ class Debugger extends Object implements Logger {
 	/**
 	 * @inheritdoc
 	 */
-	public function level($level = null) {
+	public function level($level = self::LevelFromEnv) {
 		if (func_num_args()) {
 			if ($level === self::LevelFromEnv) {
-				$this->env();
+				$this->level = $this->env();
 			} else {
 				$this->level = $level;
 			}
@@ -125,6 +121,11 @@ class Debugger extends Object implements Logger {
 		}
 	}
 
+	/**
+	 * @param null $source
+	 * @return $this|string
+	 * @fluent-setter
+	 */
 	public function source($source = null) {
 		if (func_num_args()) {
 			$this->source = $source;
@@ -145,15 +146,14 @@ class Debugger extends Object implements Logger {
 	}
 
 	/**
-	 * Set level from config.environment_levels for passed type
+	 * Return the level for a given environment.
 	 *
 	 * @param string $env 'dev', 'test', 'live'
 	 * @return $this
 	 * @fluent
 	 */
 	public function env($env = SS_ENVIRONMENT_TYPE) {
-		$this->level = $this->config()->get('environment_levels')[ $env ];
-		return $this;
+		return $this->config()->get('environment_levels')[ $env ];
 	}
 
 	/**
@@ -168,6 +168,9 @@ class Debugger extends Object implements Logger {
 
 		$this->level($level);
 		$this->source($source);
+
+		// get the level arrived at
+		$level = $this->level();
 
 		if ($this->bitfieldTest($level, self::DebugFile)) {
 			if ($logFile = $this->makeLogFileName()) {
@@ -312,7 +315,7 @@ class Debugger extends Object implements Logger {
 		}
 
 		// if truncate is specified then do so on the log file
-		if ($level && self::DebugTruncate) {
+		if (($level && self::DebugTruncate) == self::DebugTruncate) {
 			if (file_exists($this->logFilePathName)) {
 				unlink($this->logFilePathName);
 			}
@@ -382,7 +385,7 @@ class Debugger extends Object implements Logger {
 
 			$prefix = $this->source ?: "$date-";
 
-			$fileName = basename(tempnam($path, "silverstripe-$prefix")) . ".log";
+			$fileName = basename(tempnam($path, "silverstripe-$prefix"));
 		}
 		$path = Application::make_safe_path($path, false);
 		return "$path/$fileName.log";
