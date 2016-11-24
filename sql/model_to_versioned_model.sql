@@ -12,7 +12,7 @@ create table `Modular\VersionedModel` select * from `Modular\Model` where ClassN
 alter table `Modular\VersionedModel` modify column ID int not null auto_increment primary key;
 alter table `Modular\VersionedModel` add index ClassName (ClassName);
 
--- If `Modular\VersionedModel` already exists then:
+-- OR If `Modular\VersionedModel` already exists then:
 
 insert into `Modular\VersionedModel` select * from `Modular\Model` where ClassName = '';
 alter table `Modular\VersionedModel` modify column ID int not null auto_increment primary key;
@@ -29,7 +29,16 @@ update GridListBlock set AddDefaultBlocks = 0;
 -- Make sure you have added and configured `namespace Modular\Workflows\ModelExtension` to models which have become
 -- VersionedModels
 
--- Publish all pages on the site:  /admin/pages/publishall
+-- dev/build?flush=1 to create versioned tables (_Live, _versions) for the VersionedModel table
+
+-- Now make a copy of models into the _Live table so when we dev build there's something already there
+
+insert into `Modular\VersionedModel_Live` (ID, ClassName, Created, LastEdited, Version)
+select ID, ClassName, Created, LastEdited, 1 from `Modular\VersionedModel`;
+
+-- Now you can publish all pages (may need some hacks to get working as seems to be broken in SS)
+
+-- # framework/sake admin/pages/publishall "confirm=1"
 
 -- Job Done!
 

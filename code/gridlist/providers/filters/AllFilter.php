@@ -1,37 +1,46 @@
 <?php
 namespace Modular\GridList\Providers\Filters;
 
-use Modular\Fields\Title;
-use Modular\GridList\Interfaces\FilterConstraints;
+use Modular\Application;
+use Modular\Fields\Field;
 use Modular\GridList\Interfaces\FiltersProvider;
-use Modular\GridList\Interfaces\TempleDataProvider;
-use Modular\ModelExtension;
 use Modular\Models\GridListFilter;
 
 /**
- * Allows filters to be explicitly set on a page-by-page basis by setting config.gridlist_custom_filters on a page model.
+ * Add the current pages config.filter_all as a read-only in the CMS and to filters on page.
  *
  * @package Modular\GridList\Providers\Filters
  */
-class AllFilter extends ModelExtension implements FiltersProvider, TempleDataProvider {
+class AllFilter extends Field implements FiltersProvider {
+	private static $filter_all = [];
 
-	public function provideGridListTemplateData($data = []) {
-		return [
-			'AllFilter' => $this->provideGridListFilters()
-		];
+	/**
+	 * Show the configured filter as a read-only field in the CMS.
+	 * @return array
+	 */
+	public function cmsFields() {
+		if ($filter = $this->provideGridListFilters()) {
+			if (isset($filter['Title'])) {
+				return [
+					'AllFilter' => new \ReadonlyField('AllFilter', 'All Filter', $filter['Title'])
+				];
+			}
+		}
 	}
 
 	/**
-	 * Return the current pages default filter
-	 *
+	 * Add the configured filter to the list of filters.
 	 * @return array
 	 */
 	public function provideGridListFilters() {
-		$page = \Director::get_current_page();
-		if ($page instanceof \CMSMain) {
-			$page = $page->currentPage();
+		if ($page = Application::get_current_page()) {
+			if ($filter = $page->config()->get('filter_all')) {
+				// set ModelTag so GridList.Filter method can find it... yech
+				$filter['ModelTag'] = $filter['Filter'];
+				return [
+					new GridListFilter($filter)
+			    ];
+			}
 		}
-		return $page->AllFilter();
 	}
-
 }

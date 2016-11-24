@@ -21,8 +21,8 @@ class AddItemCounts extends ModelExtension implements FiltersSequencer {
 			$allTag = $allFilter->Filter;
 			$allItemCount = 0;
 		} else {
-			$allItemCount = $items->count();
 			$allTag = '';
+			$allItemCount = $items->count();
 		}
 
 		foreach ($filters as $filter) {
@@ -34,7 +34,7 @@ class AddItemCounts extends ModelExtension implements FiltersSequencer {
 				if ($item->hasExtension(HasGridListFilters::class_name())) {
 					if ($item->GridListFilters()->find('ModelTag', $tag)) {
 						$itemCount++;
-					} else if ($allTag == 'all' || ($allTag && $item->GridListFilters()->find('ModelTag', $allTag))) {
+					} else if (($allTag == $tag) || ($allTag && $item->GridListFilters()->find('ModelTag', $allTag))) {
 						$allItemCount++;
 					}
 				}

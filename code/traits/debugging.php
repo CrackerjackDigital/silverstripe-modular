@@ -27,6 +27,28 @@ trait debugging {
 		return $debugger;
 	}
 
+	/**
+	 * Output the log so far to screen/page. $formatter can be:
+	 *  -   null in which case if command line is used then no post-processing, otherwise nl2br for web
+	 *  -   true for always nl2br, false for never nl2br
+	 *  -   a function/function name to apply to the log before outputing (via ob_start)
+	 *
+	 * @param null $formatter
+	 */
+	public static function debug_output_log($formatter = null) {
+		$formatter = is_bool(is_null($formatter) ? !\Director::is_cli() : $formatter)
+			? ( $formatter ? 'nl2br' : null)
+			: $formatter;
+
+		ob_start($formatter);
+		echo static::debug_read_log();
+		ob_end_flush();
+	}
+
+	public static function debug_read_log() {
+		return static::debugger()->readLog();
+	}
+
 	public static function debug_message($message, $level) {
 		static::debugger()->log($message, $level, get_called_class());
 	}

@@ -1,6 +1,7 @@
 <?php
 namespace Modular\GridList\Constraints\Filters;
 
+use Modular\Application;
 use Modular\Fields\Title;
 use Modular\GridList\Interfaces\FilterConstraints;
 use Modular\GridList\Interfaces\FiltersProvider;
@@ -12,20 +13,16 @@ use Modular\Models\GridListFilter;
  *
  * @package Modular\GridList\Providers\Filters
  */
-class CustomFilters extends ModelExtension implements FiltersProvider {
+class PageCustomFilters extends ModelExtension implements FiltersProvider, FilterConstraints {
 
 	/**
 	 * Return the current pages config.gridlist_custom_filters if set or empty array.
 	 * @return array
 	 */
 	public function provideGridListFilters() {
-		$page = \Director::get_current_page();
-		if ($page instanceof \CMSMain) {
-			$page = $page->currentPage();
-		}
 		$filters = new \ArrayList();
-
-		if ($customFilters = $page->config()->get('gridlist_custom_filters') ?: []) {
+		if ($page = Application::get_current_page()) {
+			$customFilters = $page->config()->get('gridlist_custom_filters') ?: [];
 			foreach ($customFilters as $filter => $title) {
 				$filters->push(new GridListFilter([
 					Title::SingleFieldName       => $title,
@@ -34,5 +31,18 @@ class CustomFilters extends ModelExtension implements FiltersProvider {
 			}
 		}
 		return $filters;
+	}
+
+	/**
+	 * Make sure only the custom filters are in there.
+	 * @param $items
+	 * @param $filters
+	 */
+	public function constrainGridListFilters($items, &$filters) {
+		if ($customFilters = $this->provideGridListFilters()) {
+			if ($customFilters->count()) {
+				$filters = $customFilters;
+			}
+		}
 	}
 }
