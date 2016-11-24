@@ -76,10 +76,12 @@ class Publisher extends \Modular\Controller {
 			// clear it so if anything goes wrong we're not stuck, will be set again just before redirect later
 			\Session::clear('InPublishAll');
 
+			// write all output to file
 			$this->debugger()->toFile(Debugger::DebugAll, "publisher.log");
 			$this->debug_info("Continuing publish all at " . date('Ymdhis'));
 
 		} else {
+			// write all output to file
 			// first time we want to truncate the log
 			$this->debugger()->toFile(Debugger::DebugAll | Debugger::DebugTruncate, "publisher.log");
 			$this->debug_info("Starting publish all");
@@ -88,7 +90,7 @@ class Publisher extends \Modular\Controller {
 			$this->canDoItOrFail();
 
 		}
-		// output some progress feedback
+		// output some progress feedback of log so far
 		$this->debug_output_log();
 
 		// first page index in result set of all pages to publish
@@ -151,7 +153,6 @@ class Publisher extends \Modular\Controller {
 
 			$this->debug_info("Ending publish all");
 
-			$response = $this->debug_read_log(!\Director::is_cli());
 		}
 		// at the end there will be no redirect response so return the debug log instead
 		return $response;
