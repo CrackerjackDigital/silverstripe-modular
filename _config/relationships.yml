@@ -1,6 +1,0 @@
----
-Name: modular-relationships-config
----
-Modular\Blocks\Block:
-  belongs_many_many:
-    Pages: Page

@@ -30,3 +30,9 @@ Modular\Models\InternalOrExternalLink:
     - Modular\Fields\ExternalLink
     - Modular\Fields\ModelTag
     - Modular\Fields\Thumbnail
+---
+Name: modular-relationships-config
+---
+Modular\Blocks\Block:
+  belongs_many_many:
+    Pages: Page
