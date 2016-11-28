@@ -45,6 +45,38 @@ class Application extends Module {
 	}
 
 	/**
+	 * Returns an email address from current SiteConfig or the system default_admin's email address.
+	 * Tries first result of provideSystemAdminEmail on current SiteConfig,
+	 * as well as fields 'SystemAdminEmail' and 'AdminEmail' on SiteConfig.
+	 *
+	 * @return string
+	 */
+	public static function system_admin_email() {
+		$email = \Member::default_admin()->Email;
+
+		// try site config
+		if ($siteConfig = \SiteConfig::current_site_config()) {
+			$options = $siteConfig->extend('provideSystemAdminEmail') ?: [];
+			if ($options) {
+
+				$email = reset($options);
+
+			} else if ($siteConfig->hasField('SystemAdminEmail')) {
+
+				$email = $siteConfig->SystemAdminEmail;
+
+			} else if ($siteConfig->hasField('AdminEmail')) {
+
+				$email = $siteConfig->AdminEmail;
+
+			} else {
+				static::debug_warn("Site config should really have an 'AdminEmail' field");
+			}
+		}
+		return $email;
+	}
+
+	/**
 	 * Try to get page from Director and if in CMS then get it from CMS page, fallback to
 	 * Controller url via page_for_path.
 	 *

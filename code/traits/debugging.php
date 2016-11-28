@@ -45,22 +45,43 @@ trait debugging {
 		ob_end_flush();
 	}
 
+	/**
+	 * Return the contents of the current log (file).
+	 * @return null|string
+	 */
 	public static function debug_read_log() {
 		return static::debugger()->readLog();
 	}
 
+	/**
+	 * @param $message
+	 * @param $level
+	 * @return void
+	 */
 	public static function debug_message($message, $level) {
 		static::debugger()->log($message, $level, get_called_class());
 	}
 
+	/**
+	 * @param $message
+	 * @return void
+	 */
 	public static function debug_info($message) {
 		static::debugger()->info($message, get_called_class());
 	}
 
+	/**
+	 * @param $message
+	 * @return void
+	 */
 	public static function debug_trace($message) {
 		static::debugger()->trace($message, get_called_class());
 	}
 
+	/**
+	 * @param $message
+	 * @return void
+	 */
 	public static function debug_warn($message) {
 		static::debugger()->warn($message, get_called_class());
 	}
@@ -74,10 +95,10 @@ trait debugging {
 	}
 
 	/**
-	 * @param ExceptionInterface $exception to log message from
+	 * @param \Exception $exception to log message from
 	 * @throws Exception
 	 */
-	public function debug_fail(ExceptionInterface $exception) {
-		$this->debugger()->fail($exception->getMessage(), $exception->getFile() . ':' . $exception->getLine(), $exception);
+	public function debug_fail(\Exception $exception) {
+		$this->debugger()->fail($exception->getMessage(), ($exception->getFile() . ':' . $exception->getLine()), $exception);
 	}
 }

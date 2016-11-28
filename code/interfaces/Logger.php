@@ -3,9 +3,9 @@ namespace Modular\Interfaces;
 
 interface Logger {
 	/**
-	 * @param string $message
-	 * @param int    $facilities a level to compare to current set level and any other output options such as Screen etc
-	 * @param string $source
+	 * @param string     $message
+	 * @param int        $facilities a level to compare to current set level and any other output options such as Screen etc
+	 * @param string     $source
 	 * @return $this
 	 */
 	public function log($message, $facilities, $source = '');

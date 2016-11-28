@@ -2,7 +2,7 @@
 namespace Modular\GridList\Layout;
 
 use Modular\Application;
-use Modular\GridList\Interfaces\GridListTempleDataProvider;
+use Modular\GridList\Interfaces\TempleDataProvider;
 use Modular\ModelExtension;
 
 /**
@@ -11,7 +11,7 @@ use Modular\ModelExtension;
  *
  * @package Modular\GridList\Layout
  */
-class ModeForPage extends ModelExtension implements GridListTempleDataProvider {
+class ModeForPage extends ModelExtension implements TempleDataProvider {
 	/**
 	 *
 	 * Use the current page's gridlist_default_mode if set otherwise whatever we had before.

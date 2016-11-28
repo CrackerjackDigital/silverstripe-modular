@@ -196,12 +196,14 @@ class Debugger extends Object implements Logger {
 	 * @return mixed
 	 */
 	public function formatMessage($message, $severity, $source = '') {
+		$source = $source ?: ($this->source() ?: get_called_class());
+
 		return implode("\t", [
 			date('Y-m-d'),
 			date('h:i:s'),
 			"$severity:",
 			$source,
-			$message,
+			static::digest($message, $source),
 		]) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 	}
 
@@ -219,11 +221,17 @@ class Debugger extends Object implements Logger {
 	}
 
 	/**
-	 * @inheritdoc
 	 *
+	 * @param string $message either message or a language file key
+	 * @param int    $facilities
+	 * @param string $source
+	 * @param array  $tokens  to replace in message
+	 * @return $this
 	 */
-	public function log($message, $facilities, $source = '') {
+	public function log($message, $facilities, $source = '', $tokens = []) {
 		$source = $source ?: ($this->source() ?: get_called_class());
+
+		$message = static::digest($message, $source, $tokens);
 
 		if ($level = $this->lvl($facilities)) {
 			$this->logger->log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
@@ -231,37 +239,77 @@ class Debugger extends Object implements Logger {
 		return $this;
 	}
 
-	public function info($message, $source = '') {
-		$this->log($message, self::DebugInfo, $source);
+	/**
+	 * Try to look up message in lang files by message and source as keys (max 20 characters, camelcased and spaces removed) or just return the message.
+	 *
+	 * @param string $message
+	 * @param array  $source
+	 * @param array  $tokens to replace in message
+	 * @return string
+	 */
+	public static function digest($message, $source, $tokens = []) {
+		$key = str_replace(' ', '', ucwords(substr($message, 0, 20)));
+		$source = str_replace(' ', '', ucwords(substr($source, 0, 20)));
+		return _t("$source.$key", _t($key, $message, $tokens), $tokens);
+	}
+
+	/**
+	 * @param string $message or a lang file key
+	 * @param string $source
+	 * @param array  $tokens to replace in message
+	 * @return $this
+	 */
+	public function info($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugInfo, $source, $tokens);
 		return $this;
 	}
 
-	public function trace($message, $source = '') {
-		$this->log($message, self::DebugTrace, $source);
+	public function trace($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugTrace, $source, $tokens);
 		return $this;
 	}
 
-	public function notice($message, $source = '') {
-		$this->log($message, self::DebugNotice, $source);
+	public function notice($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugNotice, $source, $tokens);
 		return $this;
 	}
 
-	public function warn($message, $source = '') {
-		$this->log($message, self::DebugWarn, $source);
+	public function warn($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugWarn, $source, $tokens);
 		return $this;
 	}
 
-	public function error($message, $source = '') {
-		$this->log($message, self::DebugErr, $source);
+	public function error($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugErr, $source, $tokens);
 		return $this;
 	}
 
-	public function fail($message, $source = '', Exception $exception) {
-		$this->log($message, self::DebugErr, $source);
-		if ($exception) {
-			$exception->setMessage($message);
+	/**
+	 * @param string|int           $message
+	 * @param string               $source
+	 * @param \Exception|Exception $exception
+	 * @return $this
+	 * @throws \Modular\Exceptions\Exception
+	 */
+	public function fail($message, $source = '', \Exception $exception = null) {
+		if ($exception instanceof \Exception) {
+			$this->log($message, self::DebugErr, $source, [
+				'file'      => $exception->getFile(),
+				'line'      => $exception->getLine(),
+				'code'      => $exception->getCode(),
+				'backtrace' => $exception->getTraceAsString()
+			]);
+			if ($exception instanceof Exception) {
+				$exception->setMessage($message);
+			}
 			throw $exception;
 		}
+		$this->log($message, self::DebugErr, $source, [
+			'file'      => $exception->getFile(),
+			'line'      => $exception->getLine(),
+			'code'      => $exception->getCode(),
+			'backtrace' => $exception->getTraceAsString()
+		]);
 		return $this;
 	}
 
