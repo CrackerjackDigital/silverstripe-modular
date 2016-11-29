@@ -3,17 +3,11 @@ namespace Modular;
 
 use Extension;
 use Injector;
-use Modular\Module;
 
 class ContentControllerExtension extends Extension {
-	const ApplicationServiceClassName = 'Application';
+	use owned;
 
-	/**
-	 * @return Controller
-	 */
-	public function __invoke() {
-		return $this->owner;
-	}
+	const ApplicationServiceClassName = 'Application';
 
 	public function onBeforeInit() {
 		// expect an Application object derived from ModularModule to be configured.
