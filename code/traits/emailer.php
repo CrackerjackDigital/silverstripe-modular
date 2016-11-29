@@ -27,6 +27,8 @@ trait emailer {
 	 * @return boolean
 	 */
 	public function emailer_send($senderAddressOrMemberID, $recipientAddressesOrMemberIDs, $subjectOrLangKey, $messageOrBodyIfNoTemplate, $templatesOrBodyLangKey = '', $data = []) {
+		$this->debugger()->toFile(Debugger::DebugTrace, 'emailer.log');
+
 		$member = null;
 		$sent = false;
 		$className = get_called_class();
@@ -169,6 +171,8 @@ trait emailer {
 
 				// replace tokens in subject with data
 				$email->setSubject(_t('Should.Fail', $subject, $data));
+
+				$email->setFrom($senderAddress);
 
 				$email->setTo($recipientAddress);
 

@@ -2,7 +2,6 @@
 namespace Modular;
 
 class Service extends Object {
-	use trackable;
 	const ServiceName = '';
 
 	public static function factory() {

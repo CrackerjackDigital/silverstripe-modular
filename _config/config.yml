@@ -1,15 +1,10 @@
 ---
 Name: modular-config
 ---
-Director:
-  rules:
-    'gridlist//$Action/$PageID': Modular\GridList\Controllers\Standalone
 ContentController:
   extensions:
     - Modular\ContentControllerExtension
 Injector:
-  GridListService:
-    class: Modular\GridList\Service
   Application:
     class: Modular\Application
   Debugger:

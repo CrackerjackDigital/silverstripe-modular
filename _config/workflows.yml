@@ -1,7 +1,0 @@
----
-Name: modular-workflows-config
----
-Modular\VersionedModel:
-  extensions:
-    - Versioned('Stage', 'Live')
-# add Modular\Workflows\ModelExtension to Models also
