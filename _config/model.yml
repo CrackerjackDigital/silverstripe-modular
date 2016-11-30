@@ -5,9 +5,6 @@ Modular\Type:
   extensions:
     - Modular\Fields\Title
     - Modular\Fields\Code
-Modular\Model:
-  extensions:
-    - Modular\Fields\Title
 Modular\Models\Slide:
   extensions:
     - Modular\Fields\Content

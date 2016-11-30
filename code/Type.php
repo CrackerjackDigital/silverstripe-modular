@@ -5,6 +5,9 @@ class Type extends \DataObject {
 	use lang;
 	use related;
 
+	private static $indexes = [
+		'Code' => true
+	];
 	/**
 	 * Invoking a model returns itself.
 	 *
