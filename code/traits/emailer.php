@@ -57,6 +57,7 @@ trait emailer {
 		}
 		if (!$senderAddress) {
 			$this->debug_error("Failed to send email to Member with ID '$senderAddressOrMemberID' as they don't exist");
+			return false;
 		}
 
 		// try these sources, a match against first tupple is considered 'ok' of second tupple value is true
