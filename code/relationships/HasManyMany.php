@@ -11,8 +11,6 @@ class HasManyMany extends RelatedModels  {
 	const ShowAsTagsField     = 'tags';
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
-
-
 	/**
 	 * Add a csv list of implementors of this class as token 'implementors'
 	 * @return mixed

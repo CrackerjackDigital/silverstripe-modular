@@ -1,16 +1,13 @@
 <?php
 namespace Modular;
 
-use Modular\config;
-use Modular\enabler;
-use Modular\Fields\Field;
-use Modular\owned;
-use \DataExtension;
+use DataExtension;
 
 class ModelExtension extends DataExtension {
 	use config;
 	use enabler;
 	use owned;
+	use debugging;
 
 	public static function class_name() {
 		return get_called_class();

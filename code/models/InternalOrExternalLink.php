@@ -4,7 +4,7 @@ namespace Modular\Models;
 class InternalOrExternalLink extends \Modular\Model {
 	const SortFieldName    = 'Sort';
 	const RelationshipName = 'LinksBlock';
-	const RelatedClassName = 'Modular\Blocks\Block';
+	const RelatedClassName = 'Modular\Block';
 
 	private static $db = [
 		self::SortFieldName => 'Int',

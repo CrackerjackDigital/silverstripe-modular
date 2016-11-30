@@ -30,8 +30,15 @@ class Application extends Module {
 	// use this
 	private static $default_theme = self::ThemeDefault;
 
+	// who to send errors, logs etc
+	private static $system_admin_email = '';
+
+	// who to send administrative alerts, requests etc to
+	private static $admin_email = '';
+
 	/**
 	 * Return an instance of Application as registered with Injector or the called class.
+	 *
 	 * @return Application
 	 */
 	public static function factory() {
@@ -52,7 +59,7 @@ class Application extends Module {
 	 * @return string
 	 */
 	public static function system_admin_email() {
-		$email = \Member::default_admin()->Email;
+		$email = static::config()->get('system_admin_email') ?: static::admin_email();
 
 		// try site config
 		if ($siteConfig = \SiteConfig::current_site_config()) {
@@ -74,6 +81,18 @@ class Application extends Module {
 			}
 		}
 		return $email;
+	}
+
+	/**
+	 * Try and find admin email address from this apps config, Email.admin_email or default_admins Email.
+	 * This should always return something, however config.admin_email should really be set on Application.
+	 *
+	 * @return string
+	 */
+	public static function admin_email() {
+		return static::config()->get('admin_email')
+			?: \Email::config()->get('admin_email')
+				?: \Member::default_admin()->Email;
 	}
 
 	/**
@@ -124,6 +143,7 @@ class Application extends Module {
 
 	/**
 	 * Return a path from the request using a getVar or HTTP_REFERER or the request URL.
+	 *
 	 * @param \SS_HTTPRequest $request
 	 * @param string          $getVar
 	 * @return mixed|string
@@ -143,6 +163,7 @@ class Application extends Module {
 
 	/**
 	 * Walk the site-tree to find a page given a nested path.
+	 *
 	 * @param $path
 	 * @return \DataObject|\Page
 	 */

@@ -1,12 +1,12 @@
 <?php
-namespace Modular\GridField;
+namespace Modular\GridField\Configs;
 
 /**
  * Alters the config to be suitable for adding/removing blocks from an article.
  *
  * Adds an 'AddNewMultiClass' selector
  */
-class HasBlocksGridFieldConfig extends HasManyManyGridFieldConfig {
+class HasBlocks extends HasManyManyGridFieldConfig {
 	private static $add_new_multi_class = true;
 
 	private static $prefix_zones = true;
@@ -28,7 +28,7 @@ class HasBlocksGridFieldConfig extends HasManyManyGridFieldConfig {
 
 	public static function allowed_related_classes() {
 		$out = [];
-		foreach (\ClassInfo::subclassesFor('Modular\Blocks\Block') as $className) {
+		foreach (\ClassInfo::subclassesFor('Modular\Block') as $className) {
 			$out[ $className ] = singleton($className)->i18n_singular_name();
 		}
 		return $out;

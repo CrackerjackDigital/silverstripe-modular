@@ -1,20 +1,18 @@
 <?php
-namespace Modular;
+namespace Modular\Fields;
 
 use Director;
 use DisplayLogicWrapper;
 use DropdownField;
 use FieldList;
 use FormField;
-use Modular\Fields\Field;
-use Modular\Fields\Title;
 use TextField;
 use TreeDropdownField;
 
 /**
  * Add fields and functionality to LinkAttribute model.
  */
-class LinkAttributeField extends Field {
+class LinkAttributeField extends \Modular\Field {
 	const ExternalLinkFieldName    = 'ExternalLink';
 	const InternalLinkRelationship = 'InternalLink';
 	const ExternalLinkValue        = self::ExternalLinkFieldName;

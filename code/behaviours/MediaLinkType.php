@@ -6,14 +6,12 @@ use DropdownField;
 use FormField;
 use Modular\Fields\EmbedCode;
 use Modular\Fields\ExternalLink;
-use Modular\Fields\Field;
 use Modular\Fields\Media;
-use Modular\Fields\Video;
 
 /**
  * Link type field and logic for a model which has an EmbedCode, Media and ExternalLink fields.
  */
-class MediaLinkType extends Field {
+class MediaLinkType extends \Modular\Field {
 	const MediaLinkTypeFieldName = 'MediaLinkType';
 
 	private static $enum_values = [
@@ -69,7 +67,7 @@ class MediaLinkType extends Field {
 				// hide embed code link field unless MediaLinkType field is that option
 				$field->hideUnless(self::MediaLinkTypeFieldName)->isEqualTo(EmbedCode::EmbedCodeOption);
 
-			} elseif ($fieldName == Media::field_name()) {
+			} elseif ($fieldName == Media::single_field_name()) {
 				// hide upload field unless MediaLinkType field is that option
 				$field->hideUnless(self::MediaLinkTypeFieldName)->isEqualTo(Media::MediaLinkOption);
 			}
@@ -119,7 +117,7 @@ class MediaLinkType extends Field {
 	 * @return \File
 	 */
 	protected function getMediaObject() {
-		return $this()->{Media::field_name()}();
+		return $this()->{Media::single_field_name()}();
 	}
 
 }

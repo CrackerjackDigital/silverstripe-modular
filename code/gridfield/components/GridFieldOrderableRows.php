@@ -1,5 +1,5 @@
 <?php
-namespace Modular\GridField;
+namespace Modular\GridField\Components;
 /**
  * Override to fix bug to do with LastEdited field being on different model in inheritance heirarchy to the Sort field.
  */
