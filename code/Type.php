@@ -1,6 +1,8 @@
 <?php
 namespace Modular;
 
+use Modular\Fields\Code;
+
 class Type extends \DataObject {
 	/**
 	 * Invoking a type returns itself.
@@ -23,4 +25,7 @@ class Type extends \DataObject {
 		$this->ClassName = get_class($this);
 	}
 
+	public static function get_by_code($code) {
+		return static::get()->filter(Code::SingleFieldName, $code)->first();
+	}
 }
