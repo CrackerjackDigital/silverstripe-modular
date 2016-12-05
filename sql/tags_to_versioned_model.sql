@@ -1,7 +1,9 @@
 # 1.	change Modular\Model\Tag to inherit from Modular\Models\VersionedModel instead of Modular\Models\Model
 # 2.	run /dev/build
 # 3.	run:
-insert into `Modular\Models\Tag_Live`;
+delete from `Modular\Models\Tag_Live`;
+
+insert into `Modular\Models\Tag_Live` select * from `Modular\Models\Tag`;
 
 delete from `Modular\VersionedModel` where ID in (select ID from `Modular\Models\Tag`);
 delete from `Modular\VersionedModel_Live` where ID in (select ID from `Modular\Models\Tag`);

@@ -95,7 +95,16 @@ class GridList extends ContentControllerExtension {
 	 * @return mixed
 	 */
 	public function CacheHash() {
-		$data = implode(':', array_filter($this()->extend('provideGridListCacheHashData')));
+		$data = implode(':',
+			array_filter(
+				array_merge(
+					$this()->extend('provideGridListCacheHashData'),
+					[
+						Application::get_current_page()->LastEdited
+					]
+				)
+			)
+		);
 		return md5(Controller::curr()->getRequest()->getURL(true) . ':' . $data);
 	}
 
