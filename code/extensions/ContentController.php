@@ -6,6 +6,7 @@ use Injector;
 
 class ContentControllerExtension extends Extension {
 	use owned;
+	use debugging;
 
 	const ApplicationServiceClassName = 'Application';
 

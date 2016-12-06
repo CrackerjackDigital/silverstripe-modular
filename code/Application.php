@@ -52,6 +52,14 @@ class Application extends Module {
 	}
 
 	/**
+	 * Returns member configured via system_admin_email() or admin_email() if no system_admin_email
+	 * @return \DataObject
+	 */
+	public static function system_admin() {
+		return \Member::get()->filter('Email', static::system_admin_email())->first();
+	}
+
+	/**
 	 * Returns an email address from current SiteConfig or the system default_admin's email address.
 	 * Tries first result of provideSystemAdminEmail on current SiteConfig,
 	 * as well as fields 'SystemAdminEmail' and 'AdminEmail' on SiteConfig.
@@ -81,6 +89,14 @@ class Application extends Module {
 			}
 		}
 		return $email;
+	}
+
+	/**
+	 * Return admin Member found via the admin_email.
+	 * @return \Member
+	 */
+	public static function admin_member() {
+		return \Member::get()->filter('Email', static::$admin_email)->first();
 	}
 
 	/**

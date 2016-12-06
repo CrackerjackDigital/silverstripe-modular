@@ -4,6 +4,8 @@ namespace Modular;
 use Modular\Fields\Code;
 
 class Type extends \DataObject {
+	use debugging;
+
 	/**
 	 * Invoking a type returns itself.
 	 * @return $this

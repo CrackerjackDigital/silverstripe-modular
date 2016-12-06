@@ -89,7 +89,7 @@ class HasManyMany extends RelatedModels  {
 		}
 
 		return array_merge_recursive(
-			parent::extraStatics($class, $extension),
+			parent::extraStatics($class, $extension) ?: [],
 			$extra,
 			[
 				'many_many' => [

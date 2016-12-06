@@ -7,35 +7,11 @@ use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
 
-class Debugger extends Object implements Logger {
+class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 	use bitfield;
 	use enabler;
 
 	const DefaultSendEmailsFrom = 'servers@moveforward.co.nz';
-
-	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
-	const DebugNone   = -1;
-	const DebugErr    = SS_Log::ERR;        // 3
-	const DebugWarn   = SS_Log::WARN;       // 4
-	const DebugNotice = SS_Log::NOTICE;     // 5
-	const DebugInfo   = SS_Log::INFO;       // 6
-	const DebugTrace  = SS_Log::DEBUG;      // 7
-	const DebugAll    = self::DebugTrace;   // 7 alias for trace
-
-	// disable all debugging
-	const DebugOff = 16;
-
-	const DebugFile     = 32;
-	const DebugScreen   = 64;
-	const DebugEmail    = 128;
-	const DebugTruncate = 256;     // truncate log files
-	const DebugShared   = 4096;    // use the shared Application Log (not implemented), truncate is not obeyed in this case
-
-	const DebugEnvDev  = 103;      // screen | file | trace
-	const DebugEnvTest = 165;      // file | email | notice
-	const DebugEnvLive = 164;      // file | email | warn
-
-	const LevelFromEnv = null;
 
 	private static $environment_levels = [
 		'dev'  => self::DebugEnvDev,

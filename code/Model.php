@@ -4,6 +4,8 @@ namespace Modular;
 class Model extends \DataObject {
 	use lang;
 	use related;
+	use reflection;
+	use debugging;
 
 	/**
 	 * Invoking a type returns itself.

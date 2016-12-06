@@ -73,7 +73,13 @@ trait lang {
 	 * @return array
 	 */
 	protected function fieldDecorationTokens() {
-		return [];
+		$model = $this();
+		return [
+			'singlename' => $this->singularName(),
+		    'pluralname' => $this->pluralName(),
+		    'title' => $model ? $model->Title : '',
+		    'id' => $model->isInDB() ? $model->ID : _t('Global.New', 'new')
+		];
 	}
 
 	protected function singularName() {
