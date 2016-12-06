@@ -5,21 +5,23 @@ use Modular\cache;
 use Modular\GridField\GridField;
 use Modular\Helpers\Strings;
 
-class HasManyMany extends RelatedModels  {
+class HasManyMany extends RelatedModels {
 	use cache;
 
+	const RelationshipPrefix  = '';
 	const ShowAsTagsField     = 'tags';
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
 	/**
 	 * Add a csv list of implementors of this class as token 'implementors'
+	 *
 	 * @return mixed
 	 */
 	public function fieldDecorationTokens() {
 		return array_merge(
 			parent::fieldDecorationTokens(),
 			[
-				'implementors' => implode(', ', $this->implementors())
+				'implementors' => implode(', ', $this->implementors()),
 			]
 		);
 	}
@@ -55,7 +57,7 @@ class HasManyMany extends RelatedModels  {
 	 */
 	protected function tagFields() {
 		$multipleSelect = (bool) $this->config()->get('multiple_select');
-		$canCreate = (bool)$this->config()->get('allow_add_new');
+		$canCreate = (bool) $this->config()->get('allow_add_new');
 
 		$relatedClassName = static::RelatedClassName;
 
@@ -76,27 +78,33 @@ class HasManyMany extends RelatedModels  {
 	 * @return array
 	 */
 	public function extraStatics($class = null, $extension = null) {
-		$extra = [];
+		$statics = parent::extraStatics($class, $extension) ?: [];
 
-		if (static::sortable()) {
-			$extra = [
-				'many_many_extraFields' => [
-					static::relationship_name() => [
-						static::SortFieldName => 'Int',
+		if ($relationshipName = static::relationship_name('')) {
+			$extra = [];
+
+			if (static::sortable()) {
+				$extra = [
+					'many_many_extraFields' => [
+						$relationshipName => [
+							static::SortFieldName => 'Int',
+						],
 					],
-				],
-			];
-		}
+				];
+			}
 
-		return array_merge_recursive(
-			parent::extraStatics($class, $extension) ?: [],
-			$extra,
-			[
-				'many_many' => [
-					static::relationship_name() => static::related_class_name(),
-				],
-			]
-		);
+			$statics = array_merge_recursive(
+				$statics,
+				$extra,
+				[
+					'many_many' => [
+						$relationshipName => static::related_class_name(),
+					],
+				]
+			);
+		}
+		return $statics;
+
 	}
 
 }

@@ -4,12 +4,16 @@ namespace Modular\Relationships;
 use Modular\GridField\Configs\GridFieldConfig;
 use Modular\GridField\Components\GridFieldOrderableRows;
 use Modular\Model;
+use Modular\reflection;
 
 class RelatedModels extends \Modular\Field {
-	const ShowAsGridField = 'grid';
-	const ShowAsTagsField = 'tags';
+	use reflection;
+
+	const ShowAsGridField     = 'grid';
+	const ShowAsTagsField     = 'tags';
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
+	const RelationshipPrefix  = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
 	const SortFieldName = GridFieldOrderableRows::SortFieldName;
@@ -29,7 +33,6 @@ class RelatedModels extends \Modular\Field {
 	private static $can_create_tags = false;
 
 	private static $multiple_select = true;
-
 
 	/**
 	 * Customise if shows as a GridField or a TagField depending on config.show_as
@@ -67,17 +70,17 @@ class RelatedModels extends \Modular\Field {
 		return $this->related($relationshipName)->column('ID');
 	}
 
-
 	/**
 	 * Returns a field array using a tag field which can be used in derived classes instead of a RelatedModels which is the default returned by cmsFields().
+	 *
 	 * @return array
 	 */
 	protected function tagFields() {
 
 		return [
-			static::RelationshipName =>  $this()->isInDB()
-		        ? $this->tagField()
-				: $this->saveMasterHint()
+			static::RelationshipName => $this()->isInDB()
+				? $this->tagField()
+				: $this->saveMasterHint(),
 		];
 	}
 
@@ -118,13 +121,19 @@ class RelatedModels extends \Modular\Field {
 	}
 
 	/**
-	 * Returns the RelationshipName for this field if set, optionally appended with the fieldName as for a relationship.
+	 * Return the name of the relationship on the extended model, e.g. 'Members' or 'SocialOrganisations'. This will be
+	 * made from the Related Class Name with 's' appended or can be override by self.RelationshipName
 	 *
-	 * @param string $fieldName if supplied will be added on to RelationshipName with a '.' prefix
+	 * @param string $fieldName
 	 * @return string
 	 */
 	public static function relationship_name($fieldName = '') {
-		return static::RelationshipName ? (static::RelationshipName . ($fieldName ? ".$fieldName" : '')) : '';
+		if (!$relationshipName = static::RelationshipName) {
+			if ($relationshipName = static::name_from_class_name(static::related_class_name())) {
+				$relationshipName = static::RelationshipPrefix . $relationshipName;
+			}
+		}
+		return $relationshipName . ($fieldName ? ".$fieldName" : '');
 	}
 
 	protected function tagField() {
