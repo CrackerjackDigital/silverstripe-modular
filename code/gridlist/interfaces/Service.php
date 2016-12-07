@@ -1,9 +1,15 @@
 <?php
 namespace Modular\GridList\Interfaces\Service;
 
-use Modular\Constraints;
+use Modular\GridList\Interfaces\FilterConstraints;
 
 interface Service {
+
+	/**
+	 * A service should
+	 * @return Service
+	 */
+	public static function factory();
 	/**
 	 * Return a particular constraint, such as a query or url parameter, generally calls
 	 * through to filter
@@ -16,7 +22,7 @@ interface Service {
 	/**
 	 * Returns a Constraints object, which we call Filters here as we like to be confusing.
 	 *
-	 * @return Constraints
+	 * @return FilterConstraints
 	 */
 	public function Filters();
 

@@ -10,6 +10,16 @@ class Service extends Object implements ServiceInterface {
 
 	const FiltersClassName = 'Modular\GridList\Constraints';
 
+	const ServiceName = '';
+
+	/**
+	 * Factory method return from Injector either self.ServiceName or called class.
+	 * @return mixed
+	 */
+	public static function factory() {
+		return \Injector::inst()->get(static::ServiceName ?: get_called_class(), true, func_get_args());
+	}
+
 	public function constraint($name, $persistance = null) {
 		return $this->Filters()->constraint($name, $persistance);
 	}

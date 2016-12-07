@@ -23,7 +23,8 @@ class GridListItem extends ModelExtension {
 		return $this()->renderWith($template, new \ArrayData([
 			'Columns' => $columns,
 			'Filters' => $filters,
-		    'Hash' => md5($this()->ClassName . $this()->ID)
+			'Hash'    => md5($this()->ClassName . $this()->ID),
+			'ID'      => $this()->ID,
 		]));
 	}
 

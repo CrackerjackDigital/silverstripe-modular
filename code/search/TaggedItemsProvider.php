@@ -1,12 +1,10 @@
 <?php
 namespace Modular\Search;
 
-use Modular\Fields\ModelTag;
 use Modular\GridList\Interfaces\ItemsProvider;
-use Modular\Models\Tag;
 
 /**
- * Provides items which match 'tags' query paramter as ModelTags - tags can be a csv list of ModelTags.
+ * Provides items which match 'tags' query parameter as ModelTags - tags can be a csv list of ModelTags.
  *
  * @package Modular\Search
  */
@@ -22,18 +20,14 @@ class TaggedItemsProvider extends \Modular\ModelExtension implements ItemsProvid
 		$results = new \ArrayList();
 
 		/** @var Service $service */
-		$service = \Injector::inst()->get('SearchService');
+		$service = Service::factory();
 
 		if ($tags = array_filter(explode(',', $service->constraint(Constraints::TagsVar)))) {
-			$allTags = Tag::get();
 			$searchClasses = $this->config()->get('search_classes');
 
-			foreach ($tags as $tag) {
-				/** @var ModelTag $tag */
-				if ($tag = $allTags->find(ModelTag::field_name(), $tag)) {
-					// merge all related classes that end in 'Page' for this tag
-					$results->merge($tag->relatedByClassName($searchClasses));
-				}
+			foreach ($searchClasses as $className) {
+				$forTag = \DataObject::get($className)->filter('Tags.ModelTag', $tags);
+				$results->merge($forTag);
 			}
 		}
 		return $results;
