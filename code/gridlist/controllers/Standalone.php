@@ -39,7 +39,7 @@ class Standalone extends \ContentController {
 	 * @return string
 	 */
 	protected function pathForRequest(\SS_HTTPRequest $request) {
-		return Application::path_for_request($request);
+		return Application::ajax_path_for_request($request);
 	}
 
 	protected function findPageForPath($path) {

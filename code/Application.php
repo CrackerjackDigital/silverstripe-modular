@@ -32,6 +32,7 @@ class Application extends Module {
 
 	/**
 	 * Return an instance of Application as registered with Injector or the called class.
+	 *
 	 * @return Application
 	 */
 	public static function factory() {
@@ -53,7 +54,7 @@ class Application extends Module {
 	public static function get_current_page() {
 		$page = null;
 		if (\Director::is_ajax()) {
-			if ($path = self::path_for_request(\Controller::curr()->getRequest())) {
+			if ($path = self::ajax_path_for_request(\Controller::curr()->getRequest())) {
 				$page = self::page_for_path($path);
 			}
 		} else {
@@ -92,25 +93,38 @@ class Application extends Module {
 
 	/**
 	 * Return a path from the request using a getVar or HTTP_REFERER or the request URL.
+	 *
 	 * @param \SS_HTTPRequest $request
-	 * @param string          $getVar
+	 * @param array           $requestVars check these get vars looking for a path
 	 * @return mixed|string
 	 */
-	public static function path_for_request($request = null, $getVar = 'path') {
+	public static function ajax_path_for_request($request = null, $requestVars = ['path', 'CMSMainCurrentPageID', 'url']) {
 		$request = $request ?: Controller::curr()->getRequest();
 
-		if (!$path = $request->getVar($getVar)) {
-			if (isset($_SERVER['HTTP_REFERER'])) {
-				$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
-			} else {
-				$path = $request->getURL();
+		foreach ($requestVars as $varName) {
+			if ($path = $request->requestVar($varName)) {
+				if (is_numeric($path)) {
+					/** @var \SiteTree $page */
+					if ($page = \SiteTree::get()->byID($path)) {
+						$path = $page->Link();
+					} else {
+						continue;
+					}
+				}
+				return $path;
 			}
+		}
+		if (isset($_SERVER['HTTP_REFERER'])) {
+			$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+		} else {
+			$path = $request->getURL();
 		}
 		return $path;
 	}
 
 	/**
 	 * Walk the site-tree to find a page given a nested path.
+	 *
 	 * @param $path
 	 * @return \DataObject|\Page
 	 */
