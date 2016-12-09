@@ -83,7 +83,7 @@ class GridField extends Field {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
-		/** @var GridField $gridField */
+		/** @var \GridField $gridField */
 		$gridField = \GridField::create(
 			$relationshipName,
 			$relationshipName,

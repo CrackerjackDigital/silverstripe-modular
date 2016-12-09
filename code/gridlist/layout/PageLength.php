@@ -4,6 +4,7 @@ namespace Modular\GridList\Layout;
 use Modular\Application;
 use Modular\Fields\Field;
 use Modular\GridList\Constraints;
+use Modular\GridList\GridList;
 use Modular\GridList\Interfaces\GridListTempleDataProvider;
 
 /**
@@ -30,8 +31,19 @@ class PageLength extends Field implements GridListTempleDataProvider {
 	    ]
 	];
 
+	/**
+	 * Add an option set with values tuned to the default mode of the page, e.g. 'grid' or 'list'. This is usefull when
+	 * a list mode needs to show more items, or if list mode does grouping of items in which case the page length is
+	 * the number of groups to show, not the number of items.
+	 *
+	 * @return array
+	 */
 	public function cmsFields() {
-		$mode = Application::get_current_page()->config()->get('gridlist_default_mode') ?: 'grid';
+		$mode = (string)\Config::inst()->get('Modular\GridList\GridList', 'default_mode');
+
+		if ($page = Application::get_current_page()) {
+			$mode = (string)$page->config()->get('gridlist_default_mode') ?: $mode;
+		}
 		$lengthMap = $this->config()->get('length_map');
 
 		if (isset($lengthMap[$mode])) {
