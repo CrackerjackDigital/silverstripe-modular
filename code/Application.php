@@ -166,7 +166,7 @@ class Application extends Module {
 	 * @param array           $requestVars check these get vars looking for a path
 	 * @return mixed|string
 	 */
-	public static function ajax_path_for_request($request = null, $requestVars = ['path', 'CMSMainCurrentPageID', 'url']) {
+	public static function ajax_path_for_request($request = null, $requestVars = ['CMSMainCurrentPageID', 'path', 'url']) {
 		$request = $request ?: Controller::curr()->getRequest();
 
 		foreach ($requestVars as $varName) {

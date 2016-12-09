@@ -19,13 +19,19 @@ class HasManyManyGridFieldConfig extends GridFieldConfig {
 		parent::__construct($itemsPerPage);
 
 		if ($this->config()->get('allow_add_new') && $this->config()->get('add_new_multi_class')) {
+			// remove the stock 'Add New' button if present
 			$this->removeComponentsByType(
 				static::ComponentAddNewButton
+			);
+			// now replace the AddNewMultiClass if present with the custom one
+			$this->removeComponentsByType(
+				'GridFieldAddNewMultiClass'
 			);
 			$this->addComponent(
 				\Injector::inst()->create(static::ComponentAddNewMultiClass)
 			);
-			// try default before we have a grid field model, this could be overridden later
+			// try default before we have a grid field model, this could be overwritten later
+			// by explicit call to setAddNewClasses if other more specific classes needed
 			if ($classes = static::limited_related_classes()) {
 				$this->setAddNewClasses($classes);
 			}
