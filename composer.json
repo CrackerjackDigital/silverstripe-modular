@@ -26,9 +26,9 @@
 		"silverstripe-australia/gridfieldextensions": "1.x",
 		"unclecheese/betterbuttons": "1.3.x",
 		"silverstripe/tagfield": "*",
+		"crackerjackdigital/silverstripe-modular-blocks": "dev-develop",
 		"crackerjackdigital/silverstripe-modular-build": "dev-develop",
 		"crackerjackdigital/silverstripe-modular-fields": "dev-develop",
-		"crackerjackdigital/silverstripe-modular-blocks": "dev-develop",
 		"crackerjackdigital/silverstripe-modular-graph": "dev-develop",
 		"crackerjackdigital/silverstripe-modular-gridlist": "dev-develop",
 		"crackerjackdigital/silverstripe-modular-gridlist-block": "dev-develop",
@@ -38,6 +38,52 @@
 		"crackerjackdigital/silverstripe-modular-social": "dev-develop",
 		"crackerjackdigital/silverstripe-modular-workflows": "dev-develop"
 	},
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-blocks"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-build"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-fields"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-graph"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-gridlist"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-gridlist-block"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-gridlist-search"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-search"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-search-blocks"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-social"
+		},
+		{
+			"type": "vcs",
+			"url": "git@github.com:crackerjackdigital/silverstripe-modular-workflows"
+		}
+	],
 	"extra": {
 		"installer-name": "modular"
 	},
