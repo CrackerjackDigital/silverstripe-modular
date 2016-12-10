@@ -1,6 +1,8 @@
 <?php
 namespace Modular\Relationships;
+
 use Modular\Blocks\Block;
+use Versioned;
 
 /**
  * Add a gridfield to which blocks can be added and managed.
@@ -81,9 +83,11 @@ class HasBlocks extends HasManyMany {
 			->Blocks()
 			->filter('ClassName', $includes)
 			->exclude('ClassName', $excludes)
-			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName);
+			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName, 'ASC');
 
-		$this()->extend('postRenderZoneBlocks', $zone, $rules);
+		$numBlocks = $blocks->count();
+
+		$this()->extend('postRenderZoneBlocks', $zone, $rules, $blocks);
 		return $blocks;
 	}
 
@@ -101,6 +105,51 @@ class HasBlocks extends HasManyMany {
 				}
 			}
 		}
+	}
+
+	public function onAfterUnpublish() {
+		parent::onAfterPublish();
+
+		/** @var Block|\Versioned $block */
+		/** @var \SS_List $linkedPages */
+
+		if ($blocks = $this->related()) {
+			foreach ($blocks as $block) {
+				if ($block->hasExtension('Versioned')) {
+					if (!$this->hasLinks($block)) {
+						$oldMode = Versioned::get_reading_mode();
+						Versioned::reading_stage('Live');
+						$block->delete();
+						Versioned::set_reading_mode($oldMode);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Checks if a block has links to a page other than the current page.
+	 * @param $block
+	 * @return bool
+	 */
+	protected function hasLinks($block) {
+		$linkedPages = $block->Pages()->exclude('ID', $this()->ID);
+		return $linkedPages->count();
+	}
+
+	/**
+	 * Sets the data model class on a HasBlocks gridfield to be 'Modular\Blocks\Block' as 'GridListBlock' is set
+	 * otherwise, and that is not the root for these blocks.
+	 *
+	 * @param null $relationshipName
+	 * @param null $configClassName
+	 * @return \GridField
+	 */
+	protected function gridField($relationshipName = null, $configClassName = null) {
+		$gridField = parent::gridField($relationshipName, $configClassName);
+		$gridField->setModelClass('Modular\Blocks\Block');
+		$gridField->setList($this()->{static::relationship_name()}());
+		return $gridField;
 	}
 
 	/**
@@ -124,7 +173,7 @@ class HasBlocks extends HasManyMany {
 		}
 		return [
 			$excludes,
-		    $includes,
+			$includes,
 		];
 	}
 }

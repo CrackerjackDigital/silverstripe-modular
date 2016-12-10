@@ -1,6 +1,8 @@
 <?php
 namespace Modular\Blocks;
 
+use HiddenField;
+use Modular\Application;
 use Modular\Interfaces\LinkType;
 use Modular\Model;
 
@@ -16,6 +18,8 @@ use Modular\Model;
  * 'Links',
  * 'Download',
  * 'Pull Quote'
+ *
+ * @method \DataList Pages()
  */
 class Block extends \Modular\VersionedModel implements LinkType {
 	private static $template = '';
@@ -27,14 +31,14 @@ class Block extends \Modular\VersionedModel implements LinkType {
 
 	private static $link_type = '';
 
-	private $customFilterTags = [];
-
-	public function addCustomFilterTag($tag) {
-		$this->customFilterTags[ $tag ] = $tag;
-	}
-
-	public function customFilterTags() {
-		return $this->customFilterTags;
+	/**
+	 * When we do an add new multi class we need to tell it what the ClassName is.
+	 * @return \FieldList
+	 */
+	public function getCMSFields() {
+		$fields = parent::getCMSFields();
+		$fields->push(new HiddenField('ClassName', '', get_class($this)));
+		return $fields;
 	}
 
 	public function BlockType() {
@@ -130,7 +134,7 @@ class Block extends \Modular\VersionedModel implements LinkType {
 	 */
 	public function CurrentPage() {
 		/** @var \Page $parent */
-		return \Director::get_current_page();
+		return Application::get_current_page();
 	}
 
 	/**
@@ -138,7 +142,7 @@ class Block extends \Modular\VersionedModel implements LinkType {
 	 * @return string
 	 */
 	public function PageClassName() {
-		return \Director::get_current_page()->ClassName;
+		return Application::get_current_page()->ClassName;
 	}
 
 }

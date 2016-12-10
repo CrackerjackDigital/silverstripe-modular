@@ -33,6 +33,22 @@ class HasTags extends HasManyMany {
 		];
 	}
 
+	/**
+	 * Publish related tags when the owner is published.
+	 */
+	public function onAfterPublish() {
+		if ($tags = $this->related()) {
+			/** @var Tag|\Versioned $tag */
+			foreach ($tags as $tag) {
+				if ($tag->hasExtension('Versioned')) {
+					$tag->publish('Stage', 'Live');
+					// now ask the block to publish it's own blocks.
+					$tag->extend('onAfterPublish');
+				}
+			}
+		}
+	}
+
 	protected function availableTags() {
 		return Tag::get()->sort('Title');
 	}
