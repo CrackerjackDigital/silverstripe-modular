@@ -1,5 +1,5 @@
 <?php
-namespace Modular\GridField;
+namespace Modular\GridField\Components;
 
 use GridFieldAddNewMultiClass;
 use Modular\config;

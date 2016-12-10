@@ -1,15 +1,13 @@
 <?php
 namespace Modular;
 
-class Model extends \DataObject {
-	use lang;
-	use related;
-	use reflection;
+use Modular\Fields\Code;
+
+class Type extends \DataObject {
 	use debugging;
 
 	/**
 	 * Invoking a type returns itself.
-	 *
 	 * @return $this
 	 */
 	public function __invoke() {
@@ -18,11 +16,18 @@ class Model extends \DataObject {
 
 	/**
 	 * Patch until php 5.6 static::class is widely available on servers
-	 *
 	 * @return string
 	 */
 	public static function class_name() {
 		return get_called_class();
 	}
 
+	public function onBeforeWrite() {
+		parent::onBeforeWrite();
+		$this->ClassName = get_class($this);
+	}
+
+	public static function get_by_code($code) {
+		return static::get()->filter(Code::SingleFieldName, $code)->first();
+	}
 }

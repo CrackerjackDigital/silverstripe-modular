@@ -1,9 +1,7 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\Field;
-
-class HasOne extends Field {
+class HasOne extends \Modular\Field {
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
 	const RelatedKeyField     = 'ID';
@@ -19,7 +17,7 @@ class HasOne extends Field {
 	public function cmsFields() {
 		return [
 			new \DropdownField(
-				static::field_name(),
+				static::related_field_name(),
 				static::relationship_name(),
 				static::options()
 			),
@@ -32,12 +30,27 @@ class HasOne extends Field {
 	 * @param string $suffix defaults to 'ID'
 	 * @return string
 	 */
-	public static function field_name($suffix = 'ID') {
+	public static function related_field_name($suffix = 'ID') {
 		return static::RelationshipName . $suffix;
 	}
 
+	/**
+	 * Return unadorned has_one related class name.
+	 *
+	 * @return string
+	 */
 	public static function related_class_name() {
 		return static::RelatedClassName;
+	}
+
+	/**
+	 * Returns the RelationshipName for this field if set, optionally appended with the fieldName as for a relationship.
+	 *
+	 * @param string $fieldName if supplied will be added on to RelationshipName with a '.' prefix
+	 * @return string
+	 */
+	public static function relationship_name($fieldName = '') {
+		return static::RelationshipName ? (static::RelationshipName . ($fieldName ? ".$fieldName" : '')) : '';
 	}
 
 	/**

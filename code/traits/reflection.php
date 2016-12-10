@@ -3,6 +3,28 @@ namespace Modular;
 
 trait reflection {
 	/**
+	 * Remove namespace from a class and trim supplied from start or end of class name
+	 * e.g. Modular\Edges\SocialOrganisation -> Organisation
+	 *
+	 * @param $className
+	 * @return string
+	 */
+	public static function name_from_class_name($className, $trim = ['Model', 'Social']) {
+		$className = static::strip_namespace($className);
+		foreach ($trim as $prefixOrSuffix) {
+			$len = strlen($prefixOrSuffix);
+
+			if (substr($className, 0, $len) == $prefixOrSuffix) {
+				$className = substr($className, $len);
+			}
+			if (substr($className, -$len) == $prefixOrSuffix) {
+				$className = substr($className, 0, -$len);
+			}
+		}
+		return $className;
+	}
+
+	/**
 	 * Return an map of subclasses of the called class.
 	 *
 	 * TODO: implement 'depthFirst' flag to get the 'leaf' classes of heirarchy first

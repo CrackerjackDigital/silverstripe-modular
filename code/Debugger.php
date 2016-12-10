@@ -7,35 +7,11 @@ use SS_Log;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
 
-class Debugger extends Object implements Logger {
+class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 	use bitfield;
 	use enabler;
 
 	const DefaultSendEmailsFrom = 'servers@moveforward.co.nz';
-
-	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
-	const DebugNone   = -1;
-	const DebugErr    = SS_Log::ERR;        // 3
-	const DebugWarn   = SS_Log::WARN;       // 4
-	const DebugNotice = SS_Log::NOTICE;     // 5
-	const DebugInfo   = SS_Log::INFO;       // 6
-	const DebugTrace  = SS_Log::DEBUG;      // 7
-	const DebugAll    = self::DebugTrace;   // 7 alias for trace
-
-	// disable all debugging
-	const DebugOff = 16;
-
-	const DebugFile     = 32;
-	const DebugScreen   = 64;
-	const DebugEmail    = 128;
-	const DebugTruncate = 256;     // truncate log files
-	const DebugShared   = 4096;    // use the shared Application Log (not implemented), truncate is not obeyed in this case
-
-	const DebugEnvDev  = 103;      // screen | file | trace
-	const DebugEnvTest = 165;      // file | email | notice
-	const DebugEnvLive = 164;      // file | email | warn
-
-	const LevelFromEnv = null;
 
 	private static $environment_levels = [
 		'dev'  => self::DebugEnvDev,
@@ -196,12 +172,14 @@ class Debugger extends Object implements Logger {
 	 * @return mixed
 	 */
 	public function formatMessage($message, $severity, $source = '') {
+		$source = $source ?: ($this->source() ?: get_called_class());
+
 		return implode("\t", [
 			date('Y-m-d'),
 			date('h:i:s'),
 			"$severity:",
 			$source,
-			$message,
+			static::digest($message, $source),
 		]) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 	}
 
@@ -219,11 +197,17 @@ class Debugger extends Object implements Logger {
 	}
 
 	/**
-	 * @inheritdoc
 	 *
+	 * @param string $message either message or a language file key
+	 * @param int    $facilities
+	 * @param string $source
+	 * @param array  $tokens  to replace in message
+	 * @return $this
 	 */
-	public function log($message, $facilities, $source = '') {
+	public function log($message, $facilities, $source = '', $tokens = []) {
 		$source = $source ?: ($this->source() ?: get_called_class());
+
+		$message = static::digest($message, $source, $tokens);
 
 		if ($level = $this->lvl($facilities)) {
 			$this->logger->log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
@@ -231,37 +215,77 @@ class Debugger extends Object implements Logger {
 		return $this;
 	}
 
-	public function info($message, $source = '') {
-		$this->log($message, self::DebugInfo, $source);
+	/**
+	 * Try to look up message in lang files by message and source as keys (max 20 characters, camelcased and spaces removed) or just return the message.
+	 *
+	 * @param string $message
+	 * @param array  $source
+	 * @param array  $tokens to replace in message
+	 * @return string
+	 */
+	public static function digest($message, $source, $tokens = []) {
+		$key = str_replace(' ', '', ucwords(substr($message, 0, 20)));
+		$source = str_replace(' ', '', ucwords(substr($source, 0, 20)));
+		return _t("$source.$key", _t($key, $message, $tokens), $tokens);
+	}
+
+	/**
+	 * @param string $message or a lang file key
+	 * @param string $source
+	 * @param array  $tokens to replace in message
+	 * @return $this
+	 */
+	public function info($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugInfo, $source, $tokens);
 		return $this;
 	}
 
-	public function trace($message, $source = '') {
-		$this->log($message, self::DebugTrace, $source);
+	public function trace($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugTrace, $source, $tokens);
 		return $this;
 	}
 
-	public function notice($message, $source = '') {
-		$this->log($message, self::DebugNotice, $source);
+	public function notice($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugNotice, $source, $tokens);
 		return $this;
 	}
 
-	public function warn($message, $source = '') {
-		$this->log($message, self::DebugWarn, $source);
+	public function warn($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugWarn, $source, $tokens);
 		return $this;
 	}
 
-	public function error($message, $source = '') {
-		$this->log($message, self::DebugErr, $source);
+	public function error($message, $source = '', $tokens = []) {
+		$this->log($message, self::DebugErr, $source, $tokens);
 		return $this;
 	}
 
-	public function fail($message, $source = '', Exception $exception) {
-		$this->log($message, self::DebugErr, $source);
-		if ($exception) {
-			$exception->setMessage($message);
+	/**
+	 * @param string|int           $message
+	 * @param string               $source
+	 * @param \Exception|Exception $exception
+	 * @return $this
+	 * @throws \Modular\Exceptions\Exception
+	 */
+	public function fail($message, $source = '', \Exception $exception = null) {
+		if ($exception instanceof \Exception) {
+			$this->log($message, self::DebugErr, $source, [
+				'file'      => $exception->getFile(),
+				'line'      => $exception->getLine(),
+				'code'      => $exception->getCode(),
+				'backtrace' => $exception->getTraceAsString()
+			]);
+			if ($exception instanceof Exception) {
+				$exception->setMessage($message);
+			}
 			throw $exception;
 		}
+		$this->log($message, self::DebugErr, $source, [
+			'file'      => $exception->getFile(),
+			'line'      => $exception->getLine(),
+			'code'      => $exception->getCode(),
+			'backtrace' => $exception->getTraceAsString()
+		]);
 		return $this;
 	}
 

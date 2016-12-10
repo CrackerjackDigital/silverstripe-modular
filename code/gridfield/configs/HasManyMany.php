@@ -1,5 +1,5 @@
 <?php
-namespace Modular\GridField;
+namespace Modular\GridField\Configs;
 
 /**
  * Alters the config to be suitable for adding/removing many_many related models to the extended model, configurably using 'Add New MultClass' support.

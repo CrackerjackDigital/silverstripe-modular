@@ -1,23 +1,26 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\Fields\Field;
-use Modular\GridField\GridFieldConfig;
-use Modular\GridField\GridFieldOrderableRows;
+use Modular\GridField\Configs\GridFieldConfig;
+use Modular\GridField\Components\GridFieldOrderableRows;
 use Modular\Model;
+use Modular\reflection;
 
-class RelatedModels extends Field {
-	const ShowAsGridField = 'grid';
-	const ShowAsTagsField = 'tags';
+class RelatedModels extends \Modular\Field {
+	use reflection;
+
+	const ShowAsGridField     = 'grid';
+	const ShowAsTagsField     = 'tags';
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
+	const RelationshipPrefix  = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
 	const SortFieldName = GridFieldOrderableRows::SortFieldName;
 
 	// wether to show the field as a RelatedModels or a TagField
 	private static $show_as = self::ShowAsGridField;
-	
+
 	// can related models be in an order so a GridFieldOrderableRows component is added?
 	private static $sortable = true;
 
@@ -26,12 +29,11 @@ class RelatedModels extends Field {
 
 	// show autocomplete existing filter
 	private static $autocomplete = true;
-	
+
 	private static $can_create_tags = false;
-	
+
 	private static $multiple_select = true;
-	
-	
+
 	/**
 	 * Customise if shows as a GridField or a TagField depending on config.show_as
 	 *
@@ -45,7 +47,7 @@ class RelatedModels extends Field {
 		}
 		return $fields;
 	}
-	
+
 	/**
 	 * Return all related items. Optionally (for convenience more than anything) provide a relationship name to dereference otherwise this classes
 	 * late static binding relationship_name() will be used.
@@ -57,7 +59,7 @@ class RelatedModels extends Field {
 		$relationshipName = $relationshipName ?: static::relationship_name();
 		return $this()->$relationshipName();
 	}
-	
+
 	/**
 	 * Return an array of IDs from the other end of this extendsions Relationship or the supplied relationship name.
 	 *
@@ -67,21 +69,21 @@ class RelatedModels extends Field {
 	public function relatedIDs($relationshipName = '') {
 		return $this->related($relationshipName)->column('ID');
 	}
-	
-	
+
 	/**
 	 * Returns a field array using a tag field which can be used in derived classes instead of a RelatedModels which is the default returned by cmsFields().
+	 *
 	 * @return array
 	 */
 	protected function tagFields() {
-		
+
 		return [
-			static::RelationshipName =>  $this()->isInDB()
-		        ? $this->tagField()
-				: $this->saveMasterHint()
+			static::RelationshipName => $this()->isInDB()
+				? $this->tagField()
+				: $this->saveMasterHint(),
 		];
 	}
-	
+
 	/**
 	 * Return field(s) to show a gridfield in the CMS, or a 'please save...' prompt if the model hasn't been saved
 	 *
@@ -99,23 +101,39 @@ class RelatedModels extends Field {
 		return static::config()->get('sortable');
 	}
 
-	public static function field_name($suffix = '') {
+	/**
+	 * has_one relationships need an 'ID' appended to the relationship name to make the field name
+	 *
+	 * @param string $suffix defaults to 'ID'
+	 * @return string
+	 */
+	public static function related_field_name($suffix = '') {
 		return static::RelationshipName . $suffix;
 	}
 
 	/**
-	 * Returns the related class name optionally appended by '.fieldName', so e.g. when used as a filter in a relationship you will get full
-	 * namespaced class for the relationship column.
+	 * Return unadorned has_one related class name.
+	 *
+	 * @return string
+	 */
+	public static function related_class_name() {
+		return static::RelatedClassName;
+	}
+
+	/**
+	 * Return the name of the relationship on the extended model, e.g. 'Members' or 'SocialOrganisations'. This will be
+	 * made from the Related Class Name with 's' appended or can be override by self.RelationshipName
 	 *
 	 * @param string $fieldName
 	 * @return string
 	 */
-	public static function related_class_name($fieldName = '') {
-		return static::RelatedClassName . ($fieldName ? ".$fieldName" : '');
-	}
-
 	public static function relationship_name($fieldName = '') {
-		return static::RelationshipName . ($fieldName ? ".$fieldName" : '');
+		if (!$relationshipName = static::RelationshipName) {
+			if ($relationshipName = static::name_from_class_name(static::related_class_name())) {
+				$relationshipName = static::RelationshipPrefix . $relationshipName;
+			}
+		}
+		return $relationshipName . ($fieldName ? ".$fieldName" : '');
 	}
 
 	protected function tagField() {
@@ -129,7 +147,7 @@ class RelatedModels extends Field {
 			(bool) $this->config()->get('can_create_tags')
 		);
 	}
-	
+
 	/**
 	 * Return a RelatedModels configured for editing attached MediaModels. If the master record is in the database
 	 * then also add GridFieldOrderableRows (otherwise complaint re UnsavedRelationList not being a DataList happens).

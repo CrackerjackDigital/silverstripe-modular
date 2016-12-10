@@ -1,9 +1,0 @@
----
-Name: modular-blocks
----
-Modular\Blocks\Download:
-  extensions:
-    - Modular\Fields\Download
-Modular\Blocks\LinkedPage:
-  extensions:
-    - Modular\Fields\InternalLink

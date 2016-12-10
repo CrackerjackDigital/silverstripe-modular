@@ -1,7 +1,6 @@
 <?php
 namespace Modular\Behaviours;
 
-use Modular\Fields\Field;
 use Modular\Fields\InternalLink;
 use Modular\Fields\ExternalLink;
 use ClassInfo;
@@ -14,7 +13,7 @@ use Modular\Interfaces\LinkType;
  *
  * @package Modular\Behaviours
  */
-class InternalOrExternalLink extends Field {
+class InternalOrExternalLink extends \Modular\Field {
 	const LinkTypeFieldName = 'LinkType';
 
 	private static $enum_values = [

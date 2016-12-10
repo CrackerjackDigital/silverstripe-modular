@@ -30,6 +30,12 @@ class Application extends Module {
 	// use this
 	private static $default_theme = self::ThemeDefault;
 
+	// who to send errors, logs etc
+	private static $system_admin_email = '';
+
+	// who to send administrative alerts, requests etc to
+	private static $admin_email = '';
+
 	/**
 	 * Return an instance of Application as registered with Injector or the called class.
 	 *
@@ -43,6 +49,66 @@ class Application extends Module {
 		} else {
 			return $injector::inst()->get(get_called_class(), true, func_get_args());
 		}
+	}
+
+	/**
+	 * Returns member configured via system_admin_email() or admin_email() if no system_admin_email
+	 * @return \DataObject
+	 */
+	public static function system_admin() {
+		return \Member::get()->filter('Email', static::system_admin_email())->first();
+	}
+
+	/**
+	 * Returns an email address from current SiteConfig or the system default_admin's email address.
+	 * Tries first result of provideSystemAdminEmail on current SiteConfig,
+	 * as well as fields 'SystemAdminEmail' and 'AdminEmail' on SiteConfig.
+	 *
+	 * @return string
+	 */
+	public static function system_admin_email() {
+		$email = static::config()->get('system_admin_email') ?: static::admin_email();
+
+		// try site config
+		if ($siteConfig = \SiteConfig::current_site_config()) {
+			$options = $siteConfig->extend('provideSystemAdminEmail') ?: [];
+			if ($options) {
+
+				$email = reset($options);
+
+			} else if ($siteConfig->hasField('SystemAdminEmail')) {
+
+				$email = $siteConfig->SystemAdminEmail;
+
+			} else if ($siteConfig->hasField('AdminEmail')) {
+
+				$email = $siteConfig->AdminEmail;
+
+			} else {
+				static::debug_warn("Site config should really have an 'AdminEmail' field");
+			}
+		}
+		return $email;
+	}
+
+	/**
+	 * Return admin Member found via the admin_email.
+	 * @return \Member
+	 */
+	public static function admin_member() {
+		return \Member::get()->filter('Email', static::$admin_email)->first();
+	}
+
+	/**
+	 * Try and find admin email address from this apps config, Email.admin_email or default_admins Email.
+	 * This should always return something, however config.admin_email should really be set on Application.
+	 *
+	 * @return string
+	 */
+	public static function admin_email() {
+		return static::config()->get('admin_email')
+			?: \Email::config()->get('admin_email')
+				?: \Member::default_admin()->Email;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 <?php
-namespace Modular\GridField;
+namespace Modular\GridField\Configs;
 
 class HasMediaGridFieldConfig extends GridFieldConfig {
 }
