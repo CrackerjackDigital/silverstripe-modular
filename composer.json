@@ -26,7 +26,17 @@
 		"silverstripe-australia/gridfieldextensions": "1.x",
 		"unclecheese/betterbuttons": "1.3.x",
 		"silverstripe/tagfield": "*",
-		"crackerjackdigital/silverstripe-modular-fields": "*"
+		"crackerjackdigital/silverstripe-modular-build": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-fields": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-blocks": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-graph": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-gridlist": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-gridlist-block": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-gridlist-search": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-search": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-search-blocks": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-social": "dev-develop",
+		"crackerjackdigital/silverstripe-modular-workflows": "dev-develop"
 	},
 	"extra": {
 		"installer-name": "modular"
