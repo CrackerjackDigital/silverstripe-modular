@@ -25,9 +25,13 @@ class TaggedItemsProvider extends \Modular\ModelExtension implements ItemsProvid
 		if ($tags = array_filter(explode(',', $service->constraint(Constraints::TagsVar)))) {
 			$searchClasses = $this->config()->get('search_classes');
 
-			foreach ($searchClasses as $className) {
-				$forTag = \DataObject::get($className)->filter('Tags.ModelTag', $tags);
-				$results->merge($forTag);
+			foreach ($searchClasses as $parentClass) {
+				foreach (\ClassInfo::subclassesFor($parentClass) as $className) {
+					if (singleton($className)->hasMethod('Tags')) {
+						$forTag = \DataObject::get($className)->filter('Tags.ModelTag', $tags);
+						$results->merge($forTag);
+					}
+				}
 			}
 		}
 		return $results;

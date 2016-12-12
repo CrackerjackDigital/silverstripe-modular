@@ -83,11 +83,13 @@ class GridField extends Field {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
+		$list = $this->owner->$relationshipName();
+
 		/** @var \GridField $gridField */
 		$gridField = \GridField::create(
 			$relationshipName,
 			$relationshipName,
-			$this->owner->$relationshipName(),
+			$list,
 			$config
 		);
 
@@ -95,23 +97,29 @@ class GridField extends Field {
 	}
 
 	/**
-	 * Allow override of grid field config
+	 * Returns a configured GridFieldConfig
 	 *
-	 * @param $relationshipName
-	 * @param $configClassName
+	 * @param string $relationshipName if not supplied then static.RelationshipName via relationship_name()
+	 * @param string $configClassName if not supplied then static.GridFieldConfigName or one is guessed, or base is used
 	 * @return GridFieldConfig
 	 */
-	protected function gridFieldConfig($relationshipName, $configClassName) {
+	protected function gridFieldConfig($relationshipName = '' ,$configClassName = '') {
 		$configClassName = $configClassName
 			?: static::GridFieldConfigName
 				?: get_class($this) . 'GridFieldConfig';
+
+		if (!\ClassInfo::exists($configClassName)) {
+			$configClassName = GridFieldConfig::class_name();
+		}
+
+		$relationshipName = $relationshipName ?: static::relationship_name();
 
 		/** @var GridFieldConfig $config */
 		$config = $configClassName::create();
 		$config->setSearchPlaceholder(
 
 			singleton(static::RelatedClassName)->fieldDecoration(
-				static::RelationshipName,
+				$relationshipName,
 				'SearchPlaceholder',
 				"Link existing {plural} by Title"
 			)
