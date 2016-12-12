@@ -43,6 +43,10 @@ class ModelExtension extends \Modular\ModelExtension {
 		return $this->canDoIt(self::ActionView, $member);
 	}
 
+	public function canViewVersioned($member = null) {
+		return $this->canDoIt(self::ActionView, $member);
+	}
+
 	public function canEdit($member) {
 		return $this->canDoIt(self::ActionEdit, $member);
 	}
@@ -51,9 +55,6 @@ class ModelExtension extends \Modular\ModelExtension {
 		return $this->canDoIt(self::ActionEdit, $member);
 	}
 
-	public function canViewVersioned($member = null) {
-		return $this->canDoIt(self::ActionEdit, $member);
-	}
 	/*
 	 * TODO SLW 2016-12-02 This could be a better way to do it, needs to be tested though, then can remove
 	 * onAfterPublish handlers from extensions like 'HasBlocks' and 'HasTags'

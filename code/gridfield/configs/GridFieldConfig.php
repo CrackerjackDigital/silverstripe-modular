@@ -33,6 +33,10 @@ class GridFieldConfig extends GridFieldConfig_RelationEditor {
 		}
 	}
 
+	public static function class_name() {
+		return get_called_class();
+	}
+
 	/**
 	 * Invoking GridFieldConfig returns itself
 	 * @return $this
