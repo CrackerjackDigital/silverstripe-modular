@@ -83,8 +83,12 @@ class GridField extends Field {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
-		$list = $this->owner->$relationshipName();
-
+		if ($this()->hasMethod($relationshipName)) {
+			// we need to guard this for when changing page types in CMS
+			$list = $this()->$relationshipName();
+		} else {
+			$list = null;
+		}
 		/** @var \GridField $gridField */
 		$gridField = \GridField::create(
 			$relationshipName,
