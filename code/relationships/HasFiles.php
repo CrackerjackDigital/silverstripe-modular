@@ -15,11 +15,17 @@ class HasFiles extends HasManyMany {
 
 	private static $allowed_files = 'download';
 
+	private static $many_many_extraFields = [
+		'Files' => [
+			'SortOrder' => 'Int',
+		],
+	];
+
 	public function cmsFields() {
 		return [
-			new \UploadField(
+			new \SortableUploadField(
 				static::RelationshipName
-			)
+			),
 		];
 	}
 

@@ -2,8 +2,8 @@
 
 namespace Modular;
 
-use UploadField;
 use Modular\Exceptions\Exception;
+use UploadField;
 
 /**
  * Trait adds functionality for dealing with upload fields
@@ -22,7 +22,7 @@ trait upload {
 	 */
 	public function makeUploadField($relationshipName) {
 		$wrapper = (new \DisplayLogicWrapper(
-			$field = new \UploadField(
+			$field = new \SortableUploadField(
 				static::field_name()
 			)
 		))->setID($relationshipName)->setName($relationshipName);
@@ -52,7 +52,7 @@ trait upload {
 		// try extension first, then model
 
 		$extensions = $allowedFiles = $this->config()->get($configVarName)
-			?: $this()->config()->get($configVarName);
+		?: $this()->config()->get($configVarName);
 
 		$categories = [];
 		if (!is_array($allowedFiles)) {
@@ -63,8 +63,8 @@ trait upload {
 
 			foreach ($categories as $category) {
 
-				if (isset($allCategoryExtensions[ $category ])) {
-					$extensions = $allCategoryExtensions[ $category];
+				if (isset($allCategoryExtensions[$category])) {
+					$extensions = $allCategoryExtensions[$category];
 				} else {
 					$extensions = [$category];
 				}
@@ -101,10 +101,10 @@ trait upload {
 		// try extension first, then model
 		return \Controller::join_links(
 			$this->config()->get('base_upload_folder')
-				?: $this()->config()->get('base_upload_folder'),
+			?: $this()->config()->get('base_upload_folder'),
 			$this->config()->get('upload_folder')
-				?: ($this()->config()->get('upload_folder')
-					?: static::DefaultUploadFolderName)
+			?: ($this()->config()->get('upload_folder')
+				?: static::DefaultUploadFolderName)
 		);
 	}
 
