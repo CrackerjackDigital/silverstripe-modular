@@ -1,6 +1,11 @@
 <?php
 namespace Modular;
-
+/**
+ * Model
+ *
+ * @package Modular
+ * @property int ID
+ */
 class Model extends \DataObject {
 	use lang;
 	use related;
