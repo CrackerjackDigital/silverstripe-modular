@@ -2,10 +2,9 @@
 namespace Modular\Relationships;
 
 use Modular\cache;
-use Modular\GridField\GridField;
-use Modular\Helpers\Strings;
+use Modular\Fields\Relationship;
 
-class HasManyMany extends GridField {
+class HasManyMany extends Relationship  {
 	use cache;
 
 	const ShowAsTagsField     = 'tags';
@@ -23,6 +22,37 @@ class HasManyMany extends GridField {
 			$fields = $this->gridFields();
 		}
 		return $fields;
+	}
+
+	/**
+	 * Adds many_many relationships based off relationship_name and related_class_name, and many_many_extraFields such as 'Sort'.
+	 *
+	 * @param null $class
+	 * @param null $extension
+	 * @return array
+	 */
+	public function extraStatics($class = null, $extension = null) {
+		$extra = [];
+
+		if (static::sortable()) {
+			$extra = [
+				'many_many_extraFields' => [
+					static::relationship_name() => [
+						static::GridFieldOrderableRowsFieldName => 'Int',
+					],
+				],
+			];
+		}
+
+		return array_merge_recursive(
+			parent::extraStatics($class, $extension),
+			$extra,
+			[
+				'many_many' => [
+					static::relationship_name() => static::related_class_name(),
+				],
+			]
+		);
 	}
 
 	/**
@@ -102,37 +132,6 @@ class HasManyMany extends GridField {
 				$relatedClassName::get()
 			))->setIsMultiple($multipleSelect)->setCanCreate($canCreate),
 		];
-	}
-
-	/**
-	 * Adds many_many relationships based off relationship_name and related_class_name, and many_many_extraFields such as 'Sort'.
-	 *
-	 * @param null $class
-	 * @param null $extension
-	 * @return array
-	 */
-	public function extraStatics($class = null, $extension = null) {
-		$extra = [];
-
-		if (static::sortable()) {
-			$extra = [
-				'many_many_extraFields' => [
-					static::relationship_name() => [
-						static::GridFieldOrderableRowsFieldName => 'Int',
-					],
-				],
-			];
-		}
-
-		return array_merge_recursive(
-			parent::extraStatics($class, $extension),
-			$extra,
-			[
-				'many_many' => [
-					static::relationship_name() => static::related_class_name(),
-				],
-			]
-		);
 	}
 
 }

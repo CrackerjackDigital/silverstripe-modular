@@ -1,10 +1,9 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\GridField\GridField;
-use Modular\Model;
+use Modular\Fields\Relationship;
 
-class HasMany extends GridField {
+class HasMany extends Relationship  {
 	const GridFieldConfigName = 'Modular\GridField\HasManyGridFieldConfig';
 
 	public function extraStatics($class = null, $extension = null) {

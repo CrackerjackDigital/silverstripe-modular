@@ -2,6 +2,7 @@
 namespace Modular\Relationships;
 
 use Modular\Blocks\Block;
+use Modular\GridField\GridFieldConfig;
 use Versioned;
 
 /**
@@ -20,6 +21,10 @@ class HasBlocks extends HasManyMany {
 	private static $cms_tab_name = 'Root.ContentBlocks';
 
 	private static $allow_new_multi_class = true;
+
+	// if this is set as a list of class names then will override the Configs list of allowed classes
+	// in this case the related class names are Block class names
+	private static $allowed_related_classes = [];
 
 	// add block class names for each 'zone' in templates here, then include in template with
 	// ZoneBlocks('Top'). Can be consfigured on extended class (e.g. Page) which will take precedence over
@@ -83,9 +88,7 @@ class HasBlocks extends HasManyMany {
 			->Blocks()
 			->filter('ClassName', $includes)
 			->exclude('ClassName', $excludes)
-			->sort(\Modular\GridField\GridField::GridFieldOrderableRowsFieldName, 'ASC');
-
-		$numBlocks = $blocks->count();
+			->sort(\Modular\Fields\Relationship::GridFieldOrderableRowsFieldName, 'ASC');
 
 		$this()->extend('postRenderZoneBlocks', $zone, $rules, $blocks);
 		return $blocks;
@@ -176,4 +179,5 @@ class HasBlocks extends HasManyMany {
 			$includes,
 		];
 	}
+
 }

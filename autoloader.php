@@ -7,6 +7,12 @@ if (isset($_REQUEST['flush'])) {
 				$class = current(array_reverse(explode('\\', $class)));
 				// traits are all lower case
 				if (strtolower($class) == $class) {
+					// short-circuit 'traits' folder
+					if (file_exists(__DIR__ . "code/traits/$class.php")) {
+						require_once(__DIR__ . "code/traits/$class.php");
+						return;
+					}
+
 					foreach (glob(__DIR__ . '/code/**/') as $path) {
 						$file = "$path/$class.php";
 						if (file_exists($file)) {

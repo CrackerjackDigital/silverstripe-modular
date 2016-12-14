@@ -1,11 +1,17 @@
 <?php
-namespace Modular\GridField;
+namespace Modular\Fields;
 
-use Modular\Fields\Field;
+use Modular\GridField\GridFieldConfig;
+use Modular\GridField\GridFieldOrderableRows;
 use Modular\Model;
 
-class GridField extends Field {
-	const ShowAsGridField = 'grid';
+/**
+ * A field that manages relationships between the extended model and other models.
+ *
+ * @package Modular\Fields
+ */
+abstract class Relationship extends Field {
+	const ShowAsGridField     = 'grid';
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
@@ -23,6 +29,8 @@ class GridField extends Field {
 
 	// show autocomplete existing filter
 	private static $autocomplete = true;
+
+	private static $gridfield_config_class = self::GridFieldConfigName;
 
 	/**
 	 * Return a gridfield
@@ -78,9 +86,6 @@ class GridField extends Field {
 	 * @return \GridField
 	 */
 	protected function gridField($relationshipName = null, $configClassName = null) {
-		$relationshipName = $relationshipName
-			?: static::RelationshipName;
-
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
 		if ($this()->hasMethod($relationshipName)) {
@@ -104,19 +109,15 @@ class GridField extends Field {
 	 * Returns a configured GridFieldConfig
 	 *
 	 * @param string $relationshipName if not supplied then static.RelationshipName via relationship_name()
-	 * @param string $configClassName if not supplied then static.GridFieldConfigName or one is guessed, or base is used
+	 * @param string $configClassName  if not supplied then static.GridFieldConfigName or one is guessed, or base is used
 	 * @return GridFieldConfig
 	 */
-	protected function gridFieldConfig($relationshipName = '' ,$configClassName = '') {
+	protected function gridFieldConfig($relationshipName = '', $configClassName = '') {
+		$relationshipName = $relationshipName
+			?: static::relationship_name();
+
 		$configClassName = $configClassName
-			?: static::GridFieldConfigName
-				?: get_class($this) . 'GridFieldConfig';
-
-		if (!\ClassInfo::exists($configClassName)) {
-			$configClassName = GridFieldConfig::class_name();
-		}
-
-		$relationshipName = $relationshipName ?: static::relationship_name();
+			?: static::gridfield_config_class();
 
 		/** @var GridFieldConfig $config */
 		$config = $configClassName::create();
@@ -156,5 +157,21 @@ class GridField extends Field {
 				$block->publish('Stage', 'Live', false);
 			}
 		}
+	}
+
+	/**
+	 * Returns configured or manufactured class name
+	 * falling back to 'Modular\GridField\GridFieldConfig' if class doesn't exist.
+	 *
+	 * @return string
+	 */
+	protected static function gridfield_config_class() {
+		$className = static::config()->get('gridfield_config_class')
+			?: get_called_class() . 'GridFieldConfig';
+
+		if (!\ClassInfo::exists($className)) {
+			$className = GridFieldConfig::class_name();
+		}
+		return $className;
 	}
 }

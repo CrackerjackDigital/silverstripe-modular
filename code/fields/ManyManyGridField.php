@@ -39,11 +39,17 @@ class HasManyManyGridField extends HasManyMany {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
+		if ($this()->hasMethod($relationshipName)) {
+			$list = $this()->$relationshipName();
+		} else {
+			$list = null;
+		}
+
 		/** @var HasManyManyGridField $gridField */
 		$gridField = \GridField::create(
 			$relationshipName,
 			$relationshipName,
-			$this->owner->$relationshipName(),
+			$list,
 			$config
 		);
 
@@ -66,8 +72,8 @@ class HasManyManyGridField extends HasManyMany {
 	 */
 	protected function gridFieldConfig($relationshipName, $configClassName) {
 		$configClassName = $configClassName
-			?: static::GridFieldConfigName
-				?: get_class($this) . 'GridFieldConfig';
+			?: static::gridfield_config_class();
+
 
 		/** @var GridFieldConfig $config */
 		$config = $configClassName::create();
