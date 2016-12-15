@@ -25,6 +25,25 @@ trait reflection {
 	}
 
 	/**
+	 * Return the class name  of the passed thing
+	 *
+	 * @param Object|mixed $modelOrClassName
+	 * @param bool          $stripNamespace
+	 * @return string
+	 */
+	public static function derive_class_name($modelOrClassName, $stripNamespace = false) {
+		$modelOrClassName = is_object($modelOrClassName) ? get_class($modelOrClassName) : $modelOrClassName;
+		if ($stripNamespace && is_array($modelOrClassName)) {
+			foreach ($modelOrClassName as &$className) {
+				$className = static::strip_namespace($className);
+			}
+		} else if ($stripNamespace) {
+			$modelOrClassName = static::strip_namespace($modelOrClassName);
+		}
+		return $modelOrClassName;
+	}
+
+	/**
 	 * Return an map of subclasses of the called class.
 	 *
 	 * TODO: implement 'depthFirst' flag to get the 'leaf' classes of heirarchy first
@@ -39,13 +58,14 @@ trait reflection {
 			if ($excludeThisClass && ($className == get_called_class())) {
 				continue;
 			}
-			$classes[$className] = static::strip_namespace($className);
+			$classes[ $className ] = static::strip_namespace($className);
 		}
 		return $classes;
 	}
 
 	/**
 	 * Return class name without namespace if there is one passed.
+	 *
 	 * @param string $maybeNamespacedClassName
 	 * @return string
 	 */
