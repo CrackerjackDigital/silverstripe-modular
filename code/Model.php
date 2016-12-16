@@ -30,4 +30,16 @@ class Model extends \DataObject {
 		return get_called_class();
 	}
 
+	public function getModelClass() {
+		return get_class($this);
+	}
+
+	public function getModelID() {
+		return $this->ID;
+	}
+
+	public function getModelInstance() {
+		return $this;
+	}
+
 }
