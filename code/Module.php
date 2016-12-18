@@ -98,11 +98,13 @@ abstract class ModularModule extends Object {
 		else {
 			$requirements = static::get_config_setting('requirements', $when, $forClass);
 
-			$required = static::add_requirements($controller, $requirements, $moduleName);
-
-			if (static::config()->get('combine')) {
-				static::combine($required, $moduleName);
+			if ($required = static::add_requirements($controller, $requirements, $moduleName)) {
+				if (static::config()->get('combine')) {
+					static::combine($required, $moduleName);
+				}
 			}
+
+
 		}
 	}
 
