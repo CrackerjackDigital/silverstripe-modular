@@ -58,7 +58,7 @@ trait reflection {
 			if ($excludeThisClass && ($className == get_called_class())) {
 				continue;
 			}
-			$classes[ $className ] = static::strip_namespace($className);
+			$classes[ $className ] = $className;
 		}
 		return $classes;
 	}
