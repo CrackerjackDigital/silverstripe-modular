@@ -20,9 +20,12 @@ class HasManyManyGridField extends HasManyMany {
 	 * @return array
 	 */
 	public function cmsFields() {
-		return $this()->isInDB()
+		// could get a null gridfield so filter it out
+		return array_filter(
+			$this()->isInDB()
 			? [$this->gridField()]
-			: [$this->saveMasterHint()];
+			: [$this->saveMasterHint()]
+		);
 	}
 
 	/**
@@ -39,28 +42,27 @@ class HasManyManyGridField extends HasManyMany {
 
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
+		$gridField = null;
+
 		if ($this()->hasMethod($relationshipName)) {
 			$list = $this()->$relationshipName();
-		} else {
-			$list = null;
-		}
-
-		/** @var HasManyManyGridField $gridField */
-		$gridField = \GridField::create(
-			$relationshipName,
-			$relationshipName,
-			$list,
-			$config
-		);
-
-		if ($this()->isInDB()) {
-			// only add if this record is already saved
-			$config->addComponent(
-				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+			/** @var \GridField $gridField */
+			$gridField = \GridField::create(
+				$relationshipName,
+				$relationshipName,
+				$list,
+				$config
 			);
-		}
 
-		return $gridField;
+			if ($this()->isInDB()) {
+				// only add if this record is already saved
+				$config->addComponent(
+					new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
+				);
+			}
+			return $gridField;
+
+		}
 	}
 
 	/**

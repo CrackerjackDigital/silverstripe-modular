@@ -47,11 +47,12 @@ abstract class Relationship extends Field {
 	 * @return array
 	 */
 	protected function gridFields() {
-		return [
+		// could get a null gridfield so filter it out
+		return array_filter(
 			$this()->isInDB()
-				? $this->gridField()
-				: $this->saveMasterHint(),
-		];
+				? [$this->gridField()]
+				: [$this->saveMasterHint()]
+		);
 	}
 
 	public static function sortable() {
@@ -86,23 +87,24 @@ abstract class Relationship extends Field {
 	 * @return \GridField
 	 */
 	protected function gridField($relationshipName = null, $configClassName = null) {
+		$relationshipName = $relationshipName ?: static::RelationshipName;
+
 		$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
 		if ($this()->hasMethod($relationshipName)) {
 			// we need to guard this for when changing page types in CMS
 			$list = $this()->$relationshipName();
-		} else {
-			$list = null;
-		}
-		/** @var \GridField $gridField */
-		$gridField = \GridField::create(
-			$relationshipName,
-			$relationshipName,
-			$list,
-			$config
-		);
+			/** @var \GridField $gridField */
 
-		return $gridField;
+			return \GridField::create(
+				$relationshipName,
+				$relationshipName,
+				$list,
+				$config
+			);
+
+		}
+		return null;
 	}
 
 	/**
