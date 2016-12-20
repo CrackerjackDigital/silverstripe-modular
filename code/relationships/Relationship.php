@@ -6,12 +6,14 @@ use Modular\GridField\GridFieldOrderableRows;
 use Modular\Model;
 
 /**
- * A field that manages relationships between the extended model and other models.
+ * A field that manages relationships between the extended model and other models. Can show as a GridField or a TagField
+ * depending on the config.show_as setting.
  *
  * @package Modular\Fields
  */
 abstract class Relationship extends Field {
 	const ShowAsGridField     = 'grid';
+	const ShowAsTagsField     = 'tags';
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
@@ -22,10 +24,13 @@ abstract class Relationship extends Field {
 	private static $show_as = self::ShowAsGridField;
 
 	// can related models be in an order so a GridFieldOrderableRows component is added?
-	private static $sortable = true;
+	private static $allow_sorting = true;
 
 	// allow new related models to be created
 	private static $allow_add_new = true;
+
+	// allow multiple relationships to be created (really only for tag fields)
+	private static $allow_multiple = true;
 
 	// show autocomplete existing filter
 	private static $autocomplete = true;
@@ -41,22 +46,13 @@ abstract class Relationship extends Field {
 		return $this->gridFields();
 	}
 
-	/**
-	 * Return field(s) to show a gridfield in the CMS, or a 'please save...' prompt if the model hasn't been saved
-	 *
-	 * @return array
-	 */
-	protected function gridFields() {
-		// could get a null gridfield so filter it out
-		return array_filter(
-			$this()->isInDB()
-				? [$this->gridField()]
-				: [$this->saveMasterHint()]
-		);
+	protected function availableTags() {
+		$tagClassName = static::RelatedClassName;
+		return $tagClassName::get()->sort('Title');
 	}
 
 	public static function sortable() {
-		return static::config()->get('sortable');
+		return static::config()->get('allow_sorting');
 	}
 
 	public static function field_name($suffix = '') {
@@ -79,36 +75,72 @@ abstract class Relationship extends Field {
 	}
 
 	/**
-	 * Return a GridField configured for editing attached MediaModels. If the master record is in the database
-	 * then also add GridFieldOrderableRows (otherwise complaint re UnsavedRelationList not being a DataList happens).
+	 * Returns a field array using a tag field which can be used in derived classes instead of a GridField which is the default returned by cmsFields().
+	 *
+	 * @return array
+	 */
+	protected function tagFields() {
+		// could get a null tag field so filter it out
+		return [ $this->tagField() ?: $this->saveMasterHint() ];
+	}
+
+	/**
+	 * Return field(s) to show a gridfield in the CMS, or a 'please save...' prompt if the model hasn't been saved
+	 *
+	 * @return array
+	 */
+	protected function gridFields() {
+		// could get a null gridfield so filter it out
+		return [ $this->gridField() ?: $this->saveMasterHint() ];
+	}
+
+	protected function tagField() {
+		if ($this()->isInDB()) {
+			$multipleSelect = (bool) $this->config()->get('allow_multiple');
+			$canCreate = (bool) $this->config()->get('allow_create');
+
+			return \TagField::create(
+					static::relationship_name(),
+					null,
+					$this->availableTags()
+				)->setIsMultiple(
+					$multipleSelect
+				)->setCanCreate(
+					$canCreate
+				);
+		}
+	}
+
+	/**
+	 * If owner is in database then return a GridField configured for editing attached Models.
 	 *
 	 * @param string|null $relationshipName
 	 * @param string|null $configClassName name of grid field configuration class otherwise one is manufactured
 	 * @return \GridField
 	 */
 	protected function gridField($relationshipName = null, $configClassName = null) {
-		$relationshipName = $relationshipName ?: static::RelationshipName;
+		if ($this()->isInDB()) {
+			$relationshipName = $relationshipName ?: static::RelationshipName;
 
-		$config = $this->gridFieldConfig($relationshipName, $configClassName);
+			$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
-		if ($this()->hasMethod($relationshipName)) {
-			// we need to guard this for when changing page types in CMS
-			$list = $this()->$relationshipName();
-			/** @var \GridField $gridField */
+			if ($this()->hasMethod($relationshipName)) {
+				// we need to guard this for when changing page types in CMS
+				$list = $this()->$relationshipName();
+				/** @var \GridField $gridField */
 
-			return \GridField::create(
-				$relationshipName,
-				$relationshipName,
-				$list,
-				$config
-			);
-
+				return \GridField::create(
+					$relationshipName,
+					$relationshipName,
+					$list,
+					$config
+				);
+			}
 		}
-		return null;
 	}
 
 	/**
-	 * Returns a configured GridFieldConfig
+	 * Returns a configured GridFieldConfig based on config.gridfield_config_class.
 	 *
 	 * @param string $relationshipName if not supplied then static.RelationshipName via relationship_name()
 	 * @param string $configClassName  if not supplied then static.GridFieldConfigName or one is guessed, or base is used
@@ -133,13 +165,13 @@ abstract class Relationship extends Field {
 		);
 
 		if ($this()->isInDB()) {
-			// only add if this record is already saved
+			// only add if this record is already saved otherwise can get an error.
 			$config->addComponent(
 				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
 			);
 		}
 
-		if (!$this->config()->get('allow_add_new')) {
+		if (!$this->config()->get('allow_create')) {
 			$config->removeComponentsByType(GridFieldConfig::ComponentAddNewButton);
 		}
 		if (!$this->config()->get('autocomplete')) {

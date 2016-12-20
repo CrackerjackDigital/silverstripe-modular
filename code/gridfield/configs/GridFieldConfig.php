@@ -18,7 +18,7 @@ class GridFieldConfig extends GridFieldConfig_RelationEditor {
 
 	public function __construct($itemsPerPage = null) {
 		parent::__construct($itemsPerPage ?: static::config()->get('items_per_page'));
-		if (!$this->config()->get('allow_add_new')) {
+		if (!$this->config()->get('allow_create')) {
 			$this->removeComponentsByType(static::ComponentAddNewButton);
 		}
 		if (!$this->config()->get('autocomplete')) {

@@ -9,25 +9,10 @@ use Modular\Relationships\HasManyMany;
  */
 
 class HasManyManyTagField extends HasManyMany {
-	private static $multiple_tags = true;
-	private static $can_create_tags = true;
+	private static $allow_multiple = true;
+	private static $allow_create = true;
 
-	public function cmsFields() {
-		return [
-			(new \TagField(
-				static::RelationshipName,
-				'',
-				$this->availableTags()
-			))->setIsMultiple(
-				(bool) $this->config()->get('multiple_tags')
-			)->setCanCreate(
-				(bool) $this->config()->get('can_create_tags')
-			),
-		];
-	}
+	// force tags field view
+	private static $show_as = self::ShowAsTagsField;
 
-	protected function availableTags() {
-		$tagClassName = static::RelatedClassName;
-		return $tagClassName::get()->sort('Title');
-	}
 }

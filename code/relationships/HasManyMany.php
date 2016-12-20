@@ -4,10 +4,9 @@ namespace Modular\Relationships;
 use Modular\cache;
 use Modular\Fields\Relationship;
 
-class HasManyMany extends Relationship  {
+class HasManyMany extends Relationship {
 	use cache;
 
-	const ShowAsTagsField     = 'tags';
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
 
 	/**
@@ -112,26 +111,6 @@ class HasManyMany extends Relationship  {
 			static::cache("$calledClass-implementors", $implementors);
 		}
 		return $implementors ?: [];
-	}
-
-	/**
-	 * Returns a field array using a tag field which can be used in derived classes instead of a GridField which is the default returned by cmsFields().
-	 *
-	 * @return array
-	 */
-	protected function tagFields() {
-		$multipleSelect = (bool) $this->config()->get('multiple_select');
-		$canCreate = (bool)$this->config()->get('allow_add_new');
-
-		$relatedClassName = static::RelatedClassName;
-
-		return [
-			(new \TagField(
-				static::relationship_name(),
-				null,
-				$relatedClassName::get()
-			))->setIsMultiple($multipleSelect)->setCanCreate($canCreate),
-		];
 	}
 
 }
