@@ -1,8 +1,10 @@
 <?php
 namespace Modular\Relationships;
 
+use DataObject;
 use Modular\cache;
 use Modular\Fields\Relationship;
+use Modular\Model;
 
 class HasManyMany extends Relationship {
 	use cache;
@@ -55,15 +57,30 @@ class HasManyMany extends Relationship {
 	}
 
 	/**
-	 * Return all related items. Optionally (for convenience more than anything) provide a relationship name to dereference otherwise this classes
-	 * late static binding relationship_name() will be used.
+	 * Checks if a model has links to any other models other than the extended model, for example when checking if a model
+	 * can be unpublished this can only happen if the model has no other relationships to other models.
 	 *
-	 * @param string $relationshipName if supplied use this relationship instead of static relationship_name
-	 * @return \ArrayList|\DataList
+	 * @param DataObject $model
+	 * @return bool
 	 */
-	public function related($relationshipName = '') {
-		$relationshipName = $relationshipName ?: static::relationship_name();
-		return $this()->$relationshipName();
+	protected function hasOtherLinks($model) {
+		$belongs = $model->config()->get('belongs_many_many') ?: [];
+
+		foreach ($belongs as $relationshipName => $className) {
+			if ($className == get_class($this())) {
+				if ($linked = array_filter($className::$relationshipName()->exclude('ID', $this()->ID))) {
+					foreach ($linked as $link) {
+						// double check the linked model exists
+						if ($link->exists()) {
+
+							// NB EARLY RETURN
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

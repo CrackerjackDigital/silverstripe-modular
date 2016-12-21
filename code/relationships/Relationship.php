@@ -1,9 +1,11 @@
 <?php
 namespace Modular\Fields;
 
+use DataObject;
 use Modular\GridField\GridFieldConfig;
 use Modular\GridField\GridFieldOrderableRows;
 use Modular\Model;
+use Versioned;
 
 /**
  * A field that manages relationships between the extended model and other models. Can show as a GridField or a TagField
@@ -20,6 +22,9 @@ abstract class Relationship extends Field {
 
 	const GridFieldOrderableRowsFieldName = GridFieldOrderableRows::SortFieldName;
 
+	// should models related by this relationship be published when the extended model is pubished
+	private static $publish_related = true;
+
 	// wether to show the field as a GridField or a TagField
 	private static $show_as = self::ShowAsGridField;
 
@@ -34,6 +39,15 @@ abstract class Relationship extends Field {
 
 	// show autocomplete existing filter
 	private static $autocomplete = true;
+
+	/**
+	 * Check if the passed model has back-links for this relationship to other than the extended model. Used e.g. to check if a model
+	 * can be unpublished if no other links exist.
+	 *
+	 * @param DataObject $model
+	 * @return bool
+	 */
+	abstract protected function hasOtherLinks($model);
 
 	/**
 	 * Return a gridfield
@@ -55,6 +69,77 @@ abstract class Relationship extends Field {
 
 	public static function field_name($suffix = '') {
 		return static::RelationshipName . $suffix;
+	}
+
+	/**
+	 * Publish Versioned related models when this extensions owner is published. Extend the related model via onBeforePublish also as we are calling
+	 * publish directly not via doPublish.
+	 */
+	public function onBeforePublish() {
+		if (static::publish_related()) {
+			if ($related = $this->related()) {
+				/** @var Model|\Versioned $model */
+				foreach ($related as $model) {
+					if ($model->hasExtension('Versioned')) {
+						$model->publish('Stage', 'Live');
+						// now ask the block to publish it's own blocks.
+						$model->extend('onBeforePublish');
+					}
+				}
+			}
+		}
+	}
+
+
+	/**
+	 * If a block no longer has any linked pages or linked grid list blocks then it can be unpublished (deleted from Live)
+	 */
+	public function onAfterUnpublish() {
+		/** @var \DataList $gridListBlocks $blocks */
+
+		if (static::publish_related()) {
+			if ($related = $this->related()) {
+				/** @var DataObject|Versioned $model */
+				foreach ($related as $model) {
+					if ($model->hasExtension('Versioned')) {
+						if (!$this->hasOtherLinks($model)) {
+							//
+							$origStage = Versioned::current_stage();
+							Versioned::reading_stage('Live');
+
+							// This way the extended model's ID won't be unset
+							$clone = clone $this();
+							$clone->delete();
+
+							Versioned::reading_stage($origStage);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Return all related items. Optionally (for convenience more than anything) provide a relationship name to dereference otherwise this classes
+	 * late static binding relationship_name() will be used.
+	 *
+	 * @param string $relationshipName if supplied use this relationship instead of static relationship_name
+	 * @return \ArrayList|\DataList
+	 */
+	public function related($relationshipName = '') {
+		$relationshipName = $relationshipName ?: static::relationship_name();
+		// sanity check, it should have this relationship name, but on changing page class in CMS this can maybe cause problems.
+		if ($this()->hasMethod($relationshipName)) {
+			return $this()->$relationshipName();
+		}
+	}
+
+	/**
+	 * Should the foreign models for this relationship also be published when the extended model is published.
+	 * @return bool
+	 */
+	public static function publish_related() {
+		return static::config()->get('publish_related');
 	}
 
 	/**
@@ -177,18 +262,6 @@ abstract class Relationship extends Field {
 		}
 
 		return $config;
-	}
-
-	/**
-	 * When a page with blocks is published we also need to publish blocks. Blocks should also publish their 'sub' blocks.
-	 */
-	public function onAfterPublish() {
-		/** @var Model|\Versioned $block */
-		foreach ($this()->{static::RelationshipName}() as $block) {
-			if ($block->hasExtension('Versioned')) {
-				$block->publish('Stage', 'Live', false);
-			}
-		}
 	}
 
 	/**

@@ -94,51 +94,6 @@ class HasBlocks extends HasManyMany {
 		return $blocks;
 	}
 
-	/**
-	 * Deep publish owned blocks when the owner is published.
-	 */
-	public function onAfterPublish() {
-		if ($blocks = $this->related()) {
-			/** @var Block|\Versioned $block */
-			foreach ($blocks as $block) {
-				if ($block->hasExtension('Versioned')) {
-					$block->publish('Stage', 'Live');
-					// now ask the block to publish it's own blocks.
-					$block->extend('onAfterPublish');
-				}
-			}
-		}
-	}
-
-	public function onAfterUnpublish() {
-		parent::onAfterPublish();
-
-		/** @var Block|\Versioned $block */
-		/** @var \SS_List $linkedPages */
-
-		if ($blocks = $this->related()) {
-			foreach ($blocks as $block) {
-				if ($block->hasExtension('Versioned')) {
-					if (!$this->hasLinks($block)) {
-						$oldMode = Versioned::get_reading_mode();
-						Versioned::reading_stage('Live');
-						$block->delete();
-						Versioned::set_reading_mode($oldMode);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Checks if a block has links to a page other than the current page.
-	 * @param $block
-	 * @return bool
-	 */
-	protected function hasLinks($block) {
-		$linkedPages = $block->Pages()->exclude('ID', $this()->ID);
-		return $linkedPages->count();
-	}
 
 	/**
 	 * Sets the data model class on a HasBlocks gridfield to be 'Modular\Blocks\Block' as 'GridListBlock' is set

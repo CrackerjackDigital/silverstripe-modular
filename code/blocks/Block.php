@@ -3,6 +3,7 @@ namespace Modular\Blocks;
 
 use HiddenField;
 use Modular\Application;
+use Modular\backprop;
 use Modular\Interfaces\LinkType;
 use Modular\Model;
 use Modular\Relationships\HasBlocks;
@@ -23,6 +24,8 @@ use Modular\Relationships\HasBlocks;
  * @method \DataList Pages()
  */
 class Block extends \Modular\VersionedModel implements LinkType {
+	use backprop;
+
 	private static $template = '';
 
 	private static $summary_fields = [
@@ -62,29 +65,6 @@ class Block extends \Modular\VersionedModel implements LinkType {
 			}
 		}
 		return implode(', ', $zones);
-	}
-
-	/**
-	 * Update the owner (e.g. Page) so it shows as modified in CMS.
-	 */
-	public function onAfterWrite() {
-		$pages = $this()->Pages();
-		foreach ($pages as $page) {
-			$page->update([
-				'LastEdited' => date('Y-m-d h:i:s')
-			]);
-			$page->write();
-		}
-		if ($controller = \Controller::curr()) {
-			$controller->getRequest()->addHeader('X-Pjax', 'Content');
-			$controller->getResponse()->addHeader('X-Pjax', 'Content');
-
-			if ($page = Application::get_current_page()) {
-				$url = \Controller::join_links(singleton('CMSPageEditController')->Link('show'), $page->ID);
-				$controller->getResponse()->addHeader('X-ControllerURL', $url);
-			}
-		}
-
 	}
 
 	/**
