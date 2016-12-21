@@ -95,14 +95,17 @@ class Application extends Module {
 	 * Return a path from the request using a getVar or HTTP_REFERER or the request URL.
 	 *
 	 * @param \SS_HTTPRequest $request
-	 * @param array           $requestVars check these get vars looking for a path
+	 * @param array           $checkVars check these get vars looking for a path
 	 * @return mixed|string
 	 */
-	public static function ajax_path_for_request($request = null, $requestVars = ['CMSMainCurrentPageID', 'path', 'url']) {
+	public static function ajax_path_for_request($request = null, $checkVars = ['CMSMainCurrentPageID', 'path', 'ID', 'url']) {
 		$request = $request ?: Controller::curr()->getRequest();
+		$requestVars = $request->requestVars();
 
-		foreach ($requestVars as $varName) {
-			if ($path = $request->requestVar($varName)) {
+		foreach ($checkVars as $varName) {
+			if (isset($requestVars[$varName])) {
+				$path = $request->requestVar($varName);
+
 				if (is_numeric($path)) {
 					/** @var \SiteTree $page */
 					if ($page = \SiteTree::get()->byID($path)) {

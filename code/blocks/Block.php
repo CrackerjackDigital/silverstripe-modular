@@ -24,8 +24,6 @@ use Modular\Relationships\HasBlocks;
  * @method \DataList Pages()
  */
 class Block extends \Modular\VersionedModel implements LinkType {
-	use backprop;
-
 	private static $template = '';
 
 	private static $summary_fields = [
