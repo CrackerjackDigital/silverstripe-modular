@@ -15,6 +15,8 @@ class HasFiles extends HasManyMany {
 
 	private static $allowed_files = 'download';
 
+	private static $allow_attach_existing = true;
+
 	private static $many_many_extraFields = [
 		'Files' => [
 			'SortOrder' => 'Int',
@@ -33,6 +35,10 @@ class HasFiles extends HasManyMany {
 		if ($field->getName() == static::RelationshipName) {
 			$this->configureUploadField($field);
 		}
+	}
+
+	public function allowAttachExisting() {
+		return static::config()->get('allow_attach_existing');
 	}
 
 }

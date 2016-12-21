@@ -148,7 +148,7 @@ class HasBlocks extends HasManyMany {
 	 * @param null $configClassName
 	 * @return \GridField
 	 */
-	protected function gridField($relationshipName = null, $configClassName = null) {
+	protected function XgridField($relationshipName = null, $configClassName = null) {
 		if ($gridField = parent::gridField($relationshipName, $configClassName)) {
 			$gridField->setModelClass('Modular\Blocks\Block');
 			$gridField->setList($this()->{static::relationship_name()}());

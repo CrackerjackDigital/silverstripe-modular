@@ -29,7 +29,7 @@ class Transcript extends File {
 		return new ArrayList(array_filter([$this->Transcript()]));
 	}
 
-	public static function allowed_files() {
+	public static function allowed_files_config_var() {
 		return 'allowed_transcript_files';
 	}
 }

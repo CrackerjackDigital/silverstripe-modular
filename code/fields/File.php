@@ -26,6 +26,9 @@ class File extends HasOne {
 	// this will be appended to 'base_upload_folder'
 	private static $upload_folder = self::DefaultUploadFolderName;
 
+	// allow existing files to be attached in CMS by default.
+	private static $allow_attach_existing = true;
+
 	public function cmsFields() {
 		return [
 			$this->makeUploadField(static::field_name()),
@@ -42,7 +45,11 @@ class File extends HasOne {
 		return static::RelationshipName . $suffix;
 	}
 
-	public static function allowed_files() {
+	public function allowAttachExisting() {
+		return static::config()->get('allow_attach_existing');
+	}
+
+	public static function allowed_files_config_var() {
 		return 'allowed_files';
 	}
 
@@ -50,7 +57,7 @@ class File extends HasOne {
 		$fieldName = $field->getName();
 		/** @var UploadField $field */
 		if ($fieldName == static::field_name()) {
-			$this->configureUploadField($field, static::allowed_files());
+			$this->configureUploadField($field, static::allowed_files_config_var());
 		}
 	}
 

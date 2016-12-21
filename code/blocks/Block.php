@@ -65,6 +65,29 @@ class Block extends \Modular\VersionedModel implements LinkType {
 	}
 
 	/**
+	 * Update the owner (e.g. Page) so it shows as modified in CMS.
+	 */
+	public function onAfterWrite() {
+		$pages = $this()->Pages();
+		foreach ($pages as $page) {
+			$page->update([
+				'LastEdited' => date('Y-m-d h:i:s')
+			]);
+			$page->write();
+		}
+		if ($controller = \Controller::curr()) {
+			$controller->getRequest()->addHeader('X-Pjax', 'Content');
+			$controller->getResponse()->addHeader('X-Pjax', 'Content');
+
+			if ($page = Application::get_current_page()) {
+				$url = \Controller::join_links(singleton('CMSPageEditController')->Link('show'), $page->ID);
+				$controller->getResponse()->addHeader('X-ControllerURL', $url);
+			}
+		}
+
+	}
+
+	/**
 	 * Returns:
 	 *  -   configured config.link_type for this block
 	 *

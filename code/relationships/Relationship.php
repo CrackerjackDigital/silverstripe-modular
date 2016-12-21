@@ -167,10 +167,11 @@ abstract class Relationship extends Field {
 				new GridFieldOrderableRows(static::GridFieldOrderableRowsFieldName)
 			);
 		}
-
+		// we can override settings in GridFieldConfig here
 		if (!$this->config()->get('allow_create')) {
 			$config->removeComponentsByType(GridFieldConfig::ComponentAddNewButton);
 		}
+		// we can override settings in GridFieldConfig here
 		if (!$this->config()->get('autocomplete')) {
 			$config->removeComponentsByType(GridFieldConfig::ComponentAutoCompleter);
 		}

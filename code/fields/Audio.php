@@ -33,7 +33,7 @@ class Audio extends Media {
 		return $this()->Media();
 	}
 
-	public static function allowed_files() {
+	public static function allowed_files_config_var() {
 		return 'allowed_audio_files';
 	}
 

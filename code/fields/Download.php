@@ -19,7 +19,7 @@ class Download extends File {
 		return new \ArrayList(array_filter($this->{static::RelationshipName}()));
 	}
 
-	public static function allowed_files() {
+	public static function allowed_files_config_var() {
 		return 'allowed_download_files';
 	}
 
