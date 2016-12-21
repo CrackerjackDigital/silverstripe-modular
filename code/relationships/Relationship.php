@@ -26,16 +26,14 @@ abstract class Relationship extends Field {
 	// can related models be in an order so a GridFieldOrderableRows component is added?
 	private static $allow_sorting = true;
 
-	// allow new related models to be created
-	private static $allow_add_new = true;
+	// allow new related models to be created either via 'add' button or by adding a tag
+	private static $allow_create = true;
 
 	// allow multiple relationships to be created (really only for tag fields)
 	private static $allow_multiple = true;
 
 	// show autocomplete existing filter
 	private static $autocomplete = true;
-
-	private static $gridfield_config_class = self::GridFieldConfigName;
 
 	/**
 	 * Return a gridfield
@@ -51,7 +49,7 @@ abstract class Relationship extends Field {
 		return $tagClassName::get()->sort('Title');
 	}
 
-	public static function sortable() {
+	public static function allow_sorting() {
 		return static::config()->get('allow_sorting');
 	}
 
@@ -120,8 +118,7 @@ abstract class Relationship extends Field {
 	 */
 	protected function gridField($relationshipName = null, $configClassName = null) {
 		if ($this()->isInDB()) {
-			$relationshipName = $relationshipName ?: static::RelationshipName;
-
+			// relationshipName and configClassName if empty will be updated according to what GridFieldConfig determins
 			$config = $this->gridFieldConfig($relationshipName, $configClassName);
 
 			if ($this()->hasMethod($relationshipName)) {
@@ -142,11 +139,11 @@ abstract class Relationship extends Field {
 	/**
 	 * Returns a configured GridFieldConfig based on config.gridfield_config_class.
 	 *
-	 * @param string $relationshipName if not supplied then static.RelationshipName via relationship_name()
-	 * @param string $configClassName  if not supplied then static.GridFieldConfigName or one is guessed, or base is used
+	 * @param string $relationshipName if not supplied then static.RelationshipName via relationship_name() and is updated
+	 * @param string $configClassName  if not supplied then static.GridFieldConfigName or one is guessed, or base is used and value is updated
 	 * @return GridFieldConfig
 	 */
-	protected function gridFieldConfig($relationshipName = '', $configClassName = '') {
+	protected function gridFieldConfig(&$relationshipName = '', &$configClassName = '') {
 		$relationshipName = $relationshipName
 			?: static::relationship_name();
 
@@ -200,8 +197,7 @@ abstract class Relationship extends Field {
 	 * @return string
 	 */
 	protected static function gridfield_config_class() {
-		$className = static::config()->get('gridfield_config_class')
-			?: get_called_class() . 'GridFieldConfig';
+		$className = static::GridFieldConfigName;
 
 		if (!\ClassInfo::exists($className)) {
 			$className = GridFieldConfig::class_name();

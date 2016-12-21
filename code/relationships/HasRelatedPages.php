@@ -17,7 +17,7 @@ abstract class HasRelatedPages extends HasManyMany {
 
 	private static $cms_tab_name = 'Root.RelatedPages';
 
-	private static $sortable = false;
+	private static $allow_sorting = false;
 
 	/**
 	 * Given an array of page model-tags e.g. 'firth', 'people' etc add them as related pages to the extended model if that relationship doesn't already exist.
@@ -31,7 +31,7 @@ abstract class HasRelatedPages extends HasManyMany {
 		$pageClass = static::related_class_name();
 		/** @var \SS_List $existing */
 		$existing = $this()->{static::relationship_name()}();
-		
+
 
 		// keep track of all the pages which are added
 		$handled = [];

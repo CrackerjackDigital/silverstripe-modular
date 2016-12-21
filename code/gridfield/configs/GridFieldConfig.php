@@ -12,7 +12,7 @@ class GridFieldConfig extends GridFieldConfig_RelationEditor {
 
 	private static $items_per_page = 20;
 
-	private static $allow_add_new = true;
+	private static $allow_create = true;
 
 	private static $autocomplete = true;
 

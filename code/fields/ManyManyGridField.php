@@ -15,6 +15,8 @@ class HasManyManyGridField extends HasManyMany {
 
 	private static $cms_tab_name = '';
 
+	private static $allow_multiple = true;
+	private static $allow_create = true;
 	private static $allow_sorting = true;
 
 }

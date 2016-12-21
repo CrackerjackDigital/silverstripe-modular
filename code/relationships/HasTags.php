@@ -17,7 +17,7 @@ class HasTags extends HasManyMany {
 
 	private static $can_create_tags = true;
 
-	private static $sortable = false;
+	private static $allow_sorting = false;
 
 	public function cmsFields() {
 		return [

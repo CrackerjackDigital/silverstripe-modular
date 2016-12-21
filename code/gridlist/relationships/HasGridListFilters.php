@@ -12,7 +12,7 @@ class HasGridListFilters extends HasManyMany {
 	const RelationshipName = 'GridListFilters';
 	const RelatedClassName = 'Modular\Models\GridListFilter';
 
-	private static $sortable = false;
+	private static $allow_sorting = false;
 
 	private static $summary_fields = [
 		'DisplayGridListFilters' => 'Filters'

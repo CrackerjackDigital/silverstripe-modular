@@ -33,7 +33,7 @@ class HasManyMany extends Relationship {
 	public function extraStatics($class = null, $extension = null) {
 		$extra = [];
 
-		if (static::sortable()) {
+		if (static::allow_sorting()) {
 			$extra = [
 				'many_many_extraFields' => [
 					static::relationship_name() => [
