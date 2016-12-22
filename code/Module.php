@@ -5,6 +5,7 @@ use Director;
 use Modular\Exceptions\Exception;
 
 abstract class Module extends Object {
+	use requirements;
 	use config;
 
 	// handled file types which for simplicity are also the file extensions
@@ -257,33 +258,6 @@ abstract class Module extends Object {
 		return $fileName;
 	}
 
-	/**
-	 * Adds javascript files to requirements based on them ending in '.js'
-	 * using config.install_dir as base path.
-	 *
-	 * @param        $controller
-	 * @param string $when - look at before or after components.
-	 */
-	public static function requirements($controller, $when) {
-		$forClass = get_called_class();
-
-		// have to save and pass as later calls will be this class not the real caller.
-		$moduleName = $forClass::module_name();
-
-		if ($when == self::Block) {
-
-			static::block(static::get_config_setting('requirements', self::Block, $forClass));
-
-		} else {
-			$requirements = static::get_config_setting('requirements', $when, $forClass);
-
-			$required = static::add_requirements($controller, $requirements, $moduleName);
-
-			if (static::config()->get('combine')) {
-				static::combine($required, $moduleName);
-			}
-		}
-	}
 
 	/**
 	 * Iterate config.$configVariable map and return map excluding false values
@@ -347,6 +321,34 @@ abstract class Module extends Object {
 		}
 		return [];
 	}
+/*  Moved to requirements trait
+	/**
+	 * Adds javascript files to requirements based on them ending in '.js'
+	 * using config.install_dir as base path.
+	 *
+	 * @param        $controller
+	 * @param string $when - look at before or after components.
+	 *\/
+	public static function requirements($controller, $when) {
+		$forClass = get_called_class();
+
+		// have to save and pass as later calls will be this class not the real caller.
+		$moduleName = $forClass::module_name();
+
+		if ($when == self::Block) {
+
+			static::block(static::get_config_setting('requirements', self::Block, $forClass));
+
+		} else {
+			$requirements = static::get_config_setting('requirements', $when, $forClass);
+
+			$required = static::add_requirements($controller, $requirements, $moduleName);
+
+			if (static::config()->get('combine')) {
+				static::combine($required, $moduleName);
+			}
+		}
+	}
 
 	/**
 	 * Iterate through configured requirements and require if:
@@ -361,7 +363,7 @@ abstract class Module extends Object {
 	 * @param array $requirements
 	 * @param       $moduleName
 	 * @return array
-	 */
+	 *\/
 	protected static function add_requirements($controller, array $requirements, $moduleName) {
 		if ($requirements) {
 
@@ -410,7 +412,7 @@ abstract class Module extends Object {
 		}
 		return [];
 	}
-
+*/
 	/**
 	 * SilverStripe require CSS
 	 *

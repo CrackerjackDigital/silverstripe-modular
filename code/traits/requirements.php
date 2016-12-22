@@ -1,56 +1,69 @@
 <?php
 namespace Modular;
 
-use Quaff\Module;
 use \Requirements as Requirement;
 
 trait requirements {
 
 	/**
-	 * Includes requirements from static.config.requirements. If a requirement starts with '/' then
+	 * Includes requirements from Injector configured Application. If a requirement starts with '/' then
 	 * it is included relative to site root, otherwise it is included relative to module root. Requirements
 	 * can be defined as 'before' and 'after' in which case they will be included as per $beforeOrAfterInit
 	 * parameter otherwise all requirements will be included when called.
 	 *
+	 * Will also walk to parent class first to get it's requirements so they are included in the correct order, if it
+	 * is a
+	 *
 	 * e.g.
 	 *
 	 * private static $requirements = array(
-	 *  '/framework/thirdpary/jquery/jquery.min.js', // will come relative to site root
-	 *  'js/modulescript.js' // will load from module_path/js/
-	 *  'css/modulecss.js'
+	 *  '/framework/thirdpary/jquery/jquery.min.js': true,  // will come relative to site root
+	 *  'js/modulescript.js': true                          // will load from module_path/js/
+	 *  'css/modulecss.js': false                           // will not load as value is set to 'false' (but would load from module_path/css/)
 	 * )
 	 *
 	 * or
 	 *
 	 * private static $requirements = array(
-	 *  'before' => array( ... )',
-	 *  'after' => array( ... )'
+	 *  'block' => array( ... ),                //  requirements in here will be blocked
+	 *  'before' => array( ... )',              //  these will be loaded onBeforeInit of extended controller
+	 *  'after' => array( ... )'                //  these will be loaded onAfterInit of extended controller
 	 * )
 	 *
-	 * @param               $modulePath
-	 * @param string        $beforeOrAfterInit wether to include before or after requirements
+	 * @param string $beforeOrAfterInit wether to include before or after requirements
+	 * @param string $modulePath        path to load scripts, css etc from if not the them
 	 */
-	public static function requirements($modulePath, $beforeOrAfterInit = Module::BothInit) {
-		$requirements = static::config()->get('requirements');
+	public function requirements($beforeOrAfterInit = Module::BothInit, $modulePath = '') {
+		if ($application = Application::factory()) {
+			$config = $application->config();
 
-		if (isset($requirements[ $beforeOrAfterInit ])) {
-			$requirements = $requirements[ $beforeOrAfterInit ];
-		}
+			if (is_a(get_parent_class(), 'Modular\Module', true)) {
+				// if parent is also a Module then do it's requirements first
+				$parent = parent::requirements($beforeOrAfterInit);
+			}
 
-		foreach ($requirements as $requirement) {
-			if (substr($requirement, -3) == '.js') {
-				if (substr($requirement, 0, 1) == '/') {
-					Requirement::javascript(substr($requirement, 1));
-				} else {
-					Requirement::javascript(\Controller::join_links($modulePath, $requirement));
+			if ($requirements = array_filter($config->get('requirements', \Config::UNINHERITED))) {
+				$modulePath = $modulePath
+					?: $config->get('module_path', \Config::UNINHERITED)
+					?: \SSViewer::get_theme_folder();
+
+				if (isset($requirements[ $beforeOrAfterInit ])) {
+					// exclude any requirements which have been set to 'false' in config
+					$requirements = array_filter($requirements[ $beforeOrAfterInit ]);
 				}
-			} else {
-				if (substr($requirement, 0, 1) == '/') {
-					Requirement::css(substr($requirement, 1));
-				} else {
-					Requirement::css(\Controller::join_links($modulePath, $requirement));
+
+				foreach ($requirements as $requirement => $info) {
+					if (substr($requirement, 0, 1) != '/') {
+						$requirement = \Controller::join_links($modulePath, $requirement);
+					}
+					if (substr($requirement, -3) == '.js') {
+						Requirement::javascript(substr($requirement, 1));
+					} else {
+						Requirement::css(substr($requirement, 1));
+					}
 				}
 			}
 		}
+
 	}
 }

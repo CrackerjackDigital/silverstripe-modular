@@ -7,6 +7,7 @@ use Director;
 
 class Application extends Module {
 	use reflection;
+	use requirements;
 
 	// the name of the service expected by Injector e.g. in factory method
 	const ServiceName = 'Application';
@@ -37,7 +38,7 @@ class Application extends Module {
 	private static $admin_email = '';
 
 	/**
-	 * Return an instance of Application as registered with Injector or the called class.
+	 * Return an instance of Application as registered with Injector Application service, or the called class if not registered.
 	 *
 	 * @return Application
 	 */
@@ -45,10 +46,11 @@ class Application extends Module {
 		$injector = \Injector::inst();
 
 		if ($injector->hasService(static::ServiceName)) {
-			return $injector::inst()->get(static::ServiceName, true, func_get_args());
+			$application = $injector::inst()->get(static::ServiceName, true, func_get_args());
 		} else {
-			return $injector::inst()->get(get_called_class(), true, func_get_args());
+			$application = $injector::inst()->get(get_called_class(), true, func_get_args());
 		}
+		return $application;
 	}
 
 	/**

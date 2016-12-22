@@ -8,7 +8,7 @@ use SQLQuery;
  * Extension which makes models not really delete when delete is called but instead flag as
  * deleted and when selecting models ignore those flagged as deleted.
  */
-class Historical extends SocialModel  {
+class Historical extends SocialModelExtension {
 	use enabler;
 
     private static $db = [
