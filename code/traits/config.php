@@ -1,10 +1,13 @@
 <?php
-namespace Modular;
+namespace Modular\Traits;
 
 use Modular\Exceptions\Config as Exception;
 
 trait config {
 	
+	/**
+	 * @return mixed
+	 */
 	abstract public function __invoke();
 	
 	public static function config($className = null) {
@@ -12,26 +15,35 @@ trait config {
 	}
 	
 	/**
-	 * Try the owner first then the exhibiting object.
+	 * Try the owner first then the exhibiting object, only one or the other will be returned with no merging.
+	 *
 	 * @param      $name
 	 * @param null $key
-	 * @return array|null|string
+	 * @return string|array|null
 	 */
-	public function ownerOrThisConfig($name, $key = null) {
+	public function ownerOverThisConfig($name, $key = null) {
 		return $this()->get_config_setting($name, $key) ?: $this->get_config_setting($name, $key);
 	}
 	
-	public function thisOrOwnerConfig($name, $key = null) {
+	/**
+	 * Try the exhibiting object then the owner object, only one or the other will be returned with no merging.
+	 *
+	 * @param      $name
+	 * @param null $key
+	 * @return string|array|null
+	 */
+	public function thisOverOwnerConfig($name, $key = null) {
 		return $this->get_config_setting($name, $key) ?: $this()->get_config_setting($name, $key);
 	}
 	
 	/**
-	 * Try the merged owner and this object config, owner takes precedent over this.
+	 * Merge the owner's config over the exhibiting objects config so owner's config takes precedence.
+	 *
 	 * @param string $name config variable name, e.g 'allowed_actions'
-	 * @param null   $key  optional key into config variable if found and variable is an array
+	 * @param string $key  optional key into config variable if found and variable is an array
 	 * @return array|null|string
 	 */
-	public function ownerOrThisMergedConfig($name, $key = null) {
+	public function ownerOverThisMergedConfig($name, $key = null) {
 		$merged = [];
 		if ($thisConfig = $this->get_config_setting($name)) {
 			$merged[ $name ] = $thisConfig;
@@ -45,12 +57,13 @@ trait config {
 	}
 	
 	/**
-	 * Try this config or owner object config, this takes precedent over owner.
+	 * Merge the exhibiting objects config over the owner's config so the exhibiting objects config takes precedence.
+	 *
 	 * @param string $name config variable name, e.g 'allowed_actions'
 	 * @param null   $key  optional key into config variable if found and variable is an array
 	 * @return array|null|string
 	 */
-	public function thisOrOwnerMergedConfig($name, $key = null) {
+	public function thisOverOwnerMergedConfig($name, $key = null) {
 		$merged = [];
 		// this will override thisConfig
 		if ($ownerConfig = $this()->get_config_setting($name)) {
@@ -65,6 +78,7 @@ trait config {
 	
 	/**
 	 * If the value is an array and key exists return the value for the key or null.
+	 *
 	 * @param mixed      $value
 	 * @param string|int $key
 	 * @return mixed|null
@@ -82,6 +96,7 @@ trait config {
 	
 	/**
 	 * If the value is an array and key exists return the value for the key or return the value as provided.
+	 *
 	 * @param mixed      $value
 	 * @param string|int $key
 	 * @return mixed
@@ -169,4 +184,45 @@ trait config {
 		
 		return $values;
 	}
+	
+	/**
+	 * Do an fnmatch with keys of config var $name to $match and return the first found match.
+	 *
+	 * e.g. if config.map = [ 'Varchar*' => 'String' ]
+	 *      then match_config_setting('map', 'Varchar(255)') will return 'String'
+	 *
+	 * Will try a direct 'get' first before using matching
+	 *
+	 * @param string $name      the name of the config var to check, should be a map of [ pattern => value ]
+	 * @param string $match     with this test value against keys in the config using fnmatch($key, $match)
+	 * @param null   $className of configuration to get (by default get_called_class will be used).
+	 * @param null   $sourceOptions
+	 * @return mixed
+	 * @throws \Modular\Exceptions\Exception
+	 */
+	public static function match_config_setting($name, $match, $className = null, $sourceOptions = null) {
+		$className = $className ?: get_called_class();
+
+		// try a direct get first
+		if (!$type = static::get_config_setting($name, $match, $className, $sourceOptions)) {
+
+			// get the map as is
+			$map = static::config($className)->get($name, $sourceOptions);
+
+			if (!($map && is_array($map))) {
+				static::debug_fail(new Exception("No such config array '$name' set on class '$className'"));
+			}
+			// now loop through map treating as pattern => type
+			foreach ($map as $pattern => $type) {
+				if (fnmatch($pattern, $match)) {
+					// drop out of loop with this value
+					break;
+				}
+				// reset to null for last loop iteration being not found
+				$type = null;
+			}
+		}
+		return $type;
+	}
+	
 }

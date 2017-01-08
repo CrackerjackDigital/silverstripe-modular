@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Constants which can be set independantly of normal isDev etc, by default track it though.
- * Can be used e.g. in config with constantdefined.
+ * Constants which are set depending on SS_ENVIRONMENT if not already explicitly set (e.g in _ss_environment.php).
+ * Can be used e.g. in config yaml files with constantdefined predicate.
  */
 if (!defined('MODULAR_DEV')) {
     if (Director::isDev()) {

@@ -4,7 +4,7 @@ namespace Modular\Relationships;
 use Modular\GridField\Configs\GridFieldConfig;
 use Modular\GridField\Components\GridFieldOrderableRows;
 use Modular\Model;
-use Modular\reflection;
+use Modular\Traits\reflection;
 
 class RelatedModels extends \Modular\Field {
 	use reflection;
@@ -15,6 +15,7 @@ class RelatedModels extends \Modular\Field {
 	const RelatedClassName    = '';
 	const RelationshipPrefix  = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
+	const Arity = null;
 
 	const SortFieldName = GridFieldOrderableRows::SortFieldName;
 
@@ -33,13 +34,14 @@ class RelatedModels extends \Modular\Field {
 	private static $can_create_tags = false;
 
 	private static $multiple_select = true;
-
+	
 	/**
 	 * Customise if shows as a GridField or a TagField depending on config.show_as
 	 *
+	 * @param $mode
 	 * @return array
 	 */
-	public function cmsFields() {
+	public function cmsFields($mode) {
 		if ($this->config()->get('show_as') == self::ShowAsTagsField) {
 			$fields = $this->tagFields();
 		} else {

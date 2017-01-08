@@ -2,7 +2,7 @@
 namespace Modular\Admin;
 
 use Modular\Debugger;
-use Modular\debugging;
+use Modular\Traits\debugging;
 use Modular\Exceptions\Exception as Exception;
 
 class Publisher extends \Modular\Controller {

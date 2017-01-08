@@ -1,5 +1,5 @@
 <?php
-namespace Modular;
+namespace Modular\Traits;
 /**
  * Manage enable/disable status through configuration. By default static config.enabled is checked, if can be overridden
  * by defining a constant 'EnablerConfigVar' on the exhibiting model, e.g. for if the default 'enabled' is being used
@@ -8,6 +8,16 @@ namespace Modular;
  * @package Modular
  */
 trait enabler {
+	/**
+	 * If added to a field then only return fields if enabled.
+	 * @return array
+	 */
+	public function cmsFields() {
+		if (static::enabled()) {
+			return parent::cmsFields();
+		}
+		return [];
+	}
 	/**
 	 * Is extension enabled? This should be checked before doing processing checks, augmenting SQL etc, it is not
 	 * 'magical' so will need to be called on a case-by-case basis.

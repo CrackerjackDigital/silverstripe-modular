@@ -1,5 +1,7 @@
 <?php
-namespace Modular;
+namespace Modular\Traits;
+
+use Modular\Interfaces\Debugger;
 
 trait trackable {
 	/**
@@ -13,11 +15,14 @@ trait trackable {
 		$className = get_called_class();
 		$signature = md5(microtime());
 		$this->debugger()->source("$className:$what@$signature");
-		$this->debug_info("Starting with message '$message'");
+		$this->debugger()->info("Starting with message '$message'");
 	}
-
+	
+	/**
+	 * @param string $result will be output through print_r, so dont' pass anything sensitive
+	 */
 	public function trackable_end($result = '') {
-		$this->debug_info("Ending with result '$result'");
+		$this->debugger()->info("Ending" . ($result ? (" with result '" . print_r($result, true)) . "'" : ''));
 	}
 
 }

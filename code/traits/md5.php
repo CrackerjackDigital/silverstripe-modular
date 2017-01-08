@@ -1,5 +1,5 @@
 <?php
-namespace Modular;
+namespace Modular\Traits;
 /**
  * Trait adds simple md5 hashing functions
  * @package Modular

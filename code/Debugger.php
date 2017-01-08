@@ -131,13 +131,14 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 	public function env($env = SS_ENVIRONMENT_TYPE) {
 		return $this->config()->get('environment_levels')[ $env ];
 	}
-
+	
 	/**
 	 * Set levels and source and if flags indicate debugging to file screen or email initialise those aspects of debugging using defaults from config.
 	 *
 	 * @param      $level
 	 * @param null $source
 	 * @return $this
+	 * @throws \Modular\Exceptions\Application
 	 */
 	protected function init($level, $source = null) {
 		$this->logger->clearWriters();
@@ -148,15 +149,15 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 		// get the level arrived at
 		$level = $this->level();
 
-		if ($this->bitfieldTest($level, self::DebugFile)) {
+		if ($this->testbits($level, self::DebugFile)) {
 			if ($logFile = $this->makeLogFileName()) {
 				$this->toFile($level, $logFile);
 			}
 		}
-		if ($this->bitfieldTest($level, self::DebugScreen)) {
+		if ($this->testbits($level, self::DebugScreen)) {
 			$this->toScreen($level);
 		}
-		if ($this->bitfieldTest($level, self::DebugEmail)) {
+		if ($this->testbits($level, self::DebugEmail)) {
 			if ($email = $this->config()->get('log_email')) {
 				static::toEmail($email, $level);
 			}

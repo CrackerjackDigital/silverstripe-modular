@@ -2,7 +2,7 @@
 namespace Modular\GridField\Configs;
 
 use \GridFieldConfig_RelationEditor;
-use Modular\lang;
+use Modular\Traits\lang;
 
 class GridFieldConfig extends GridFieldConfig_RelationEditor {
 	use lang;

@@ -1,12 +1,18 @@
 <?php
 namespace Modular;
+use Modular\Traits\debugging;
+use Modular\Traits\lang;
+use Modular\Traits\reflection;
+use Modular\Traits\related;
+use Modular\Types\Type;
+
 /**
  * Model
  *
  * @package Modular
  * @property int ID
  */
-class Model extends \DataObject {
+class Model extends \DataObject implements Type {
 	use lang;
 	use related;
 	use reflection;
@@ -20,6 +26,18 @@ class Model extends \DataObject {
 	public function __invoke() {
 		return $this;
 	}
+	
+	public function model() {
+		return $this();
+	}
+	
+	/**
+	 * Returns the model's class with '_' instead of namespace seperator.
+	 * @return string
+	 */
+	public static function type() {
+		return str_replace('\\', '_', static::class_name());
+	}
 
 	/**
 	 * Patch until php 5.6 static::class is widely available on servers
@@ -30,16 +48,11 @@ class Model extends \DataObject {
 		return get_called_class();
 	}
 
-	public function getModelClass() {
+	public function modelClassName() {
 		return get_class($this);
 	}
 
-	public function getModelID() {
+	public function modelID() {
 		return $this->ID;
 	}
-
-	public function getModelInstance() {
-		return $this;
-	}
-
 }

@@ -2,7 +2,7 @@
 namespace Modular\GridField\Components;
 
 use GridFieldAddNewMultiClass;
-use Modular\config;
+use Modular\Traits\config;
 
 /**
  * A component which lets the user select from a list of classes to create a new record form.

@@ -1,6 +1,12 @@
 <?php
 namespace Modular\Traits;
-
+/**
+ * Return a collection class derived from \DataList instead of a \DataList. The class is nominated in the
+ * exhibiting classes config.custom_list_class_name and custom_get can be called from the a method overriding
+ * the standard SilverStripe get method.
+ *
+ * @package Modular\Traits
+ */
 trait custom_get {
 
 	public static function custom_get($callerClass = null, $filter = "", $sort = "", $join = "", $limit = null, $containerClass = 'DataList') {

@@ -1,11 +1,16 @@
 ---
 Name: modular-config
 ---
-ContentController:
-  extensions:
-    - Modular\ContentControllerExtension
 Injector:
   Application:
     class: Modular\Application
   Debugger:
     class: Modular\Debugger
+
+ContentController:
+  extensions:
+    - Modular\Extensions\Controller\Content
+    - Modular\Extensions\Controller\Requirements
+Modular\Controllers\Model:
+  extensions:
+    - Modular\Extensions\Controller\Model

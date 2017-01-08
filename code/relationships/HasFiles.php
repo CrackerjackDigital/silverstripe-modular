@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\upload;
+use Modular\Traits\upload;
 use SS_List;
 
 /**
@@ -15,7 +15,7 @@ class HasFiles extends HasManyMany {
 
 	private static $allowed_files = 'download';
 
-	public function cmsFields() {
+	public function cmsFields($mode) {
 		return [
 			new \UploadField(
 				static::RelationshipName

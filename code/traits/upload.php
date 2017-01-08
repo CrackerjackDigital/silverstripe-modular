@@ -1,6 +1,6 @@
 <?php
 
-namespace Modular;
+namespace Modular\Traits;
 
 use UploadField;
 use Modular\Exceptions\Exception;

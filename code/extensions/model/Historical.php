@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Extensions\Model;
 
-use Modular\enabler;
+use Modular\Traits\enabler;
 use SQLQuery;
 
 /**

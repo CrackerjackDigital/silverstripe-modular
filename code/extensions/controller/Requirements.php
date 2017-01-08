@@ -1,11 +1,10 @@
 <?php
 namespace Modular\Extensions\Controller;
 
-use Extension;
 use Modular\Module;
-use Modular\owned;
+use Modular\Traits\owned;
 
-class Requirements extends Extension {
+class Requirements extends \Extension {
 	use owned;
 
 	const ApplicationServiceClassName = 'Application';

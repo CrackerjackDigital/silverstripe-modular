@@ -19,7 +19,7 @@ class HasTags extends HasManyMany {
 
 	private static $sortable = false;
 
-	public function cmsFields() {
+	public function cmsFields($mode) {
 		return [
 			(new \TagField(
 				static::RelationshipName,
