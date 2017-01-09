@@ -14,9 +14,13 @@ trait upload {
 	abstract public function __invoke();
 
 	/**
+	 * Check if allowing existing files to be attached is enabled in config via config.allow_attach_existing.
+	 *
 	 * @return bool true if can attach an existing file from storage, false otherwise.
 	 */
-	abstract public function allowAttachExisting();
+	public function allowAttachExisting() {
+		return $this->config()->get('allow_attach_existing');
+	}
 
 	/**
 	 * Return an upload field wrapped in a DisplayLogicWrapper as they all should be when using displaylogic.

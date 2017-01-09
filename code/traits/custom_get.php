@@ -13,11 +13,12 @@ trait custom_get {
 		$oldClassName = '';
 		if ($listClassName = static::custom_list_class_name()) {
 			if ($listClassName != $containerClass) {
+				/** @var string|\Object $oldClassName */
 				$oldClassName = \DataList::getCustomClass('DataList');
 				$oldClassName::useCustomClass('DataList', $listClassName);
 			}
 		}
-		// use custom class name if set
+		// use custom class name if set (this is class name of the model which can also be specified, not the list).
 		$callerClass = $callerClass ?: static::custom_class_name();
 
 		$list = parent::get($callerClass, $filter, $sort, $join, $limit, $containerClass);
@@ -29,7 +30,14 @@ trait custom_get {
 	}
 
 	/**
-	 * @return string
+	 * @return string custom model class to use if set via config.custom_class_name on exhibiting class, should be derived from DataObject
+	 */
+	private static function custom_class_name() {
+		return \Config::inst()->get(get_called_class(), 'custom_class_name');
+	}
+
+	/**
+	 * @return string custom list class to use if set via config.custom_list_class_name on exhibiting class, should be derived from DataList
 	 */
 	private static function custom_list_class_name() {
 		return \Config::inst()->get(get_called_class(), 'custom_list_class_name');

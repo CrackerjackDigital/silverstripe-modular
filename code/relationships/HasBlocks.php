@@ -96,6 +96,8 @@ class HasBlocks extends HasManyMany {
 
 
 	/**
+	 * TODO DISABLED - remove once satisifed this isn't required anymore without the preceeding 'X' in method name
+	 *
 	 * Sets the data model class on a HasBlocks gridfield to be 'Modular\Blocks\Block' as 'GridListBlock' is set
 	 * otherwise, and that is not the root for these blocks.
 	 *
