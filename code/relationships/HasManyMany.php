@@ -4,7 +4,6 @@ namespace Modular\Relationships;
 use DataObject;
 use Modular\cache;
 use Modular\Fields\Relationship;
-use Modular\Model;
 
 class HasManyMany extends Relationship {
 	use cache;
@@ -36,6 +35,7 @@ class HasManyMany extends Relationship {
 		$extra = [];
 
 		if (static::allow_sorting()) {
+			// add the GridFieldOrderableRows sort column as a many_many_extraField
 			$extra = [
 				'many_many_extraFields' => [
 					static::relationship_name() => [
@@ -44,7 +44,7 @@ class HasManyMany extends Relationship {
 				],
 			];
 		}
-
+		// add any parent and the many_many relationship with the related class.
 		return array_merge_recursive(
 			parent::extraStatics($class, $extension),
 			$extra,
