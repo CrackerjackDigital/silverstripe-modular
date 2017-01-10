@@ -5,7 +5,7 @@ use Modular\Application;
 use Modular\GridList\Constraints;
 use Modular\GridList\Interfaces\ItemsSequencer;
 use Modular\ModelExtension;
-use Modular\Relationships\HasGridListFilters;
+use Modular\GridList\VersionedHasGridListFilters as HasGridListFilters;
 
 /**
  * Constrain count of items by filter to the page length

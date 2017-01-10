@@ -50,7 +50,7 @@ class RelatedPages extends Field implements ItemsProvider {
 	 * @return mixed
 	 */
 	public function provideGridListItems() {
-		if ($this()->{self::SingleFieldName}) {
+		if ($this()->{static::SingleFieldName}) {
 			if ($page = \Director::get_current_page()) {
 				$items = new \ArrayList();
 

@@ -3,9 +3,8 @@ namespace Modular\GridList\Sequencers\Filters;
 
 use Modular\Application;
 use Modular\GridList\Interfaces\FiltersSequencer;
+use Modular\GridList\VersionedHasGridListFilters as HasGridListFilters;
 use Modular\ModelExtension;
-use Modular\Relationships\HasGridListFilters;
-use Modular\Relationships\HasTags;
 
 /**
  * Iterates through filters and adds an item count of items for that filter, for use by pagination, badges etc.

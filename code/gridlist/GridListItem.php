@@ -2,7 +2,7 @@
 namespace Modular\GridList;
 
 use Modular\ModelExtension;
-use Modular\Relationships\HasGridListFilters;
+use Modular\GridList\VersionedHasGridListFilters as HasGridListFilters;
 
 /**
  * Render the extended model (e.g. Block) or view (e.g. Page) as an item in a gridlist using the associated template

@@ -4,7 +4,7 @@ namespace Modular\GridList\Providers\Items;
 use Modular\Fields\Field;
 use Modular\Fields\ModelTag;
 use Modular\GridList\Interfaces\ItemsProvider;
-use Modular\Relationships\HasGridListFilters;
+use Modular\GridList\VersionedHasGridListFilters as HasGridListFilters;
 
 /**
  * Add to a GridList host (e.g. GridListBlock) to provide all items across the site which match the filters added to the block.
@@ -38,7 +38,7 @@ class AssociatedFilters extends Field implements ItemsProvider {
 	 * @return \DataList
 	 */
 	public function provideGridListItems() {
-		if ($this()->{self::SingleFieldName}) {
+		if ($this()->{static::SingleFieldName}) {
 			if ($this()->hasExtension(HasGridListFilters::class_name())) {
 				$filterIDs = $this()->{HasGridListFilters::relationship_name()}()->column('ID');
 				$filterField = HasGridListFilters::relationship_name('ID');

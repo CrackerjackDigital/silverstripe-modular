@@ -4,7 +4,7 @@ namespace Modular\GridList\Constraints\Filters;
 use Modular\Fields\Field;
 use Modular\GridList\Interfaces\FilterConstraints;
 use Modular\Model;
-use Modular\Relationships\HasGridListFilters;
+use Modular\GridList\VersionedHasGridListFilters as HasGridListFilters;
 
 /**
  * Removes filters which don't exist in any items, should be added to GridList host (e.g. GridListBlock).

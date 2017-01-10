@@ -5,9 +5,6 @@ use Modular\Application;
 use Modular\config;
 use Modular\ContentControllerExtension;
 use Modular\Controller;
-use Modular\Fields\ModelTag;
-use Modular\Model;
-use Modular\Models\GridListFilter;
 use Modular\owned;
 use Modular\Relationships\HasGridListFilters;
 

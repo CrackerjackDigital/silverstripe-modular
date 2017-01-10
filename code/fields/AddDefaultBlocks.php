@@ -4,7 +4,7 @@ namespace Modular\Extensions\Views;
 use Modular\Blocks\Block;
 use Modular\Fields\Field;
 use Modular\Fields\Title;
-use Modular\Relationships\HasBlocks;
+use Modular\Relationships\VersionedHasBlocks as HasBlocks;
 
 class AddDefaultBlocks extends Field {
 	const SingleFieldName = 'AddDefaultBlocks';
