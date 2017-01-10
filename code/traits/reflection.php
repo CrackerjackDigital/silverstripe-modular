@@ -1,5 +1,5 @@
 <?php
-namespace Modular\Traits;
+namespace Modular;
 
 trait reflection {
 	/**
@@ -7,7 +7,7 @@ trait reflection {
 	 * @return \DataObject
 	 */
 	abstract public function __invoke();
-	
+
 	/**
 	 * Remove namespace from a class and trim supplied from start or end of class name
 	 * e.g. Modular\Edges\SocialOrganisation -> Organisation
@@ -50,7 +50,7 @@ trait reflection {
 		}
 		return $modelOrClassName;
 	}
-	
+
 	/**
 	 * Return a list of all extensions on the extended model which implement (or are a
 	 * class or subclass of) the provided interfaceName via instanceof.
@@ -67,7 +67,7 @@ trait reflection {
 		}
 		return $extensions;
 	}
-	
+
 	/**
 	 * Return an map of subclasses of the called class.
 	 *

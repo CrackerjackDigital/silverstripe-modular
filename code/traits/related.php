@@ -1,8 +1,7 @@
 <?php
-namespace Modular\Traits;
+namespace Modular;
 
 use Modular\Helpers\Reflection;
-use Modular\Model;
 
 /**
  * Tools for dealing with relationships in SilverStripe
@@ -14,12 +13,12 @@ trait related {
 	 * @return \Config_ForClass
 	 */
 	abstract public function config();
-	
+
 	/**
 	 * @return Model|\DataObject
 	 */
 	abstract public function __invoke();
-	
+
 	/**
 	 * Returns a map of all relationship names this model has, e.g. 'Members' or 'RelatedOrganisations' to their
 	 * related model types and their arity. If a single type is given then returns only for that type, otherwise
@@ -46,15 +45,15 @@ trait related {
 			}
 		} else {
 			// 'single' mode get the actual info
-			$artityConfigMap = Reflection::config()->get('arity_config_map');
+			$arityMap = Reflection::config()->get('arity_config_map');
 			$type            = $arities;
-			
+
 			if (is_int($type)) {
 				$arity = $type;
-				$type  = $artityConfigMap[ $type ];
+				$type  = $arityMap[ $type ];
 			} else {
 				// find arity by text e.g. 'has_one'
-				$arity = array_flip($artityConfigMap)[ $type ];
+				$arity = array_flip($arityMap)[ $type ];
 			}
 			// a map e.g. [ 'Members' => 'Member', 'Noses' => 'Nose' ] (or empty)
 			if ($relationships = $this()->config()->get($type)) {
@@ -65,7 +64,7 @@ trait related {
 		}
 		return $out;
 	}
-	
+
 	/**
 	 * Check if a relationship is on the exhibiting class
 	 *
@@ -75,7 +74,7 @@ trait related {
 	 */
 	public function hasRelationship($relationshipName) {
 		$relationships = $this->relationships();
-		
+
 		return isset($relationshipName, $relationships)
 			? [ $relationshipName => $relationships[ $relationshipName ] ]
 			: [];
