@@ -1,7 +1,7 @@
 <?php
 namespace Modular;
 
-use Modular\Helpers\Reflection;
+use Modular\Helpers\Reflection as ArityInfo;
 
 /**
  * Tools for dealing with relationships in SilverStripe
@@ -9,11 +9,6 @@ use Modular\Helpers\Reflection;
  * @package Modular
  */
 trait related {
-	/**
-	 * @return \Config_ForClass
-	 */
-	abstract public function config();
-
 	/**
 	 * @return Model|\DataObject
 	 */
@@ -28,10 +23,10 @@ trait related {
 	 * @return array e.g. [ 'Members' => [ 'Member' => 2 ], 'Thumbnail' => [ 'Image', 1 ] ]
 	 */
 	public function relationships($arities = [
-		Reflection::HasOne,
-		Reflection::HasMany,
-		Reflection::ManyMany,
-		Reflection::BelongsManyMany,
+		ArityInfo::HasOne,
+		ArityInfo::HasMany,
+		ArityInfo::ManyMany,
+		ArityInfo::BelongsManyMany,
 	]) {
 		$out = [];
 		if (is_array($arities)) {
@@ -45,7 +40,7 @@ trait related {
 			}
 		} else {
 			// 'single' mode get the actual info
-			$arityMap = Reflection::config()->get('arity_config_map');
+			$arityMap = ArityInfo::config()->get('arity_config_map');
 			$type            = $arities;
 
 			if (is_int($type)) {
