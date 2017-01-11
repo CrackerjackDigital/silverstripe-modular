@@ -49,6 +49,7 @@ trait backprop {
 
 	/**
 	 * Check if an event has already happened.
+	 *
 	 * @param $event
 	 * @return bool
 	 */
@@ -58,36 +59,48 @@ trait backprop {
 
 	/**
 	 * Get or set data for an event. Returns the data either way.
+	 *
 	 * @param string $event
-	 * @param mixed $data
+	 * @param mixed  $data
 	 * @return mixed
 	 */
 	public function backpropData($event, $data = null) {
 		if (func_num_args() > 1) {
-			$this->backprop[$event] = $data;
+			$this->backprop[ $event ] = $data;
 		}
-		return array_key_exists($event, $this->backprop) ? $this->backprop[$event] : null;
+		return array_key_exists($event, $this->backprop) ? $this->backprop[ $event ] : null;
 	}
 
 	/**
-	 * Return the event info for the event, override to provide results that can't be declared statically in config.
-	 * @param $event
-	 * @return null
+	 * Return the event info for the event, override to provide results that can't be declared statically in config. What to
+	 * store for each event is declared as config.backprop_events on each model, with event as key and a tag as the value. The tag
+	 * can be a method name to call on the model, a field to copy the value from, a property (not field) on the model or if none of
+	 * those are available a verbatim value.
+	 *
+	 * @param string $event name of event, e.g. 'changing'
+	 * @return mixed results from dereferencing the value from the event
 	 */
 	public function backpropEventInfo($event) {
-		$staticEvents = static::config()->get('backprop_events');
-		if (array_key_exists($event, $staticEvents)) {
-			$info = $staticEvents[$event];
+		$eventSources = static::config()->get('backprop_events');
+		if (array_key_exists($event, $eventSources)) {
+			$source = $eventSources[ $event ];
 
-			// see if we can call the method, get field value or just use info verbatim
-			$info = $this()->hasMethod($info)
-				? $this()->$info()
-				: (property_exists($this, $info)
-					? $this->$info
-					: $info
-				);
+			if ($this()->hasMethod($source)) {
 
-			return $info;
+				$data = $this()->$source($event);               // generally will call 'eventData'
+
+			} elseif (is_string($source) && $this()->hasField($source)) {
+
+				$data = $this()->$source;                       // get value from a field
+
+			} elseif (property_exists($this(), $source)) {
+
+				$data = $this()->$source;                       // property not field
+
+			} else {
+				$data = $source;                                // verbatim source
+			}
+			return $data;
 		}
 	}
 
@@ -97,7 +110,7 @@ trait backprop {
 	 * Care should be taken that this doesn't happen as part or after a publish, otherwise if the model is published then the owner will be
 	 * marked as dirty and so will always appear as being 'modified' to the CMS.
 	 *
-	 * @param string     $event  gets passed to related models, could be an 'event name' e.g. 'published' or an originating method name e.g. 'onAfterWrite'.
+	 * @param string $event gets passed to related models, could be an 'event name' e.g. 'published' or an originating method name e.g. 'onAfterWrite'.
 	 */
 	public function backprop($event) {
 		if ($data = $this->shouldBackProp($event)) {
@@ -105,7 +118,8 @@ trait backprop {
 			/** @var DataObject|Versioned $model */
 			$model = $this();
 
-			if (!isset($this()->backprop[$event])) {
+			// in this cycle we only want to record the first event that happens
+			if (!isset($this()->backprop[ $event ])) {
 				// flag as backpropped (attempted anyway) and add changed fields
 				$this()->backpropData($event, $data);
 			}
@@ -134,7 +148,7 @@ trait backprop {
 				}
 			}
 		} else {
-			unset($this()->backprop[$event]);
+			unset($this()->backprop[ $event ]);
 		}
 	}
 
