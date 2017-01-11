@@ -3,10 +3,8 @@ namespace Modular\Blocks;
 
 use HiddenField;
 use Modular\Application;
-use Modular\backprop;
 use Modular\Interfaces\LinkType;
-use Modular\Model;
-use Modular\Relationships\HasBlocks;
+use Modular\VersionedModel;
 
 /**
  * Class which represents a block which can be added to an Article, of types ( in display order ). The types in the grid dropdown are determined by
@@ -23,12 +21,13 @@ use Modular\Relationships\HasBlocks;
  *
  * @method \DataList Pages()
  */
-class Block extends \Modular\VersionedModel implements LinkType {
+class Block extends VersionedModel implements LinkType {
 	private static $template = '';
 
 	private static $summary_fields = [
 		'BlockType' => 'Block Type',
-	    'BlockZones' => 'Zone(s)'
+	    'BlockZones' => 'Zone(s)',
+		\Modular\Collections\VersionedManyManyList::VersionedStatusFieldName => 'Published'
 	];
 
 	private static $link_type = '';

@@ -70,7 +70,7 @@ trait related {
 	public function hasRelationship($relationshipName) {
 		$relationships = $this->relationships();
 
-		return isset($relationshipName, $relationships)
+		return isset($relationships[$relationshipName])
 			? [ $relationshipName => $relationships[ $relationshipName ] ]
 			: [];
 	}

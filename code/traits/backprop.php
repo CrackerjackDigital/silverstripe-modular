@@ -29,7 +29,7 @@ trait backprop {
 	abstract public function config();
 
 	public function initBackprop() {
-		$this->backprop = [];
+		$this()->backprop = [];
 	}
 
 	/**
@@ -41,18 +41,54 @@ trait backprop {
 	 * @throws \Modular\Exceptions\Exception
 	 */
 	public function shouldBackProp($event) {
-		if (is_null($this->backprop)) {
+		if (is_null($this()->backprop)) {
 			throw new Exception("initBackprop not called, please do so before advising any events");
 		}
-		$events = $events = $this->config()->get('backprop_events');
-		if (array_key_exists($event, $events)) {
-			return $events[ $event ];
-		}
-		return false;
+		return $this->backpropEventInfo($event);
 	}
 
+	/**
+	 * Check if an event has already happened.
+	 * @param $event
+	 * @return bool
+	 */
 	public function didBackprop($event) {
-		return is_array($this->backprop) && array_key_exists($event, $this->backprop);
+		return is_array($this()->backprop) && array_key_exists($event, $this()->backprop);
+	}
+
+	/**
+	 * Get or set data for an event. Returns the data either way.
+	 * @param string $event
+	 * @param mixed $data
+	 * @return mixed
+	 */
+	public function backpropData($event, $data = null) {
+		if (func_num_args() > 1) {
+			$this->backprop[$event] = $data;
+		}
+		return array_key_exists($event, $this->backprop) ? $this->backprop[$event] : null;
+	}
+
+	/**
+	 * Return the event info for the event, override to provide results that can't be declared statically in config.
+	 * @param $event
+	 * @return null
+	 */
+	public function backpropEventInfo($event) {
+		$staticEvents = static::config()->get('backprop_events');
+		if (array_key_exists($event, $staticEvents)) {
+			$info = $staticEvents[$event];
+
+			// see if we can call the method, get field value or just use info verbatim
+			$info = $this()->hasMethod($info)
+				? $this()->$info()
+				: (property_exists($this, $info)
+					? $this->$info
+					: $info
+				);
+
+			return $info;
+		}
 	}
 
 	/**
@@ -64,22 +100,24 @@ trait backprop {
 	 * @param string     $event  gets passed to related models, could be an 'event name' e.g. 'published' or an originating method name e.g. 'onAfterWrite'.
 	 */
 	public function backprop($event) {
-		if ($info = $this->shouldBackProp($event)) {
+		if ($data = $this->shouldBackProp($event)) {
 			/** @var DataObject $relatedModel */
 			/** @var DataObject|Versioned $model */
 			$model = $this();
 
-			// flag as backpropped (attempted anyway)
-			$this->backprop[ $event ] = $info;
+			if (!isset($this()->backprop[$event])) {
+				// flag as backpropped (attempted anyway) and add changed fields
+				$this()->backpropData($event, $data);
+			}
 
 			if ($belongs = $model->config()->get('belongs_many_many')) {
 				// e.g for a Block an example relationship would be 'Pages' => 'Page'
 				foreach ($belongs as $relationshipName => $className) {
-					$relatedModels = $model->$relationshipName();
-					foreach ($relatedModels as $relatedModel) {
+					$relationships = $model->$relationshipName();
+					foreach ($relationships as $relatedModel) {
 						if ($relatedModel && $relatedModel->exists()) {
 							// need to package info up for invokeWithExtensions only taking one param
-							$relatedModel->invokeWithExtensions('relatedBackProp', [$event, $info, $this, $model]);
+							$relatedModel->invokeWithExtensions('relatedBackProp', [$event, $data, $this, $model]);
 						}
 					}
 				}
@@ -91,12 +129,12 @@ trait backprop {
 					$relatedModel = $model->$relationshipName();
 					if ($relatedModel && $relatedModel->exists()) {
 						// need to package info up for invokeWithExtensions only taking one param
-						$relatedModel->invokeWithExtensions('relatedBackProp', [$event, $info, $this, $model]);
+						$relatedModel->invokeWithExtensions('relatedBackProp', [$event, $data, $this, $model]);
 					}
 				}
 			}
 		} else {
-			unset($this->backprop[$event]);
+			unset($this()->backprop[$event]);
 		}
 	}
 
