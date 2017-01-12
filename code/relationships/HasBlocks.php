@@ -94,25 +94,6 @@ class HasBlocks extends HasManyMany {
 		return $blocks;
 	}
 
-
-	/**
-	 * TODO DISABLED - remove once satisifed this isn't required anymore without the preceeding 'X' in method name
-	 *
-	 * Sets the data model class on a HasBlocks gridfield to be 'Modular\Blocks\Block' as 'GridListBlock' is set
-	 * otherwise, and that is not the root for these blocks.
-	 *
-	 * @param null $relationshipName
-	 * @param null $configClassName
-	 * @return \GridField
-	 */
-	protected function XgridField($relationshipName = null, $configClassName = null) {
-		if ($gridField = parent::gridField($relationshipName, $configClassName)) {
-			$gridField->setModelClass('Modular\Blocks\Block');
-			$gridField->setList($this()->{static::relationship_name()}());
-		}
-		return $gridField;
-	}
-
 	/**
 	 * Parse a string of rules such as '!NotBlockClass, AddBlockClass' int array of includes, excludes for filtering
 	 *
