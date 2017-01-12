@@ -9,6 +9,32 @@ namespace Modular\Traits;
  */
 trait custom_get {
 
+	/**
+	 * VersionedModel lists are Modular\Workflows\VersionedDataList's.
+	 *
+	 * @param null   $callerClass
+	 * @param string $filter
+	 * @param string $sort
+	 * @param string $join
+	 * @param null   $limit
+	 * @param string $containerClass
+	 * @return mixed
+	 */
+	public static function get($callerClass = null, $filter = "", $sort = "", $join = "", $limit = null, $containerClass = 'DataList') {
+		return static::custom_get($callerClass, $filter, $sort, $join, $limit, $containerClass);
+	}
+
+	/**
+	 * Call this from exhibiting classes get method if needed instead.
+	 *
+	 * @param null   $callerClass
+	 * @param string $filter
+	 * @param string $sort
+	 * @param string $join
+	 * @param null   $limit
+	 * @param string $containerClass
+	 * @return mixed
+	 */
 	public static function custom_get($callerClass = null, $filter = "", $sort = "", $join = "", $limit = null, $containerClass = 'DataList') {
 		$oldClassName = '';
 		if ($listClassName = static::custom_list_class_name()) {

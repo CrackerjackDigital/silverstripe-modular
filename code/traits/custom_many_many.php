@@ -9,6 +9,30 @@ namespace Modular\Traits;
  */
 trait custom_many_many {
 
+	/**
+	 * Inject call to getCustomManyManyComponents so we get a VersionedManyManyList.
+	 *
+	 * @param string $componentName
+	 * @param null   $filter
+	 * @param null   $sort
+	 * @param null   $join
+	 * @param null   $limit
+	 * @return mixed
+	 */
+	public function getManyManyComponents($componentName, $filter = null, $sort = null, $join = null, $limit = null) {
+		return $this->getCustomManyManyComponents($componentName, $filter, $sort, $join, $limit);
+	}
+
+	/**
+	 * Call this from exhibiting classes getManyManyComponents if required instead.
+	 *
+	 * @param      $componentName
+	 * @param null $filter
+	 * @param null $sort
+	 * @param null $join
+	 * @param null $limit
+	 * @return mixed
+	 */
 	public function getCustomManyManyComponents($componentName, $filter = null, $sort = null, $join = null, $limit = null) {
 		$oldClassName = '';
 		if ($listClassName = static::custom_many_many_list_class_name()) {
