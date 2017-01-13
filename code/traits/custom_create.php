@@ -9,6 +9,19 @@ namespace Modular\Traits;
  * @package Modular\Traits
  */
 trait custom_create {
+	/**
+	 * Will override in exhibiting classes which don't have a create.
+	 * @return mixed
+	 */
+	public static function create() {
+		return static::custom_create(func_get_args());
+	}
+
+	/**
+	 * Call this explicitly in class create if needed.
+	 * @param array $args
+	 * @return mixed
+	 */
 	public static function custom_create($args = []) {
 		return \Injector::inst()->createWithArgs(static::custom_class_name(), $args);
 	}

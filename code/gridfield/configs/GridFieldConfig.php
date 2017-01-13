@@ -12,13 +12,13 @@ class GridFieldConfig extends GridFieldConfig_RelationEditor {
 
 	private static $items_per_page = 20;
 
-	private static $allow_add_new = true;
+	private static $allow_create = true;
 
 	private static $autocomplete = true;
 
 	public function __construct($itemsPerPage = null) {
 		parent::__construct($itemsPerPage ?: static::config()->get('items_per_page'));
-		if (!$this->config()->get('allow_add_new')) {
+		if (!$this->config()->get('allow_create')) {
 			$this->removeComponentsByType(static::ComponentAddNewButton);
 		}
 		if (!$this->config()->get('autocomplete')) {
@@ -31,6 +31,10 @@ class GridFieldConfig extends GridFieldConfig_RelationEditor {
 		if ($component = $this->getComponentByType(static::ComponentAutoCompleter)) {
 			$component->setPlaceholderText($placeholderText);
 		}
+	}
+
+	public static function class_name() {
+		return get_called_class();
 	}
 
 	/**

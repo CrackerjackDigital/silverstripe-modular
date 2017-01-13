@@ -18,7 +18,7 @@ class HasManyManyGridFieldConfig extends GridFieldConfig {
 	public function __construct($itemsPerPage = null) {
 		parent::__construct($itemsPerPage);
 
-		if ($this->config()->get('allow_add_new') && $this->config()->get('add_new_multi_class')) {
+		if ($this->config()->get('allow_create') && $this->config()->get('add_new_multi_class')) {
 			// remove the stock 'Add New' button if present
 			$this->removeComponentsByType(
 				static::ComponentAddNewButton

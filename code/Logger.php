@@ -184,8 +184,6 @@ class Logger extends Object {
 		try {
 			$this->logger()->log($message, $priority, $extras);
 		} catch (\Exception $e) {
-			// @todo How do we handle exceptions thrown from Zend_Log?
-			// For example, an exception is thrown if no writers are added
 		}
 	}
 
