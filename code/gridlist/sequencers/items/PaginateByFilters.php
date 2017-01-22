@@ -81,12 +81,9 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 					$filter->LoadCount = $added;
 				}
 			}
-			// now add the first page length items which don't match any added above by a filter
-			// back in for the 'all' filter
-//			$out->merge(
-//				$items->exclude('ID', $out->column('ID'))->limit($limit, $start)
-//			);
+			$out->removeDuplicates();
 
+			// finally re-assign rebuilt list to items
 			$items = $out;
 		}
 	}
