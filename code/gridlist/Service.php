@@ -24,6 +24,14 @@ class Service extends Object implements ServiceInterface {
 		return $this->Filters()->constraint($name, $persistance);
 	}
 
+	/**
+	 * Returns the currently selected filter (e.g. from request query parameter) or empty if no filter advised.
+	 * @return string
+	 */
+	public function filter() {
+		return $this->Filters()->filter();
+	}
+
 	public function mode() {
 		return $this->Filters()->mode();
 	}

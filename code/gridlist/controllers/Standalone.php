@@ -2,18 +2,17 @@
 namespace Modular\GridList\Controllers;
 
 use Modular\Application;
-use Modular\GridList\GridList;
 use Modular\Relationships\HasBlocks;
 
 class Standalone extends \ContentController {
 	private static $url_handlers = [
-		'blocks' => 'blocks',
+		'items' => 'items',
 	];
 	private static $allowed_actions = [
-		'blocks' => true
+		'items' => true
 	];
 
-	public function blocks(\SS_HTTPRequest $request) {
+	public function items(\SS_HTTPRequest $request) {
 		/** @var \Page|HasBlocks $page */
 		if ($path = $this->pathForRequest($request)) {
 			if ($page = $this->findPageForPath($path)) {

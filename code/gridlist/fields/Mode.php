@@ -11,8 +11,10 @@ use Modular\GridList\Interfaces\GridListTempleDataProvider;
  * @package Modular\GridList\Fields
  */
 class Mode extends Field implements GridListTempleDataProvider {
-	const SingleFieldName = 'GridListMode';
+	const SingleFieldName   = 'GridListMode';
 	const SingleFieldSchema = 'enum("Grid,List","Grid")';
+
+	const TemplateDataKey = 'Mode';
 
 	/**
 	 * If GridList also has another way to provide mode, then set the field to that mode if it is set and don't
@@ -26,9 +28,9 @@ class Mode extends Field implements GridListTempleDataProvider {
 
 		if ($otherWays = array_filter($this()->extend('provideGridListTemplateData', $data, $source))) {
 			foreach ($otherWays as $otherWay) {
-				if (isset($otherWay['Mode'])) {
+				if (isset($otherWay[ self::TemplateDataKey ])) {
 					// replace the field with a read-only field set to the first other mode found
-					$fields[ static::SingleFieldName ] = new \ReadonlyField(static::SingleFieldName, null, $otherWay['Mode']);
+					$fields[ static::SingleFieldName ] = new \ReadonlyField(static::SingleFieldName, null, $otherWay[ self::TemplateDataKey ]);
 				}
 			}
 		}
@@ -36,14 +38,14 @@ class Mode extends Field implements GridListTempleDataProvider {
 	}
 
 	/**
-	 * @param array $existingData
+	 * @param array  $existingData
 	 * @param string $source the calling extension so if same we skip providing a value
 	 * @return array [ 'Mode' => mode from dropdown or '' ]
 	 */
 	public function provideGridListTemplateData($existingData = [], $source = null) {
 		if ($source != get_class($this)) {
 			return [
-				'Mode' => strtolower($this()->{static::SingleFieldName})
+				self::TemplateDataKey => strtolower($this()->{static::SingleFieldName}),
 			];
 		} else {
 			return [];

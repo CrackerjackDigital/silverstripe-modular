@@ -6,6 +6,8 @@ use Modular\config;
 use Modular\ContentControllerExtension;
 use Modular\Controller;
 use Modular\Fields\ModelTag;
+use Modular\GridList\Fields\Mode;
+use Modular\GridList\Providers\Filters\CurrentFilter;
 use Modular\Model;
 use Modular\Models\GridListFilter;
 use Modular\owned;
@@ -81,7 +83,7 @@ class GridList extends ContentControllerExtension {
 				[
 					'Items'      => $items,
 					'TotalItems' => $rawItemCount,
-					'Filters'    => $filters
+					'Filters'    => $filters,
 				],
 				$templateData
 			);
@@ -92,6 +94,7 @@ class GridList extends ContentControllerExtension {
 
 	/**
 	 * Use for partial caching, extensions will provide additional information for cache hash generation.
+	 *
 	 * @return mixed
 	 */
 	public function CacheHash() {
@@ -100,7 +103,7 @@ class GridList extends ContentControllerExtension {
 				array_merge(
 					$this()->extend('provideGridListCacheHashData'),
 					[
-						Application::get_current_page()->LastEdited
+						Application::get_current_page()->LastEdited,
 					]
 				)
 			)
@@ -110,11 +113,12 @@ class GridList extends ContentControllerExtension {
 
 	protected function templateData($items, $mode) {
 		$templateData = [
-			'Mode'                        => $mode,
-			'Sort'                        => $this->service()->sort(),
-			'DefaultFilter'               => $this->service()->Filters()->defaultFilter(),
-			Constraints::StartIndexGetVar => $this->service()->start() ?: 0,
-			Constraints::PageLengthGetVar => $this->service()->limit()          // may be overwritten by e.g PageLength extension
+			'Sort'                         => $this->service()->sort(),
+			'DefaultFilter'                => $this->service()->Filters()->defaultFilter(),
+			Mode::TemplateDataKey          => $mode,
+			CurrentFilter::TemplateDataKey => '',
+			Constraints::StartIndexGetVar  => $this->service()->start() ?: 0,
+			Constraints::PageLengthGetVar  => $this->service()->limit()          // may be overwritten by e.g PageLength extension
 		];
 		// now get any extra data
 		foreach ($this->providers() as $provider) {
@@ -140,24 +144,15 @@ class GridList extends ContentControllerExtension {
 			$items = new \ArrayList();
 			$service = $this->service();
 
-			$currentFilterID = $service->Filters()->currentFilterID();
-
 			foreach ($providers as $provider) {
 				// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks
 				// this will return an array of SS_Lists
 				$lists = $provider->extend('provideGridListItems');
 				/** @var \ManyManyList $list */
 				foreach ($lists as $itemList) {
-					// filter to current filter if set
-					if ($currentFilterID) {
-						$itemList = $itemList->filter([
-							HasGridListFilters::relationship_name('ID') => $currentFilterID,
-						]);
-					}
 					$items->merge($itemList);
 				}
 			}
-			$items->removeDuplicates();
 		}
 		return $items;
 	}

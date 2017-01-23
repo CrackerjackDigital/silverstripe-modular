@@ -7,12 +7,12 @@ use Modular\GridList\Interfaces\FiltersProvider;
 use Modular\Models\GridListFilter;
 
 /**
- * Add the current pages config.filter_all as a read-only in the CMS and to filters on page.
+ * Add the current pages config.gridlist_filter_all as a read-only in the CMS and to filters on page.
  *
  * @package Modular\GridList\Providers\Filters
  */
 class AllFilter extends Field implements FiltersProvider {
-	private static $filter_all = [];
+	private static $gridlist_filter_all = [];
 
 	/**
 	 * Show the configured filter as a read-only field in the CMS.
@@ -34,7 +34,7 @@ class AllFilter extends Field implements FiltersProvider {
 	 */
 	public function provideGridListFilters() {
 		if ($page = Application::get_current_page()) {
-			if ($filter = $page->config()->get('filter_all')) {
+			if ($filter = $page->config()->get('gridlist_filter_all')) {
 				// set ModelTag so GridList.Filter method can find it... yech
 				$filter['ModelTag'] = $filter['Filter'];
 				return [

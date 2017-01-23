@@ -46,7 +46,7 @@ class Constraints extends Object {
 		self::SortGetVar,
 		self::StartIndexGetVar,
 		self::PageLengthGetVar,
-		self::FilterVar
+		self::FilterVar,
 	];
 
 	/** @var \NullHTTPRequest|\SS_HTTPRequest */
@@ -67,17 +67,25 @@ class Constraints extends Object {
 	}
 
 	/**
-	 * Default filter is just a field = value
+	 * Returns a filter suitable for searching a field on a class for a term using a PartialMatch (not using full text search).
 	 *
-	 * @param $className
-	 * @param $term
-	 * @param $field
-	 * @return array
+	 * @param string $className e.g. 'Page'
+	 * @param string $searchText what to look for
+	 * @param string $fieldName e.g. 'Title'
+	 * @return array filter array or empty if searchText is empty
 	 */
-	public function filter($className, $term, $field) {
-		return [
-			"$className.$field" => $term,
-		];
+	public function searchFilter($className, $searchText, $fieldName) {
+		return array_filter([
+			"$className.$fieldName:PartialMatch" => trim($searchText)
+		]);
+	}
+
+	/**
+	 * Returns the currently selected filter (e.g. from a query string 'filter' parameter).
+	 *
+	 */
+	public function filter() {
+		return $this->constraint(self::FilterVar);
 	}
 
 	/**
@@ -87,16 +95,24 @@ class Constraints extends Object {
 	 */
 	public function currentFilterID() {
 		if ($filterTag = $this->constraint(static::FilterVar)) {
-			if ($filter = GridListFilter::get()->filter(ModelTag::SingleFieldName, $filterTag)->first()) {
+			if ($filter = GridListFilter::get()->filter(ModelTag::field_name(), $filterTag)->first()) {
 				return $filter->ID;
 			}
 		}
 	}
 
+	/**
+	 * Return current page's default filter from either DefaultFilter method, DefaultFilter field or config.gridlist_default_filter.
+	 * @return string
+	 */
 	public function defaultFilter() {
 		if ($page = Application::get_current_page()) {
 			if ($page->hasMethod('DefaultFilter')) {
 				return $page->DefaultFilter();
+			} elseif ($page->hasField('DefaultFilter')) {
+				return $page->DefaultFilter;
+			} else {
+				return $page->config()->get('gridlist_default_filter');
 			}
 		}
 	}
