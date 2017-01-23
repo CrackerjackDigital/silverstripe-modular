@@ -2,6 +2,8 @@
 namespace Modular\Search;
 
 use Modular\GridList\Interfaces\ItemsProvider;
+use Modular\Search\ModelExtension as SearchExtension;
+
 /**
  * Provides items which match fulltext parameter 'q'
  *
@@ -26,23 +28,24 @@ class FulltextProvider extends \Modular\ModelExtension implements ItemsProvider 
 			$searchClasses = $this->config()->get('search_classes') ?: [];
 
 			foreach ($searchClasses as $className) {
-				$filter = $service->Filters()->filter($className, Constraints::FullTextVar, \Modular\Search\ModelExtension::SearchIndex);
-				if ($filter) {
-					$intermediates = \DataObject::get($className)
-						->filter($filter);
+				$searchIndex = SearchExtension::SearchIndex;
 
-					/** @var ModelExtension|\DataObject $intermediate */
-					foreach ($intermediates as $intermediate) {
-						if ($intermediate->hasMethod('SearchTargets')) {
+				$intermediates = \DataObject::get($className)
+					->filter([
+						"$className.$searchIndex" => Constraints::FullTextVar
+					]);
 
-							// merge in what the intermediate object thinks are it's actual targets,
-							// e.g. for a ContentBlock this is the Pages which are related to that block
-							$results->merge($intermediate->SearchTargets());
+				/** @var ModelExtension|\DataObject $intermediate */
+				foreach ($intermediates as $intermediate) {
+					if ($intermediate->hasMethod('SearchTargets')) {
 
-						} else {
-							// if no search targets nominated then just add the intermediate as it is the target
-							$results->push($intermediate);
-						}
+						// merge in what the intermediate object thinks are it's actual targets,
+						// e.g. for a ContentBlock this is the Pages which are related to that block
+						$results->merge($intermediate->SearchTargets());
+
+					} else {
+						// if no search targets nominated then just add the intermediate as it is the target
+						$results->push($intermediate);
 					}
 				}
 			}
