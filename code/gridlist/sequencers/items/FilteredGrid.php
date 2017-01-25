@@ -17,7 +17,7 @@ use Modular\Relationships\HasGridListFilters;
  *
  * @package Modular\GridList\Constraints\Items
  */
-class PaginateByFilters extends ModelExtension implements ItemsSequencer {
+class FilteredGrid extends ModelExtension implements ItemsSequencer {
 	/**
 	 * Expects parameters 'start' and 'limit' to be set, limits items by filter to page length
 	 *
@@ -28,13 +28,14 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 	 */
 	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
 		// get from GridListMode extension
-		$mode = $parameters[ Mode::TemplateDataKey ];
+		$mode = @$parameters[ Mode::TemplateDataKey ];
 
 		if ($mode == GridList::ModeGrid) {
+			$start = @$parameters[ Constraints::StartIndexGetVar ];
+			$limit = @$parameters[ Constraints::PageLengthGetVar ];
+
 			$out = new \ArrayList();
 
-			$start = $parameters[ Constraints::StartIndexGetVar ];
-			$limit = $parameters[ Constraints::PageLengthGetVar ];
 			if (!is_null($limit)) {
 				$added = 0;
 
@@ -91,44 +92,11 @@ class PaginateByFilters extends ModelExtension implements ItemsSequencer {
 				}
 			}
 
+			$out->removeDuplicates();
+
 			// finally set items to be the re-arranged items
 			$items = $out;
 
-		} elseif ($mode == GridList::ModeList) {
-			// if list is grouped
-			if (isset($parameters[ GroupByField::TemplateDataKey ])) {
-				// if a filter is requested then filter by it, otherwise leave filtering to the client
-				if ($filter = @$parameters[ CurrentFilter::TemplateDataKey ]) {
-					foreach ($items as $group) {
-						/** @var \SS_List|\ArrayList $children */
-						$children = $group->Children;
-
-						$groupFilters = [];
-						/** @var \DataObject|HasGridListFilters $child */
-						foreach ($children as $child) {
-							$childFilters = [];
-
-							if ($child->hasExtension(HasGridListFilters::class_name())) {
-								$childFilters = $child->GridListFilters()->column(ModelTag::field_name());
-								$groupFilters += $childFilters;
-							}
-							if (!in_array($filter, $childFilters)) {
-								// remote the item from the group, it doesn't have a matching filter to the current filter
-								$children->remove($child);
-							}
-						}
-						if (!in_array($filter, $groupFilters)) {
-							// remove whole group, it doesn't have a matching filter to the current filter
-							$items->remove($group);
-						}
-					}
-					$start = @$parameters[ Constraints::StartIndexGetVar ];
-					$limit = @$parameters[ Constraints::PageLengthGetVar ];
-
-					// now limit what we return by page length and from the start requested
-					$items = $items->limit($limit, $start);
-				}
-			}
 		}
 	}
 }

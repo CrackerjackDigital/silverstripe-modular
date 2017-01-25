@@ -1,6 +1,7 @@
 <?php
 namespace Modular\GridList;
 
+use Modular\Application;
 use Modular\GridList\Interfaces\Service\Service as ServiceInterface;
 use Modular\Object;
 use Modular\owned;
@@ -46,6 +47,40 @@ class Service extends Object implements ServiceInterface {
 
 	public function limit() {
 		return $this->Filters()->limit();
+	}
+
+	/**
+	 * Return current page's default filter from either DefaultFilter method, DefaultFilter field or config.gridlist_default_filter.
+	 *
+	 * @return string
+	 */
+	public function defaultFilter() {
+		if ($page = Application::get_current_page()) {
+			if ($page->hasMethod('DefaultFilter')) {
+				return $page->DefaultFilter();
+			} elseif ($page->hasField('DefaultFilter')) {
+				return $page->DefaultFilter;
+			} else {
+				return $page->config()->get('gridlist_default_filter');
+			}
+		}
+	}
+
+	/**
+	 * Return current page's default filter from either DefaultFilter method, DefaultFilter field or config.gridlist_default_filter.
+	 *
+	 * @return string
+	 */
+	public function allFilter() {
+		if ($page = Application::get_current_page()) {
+			if ($page->hasMethod('AllFilter')) {
+				return $page->AllFilter();
+			} elseif ($page->hasField('AllFilter')) {
+				return $page->AllFilter;
+			} else {
+				return $page->config()->get('gridlist_all_filter');
+			}
+		}
 	}
 
 	/**

@@ -38,9 +38,9 @@ abstract class ModelExtension extends \Modular\ModelExtension {
 				static::config()->get('searchable_fields') ?: []
 			)
 		);
-		return array_merge_recursive(
-			parent::extraStatics($class, $extension),
-			[
+		// only add if fields where actually declared...
+		if ($searchableFields) {
+			$extra = [
 				'indexes' => [
 					static::SearchIndex => [
 						'type'  => 'fulltext',
@@ -48,7 +48,13 @@ abstract class ModelExtension extends \Modular\ModelExtension {
 						'value' => implode(',', $searchableFields),
 					],
 				],
-			]
+			];
+		} else {
+			$extra = [];
+		}
+		return array_merge_recursive(
+			parent::extraStatics($class, $extension),
+			$extra
 		);
 	}
 }

@@ -17,11 +17,11 @@ class HasGridListBlocks extends HasBlocks implements ItemsSequencer {
 	/**
 	 * Inserts manually added blocks at front of list.
 	 *
-	 * @param \ArrayList|\DataList $items
+	 * @param \ArrayList|\DataList $groups
 	 * @param                      $filters
 	 * @param array                $parameters
 	 */
-	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
+	public function sequenceGridListItems(&$groups, $filters, &$parameters = []) {
 		$out = new \ArrayList();
 
 		// reverse sort so insertFirst works
@@ -29,10 +29,10 @@ class HasGridListBlocks extends HasBlocks implements ItemsSequencer {
 		foreach ($blocks as $block) {
 			$out->push($block);
 		}
-		foreach ($items as $item) {
+		foreach ($groups as $item) {
 			$out->push($item);
 		}
-		$items = $out;
+		$groups = $out;
 	}
 
 	/**

@@ -49,8 +49,10 @@ class GridList extends ContentControllerExtension {
 
 			$mode = $this->mode();
 
+			// this will give us 'raw' items
 			$items = $this->items($mode);
 
+			// this will give us 'raw' filters
 			$filters = $this->filters($mode);
 
 			$templateData = $this->templateData($items, $mode);
@@ -59,21 +61,20 @@ class GridList extends ContentControllerExtension {
 			foreach ($providers as $provider) {
 				$provider->extend('constrainGridListItems', $items, $filters, $templateData);
 			}
-			$items->removeDuplicates();
-
 			// get raw item count before we do any more manipulation
 			$rawItemCount = $items->count();
+
+			// now do any grouping, direct manipulation of items such as fixed ordering, pagination etc
+			foreach ($providers as $provider) {
+				$provider->extend('sequenceGridListItems', $items, $filters, $templateData);
+			}
 
 			// re-arrange, decorate etc filters
 			foreach ($providers as $provider) {
 				$provider->extend('sequenceGridListFilters', $filters, $items, $templateData);
 			}
 
-			// now do any grouping, direct manipulation of items such as fixed ordering, pagination etc
-			foreach ($providers as $provider) {
-				$provider->extend('sequenceGridListItems', $items, $filters, $templateData);
-			}
-			// hook final output for e.g. redirections
+			// hook final output for e.g. redirections if only one item
 			foreach ($providers as $provider) {
 				$provider->extend('handleGridListItems', $items, $filters, $templateData);
 			}
@@ -111,10 +112,18 @@ class GridList extends ContentControllerExtension {
 		return md5(Controller::curr()->getRequest()->getURL(true) . ':' . $data);
 	}
 
+	/**
+	 * Request data via extensions provideGridListTemplateData method which we can pass into the template and also for subsequent processing.
+	 *
+	 * @param $items
+	 * @param $mode
+	 * @return array
+	 */
 	protected function templateData($items, $mode) {
 		$templateData = [
 			'Sort'                         => $this->service()->sort(),
-			'DefaultFilter'                => $this->service()->Filters()->defaultFilter(),
+			'DefaultFilter'                => $this->service()->defaultFilter(),
+			'AllFilter'                    => $this->service()->allFilter(),
 			Mode::TemplateDataKey          => $mode,
 			CurrentFilter::TemplateDataKey => '',
 			Constraints::StartIndexGetVar  => $this->service()->start() ?: 0,
@@ -142,7 +151,6 @@ class GridList extends ContentControllerExtension {
 			$providers = $this->providers();
 
 			$items = new \ArrayList();
-			$service = $this->service();
 
 			foreach ($providers as $provider) {
 				// first we get any items related to the GridList itself , e.g. curated blocks added by HasBlocks

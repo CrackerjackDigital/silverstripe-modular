@@ -101,22 +101,6 @@ class Constraints extends Object {
 		}
 	}
 
-	/**
-	 * Return current page's default filter from either DefaultFilter method, DefaultFilter field or config.gridlist_default_filter.
-	 * @return string
-	 */
-	public function defaultFilter() {
-		if ($page = Application::get_current_page()) {
-			if ($page->hasMethod('DefaultFilter')) {
-				return $page->DefaultFilter();
-			} elseif ($page->hasField('DefaultFilter')) {
-				return $page->DefaultFilter;
-			} else {
-				return $page->config()->get('gridlist_default_filter');
-			}
-		}
-	}
-
 	public function getVarOrParam($name, $sessionPersistance = self::PersistExact) {
 		return $this->getVar($name, $sessionPersistance) ?: $this->urlParam($name, $sessionPersistance);
 	}

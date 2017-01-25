@@ -6,6 +6,7 @@ use Modular\GridList\GridList;
 use Modular\GridList\Interfaces\GridListTempleDataProvider;
 use Modular\GridList\Interfaces\ItemsSequencer;
 use Modular\ModelExtension;
+use Modular\Relationships\HasGridListFilters;
 
 class GroupByField extends ModelExtension implements ItemsSequencer, GridListTempleDataProvider {
 	const GroupByFieldName  = '';
@@ -27,34 +28,35 @@ class GroupByField extends ModelExtension implements ItemsSequencer, GridListTem
 	/**
 	 * Sort items by EventDate desc, if we are in list mode then group by EventDate also update ItemCounts by group.
 	 *
-	 * @param \ArrayList|\DataList $items
+	 * @param \ArrayList|\DataList $groups
 	 * @param                      $filters
 	 * @param array                $parameters
 	 */
-	public function sequenceGridListItems(&$items, $filters, &$parameters = []) {
-		if ($items->count()) {
+	public function sequenceGridListItems(&$groups, $filters, &$parameters = []) {
+		if ($groups->count()) {
 			// this was added by Mode field
 			$mode = $parameters[Mode::TemplateDataKey];
 
 			if ($mode == GridList::ModeList) {
 				$groupByFieldName = static::GroupByFieldName;
 
-				$items = \GroupedList::create(
-					$items->Sort($groupByFieldName, 'desc')
+				$groups = \GroupedList::create(
+					$groups->Sort($groupByFieldName, 'desc')
 				)->GroupedBy($groupByFieldName);
 
-				foreach ($items as $group) {
+				foreach ($groups as $group) {
 
-					// de-dup items within the group
-					if ($group->Children) {
-						$group->Children->removeDuplicates();
+					if ($children = $group->Children) {
+						// de-dup items within the group
+						$children->removeDuplicates();
 					}
-
 					// this is used for uniqueness testing by front-end when loading via ajax
 					$group->Hash = md5($group->$groupByFieldName);
 
 					// add the group title field
 					$group->GroupTitle = $this->createGroupTitle($group->$groupByFieldName);
+
+
 				}
 			}
 		}

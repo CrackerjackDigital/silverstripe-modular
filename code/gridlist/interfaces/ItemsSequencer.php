@@ -7,10 +7,10 @@ namespace Modular\GridList\Interfaces;
  */
 interface ItemsSequencer {
 	/**
-	 * @param \ArrayList|\DataList $items
+	 * @param \ArrayList|\DataList $groups
 	 * @param                      $filters
 	 * @param array                $parameters
 	 * @return
 	 */
-	public function sequenceGridListItems(&$items, $filters, &$parameters = []);
+	public function sequenceGridListItems(&$groups, $filters, &$parameters = []);
 }
