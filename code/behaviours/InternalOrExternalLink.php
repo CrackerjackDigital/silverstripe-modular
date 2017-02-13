@@ -77,7 +77,7 @@ class InternalOrExternalLink extends Field {
 	 * Returns text of link, either as entered for External or generated from Internal. If Internal an target page
 	 * isn't found then returns LinkAttributeExtension.InternalLink.MissingTarget message e.g. '[linked page not found]' type message
 	 *
-	 * @return string
+	 * @return \ArrayData of [ 'Link' => link ]
 	 */
 	public function ResolvedLink() {
 		$link = '';
@@ -91,7 +91,9 @@ class InternalOrExternalLink extends Field {
 		} elseif ($this()->InternalLink()) {
 			$link = $this()->InternalLink()->Link();
 		}
-		return $link;
+		return new \ArrayData([
+			'Link' => $link
+		]);
 	}
 
 	public function LinkText() {
