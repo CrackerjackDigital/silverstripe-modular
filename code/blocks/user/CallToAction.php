@@ -11,11 +11,16 @@ class CallToAction extends Block {
 		if ($this->{InternalOrExternalLink::LinkTypeFieldName} == InternalLink::InternalLinkOption) {
 
 			if ($target = $this->{InternalLink::RelationshipName}()) {
-				return $target->Link();
-            }
+				$link = $target->Link();
+            } else {
+				$link = '';
+			}
 		} elseif ($this->{InternalOrExternalLink::LinkTypeFieldName} == ExternalLink::ExternalLinkOption) {
-			return $this->{ExternalLink::SingleFieldName};
+			$link = $this->{ExternalLink::SingleFieldName};
 		}
+		return new \ArrayData([
+			'Link' => $link
+		]);
 	}
 
 }

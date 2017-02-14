@@ -21,7 +21,7 @@ class Links extends Block implements HasLinks {
 		/** @var InternalOrExternalLink|\Modular\Behaviours\InternalOrExternalLink $link */
 		foreach ($this->Links() as $link) {
 			$links->push(new \ArrayData([
-				'Link' => $link->ResolvedLink(),
+				'Link' => $link->ResolvedLink()->Link,
 				'Title' => $link->Title,
 				'LinkType' => $link->LinkType,
 			    'LinkText' => $this->LinkText() ?: $link->LinkText()

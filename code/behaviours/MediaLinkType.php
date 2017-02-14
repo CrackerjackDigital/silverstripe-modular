@@ -98,12 +98,17 @@ class MediaLinkType extends Field {
 	 */
 	public function ResolvedLink() {
 		if ($this->IsExternalLink()) {
-			return $this()->{ExternalLink::SingleFieldName};
+			$link = $this()->{ExternalLink::SingleFieldName};
 		} elseif ($this->IsMedia()) {
-			return $this->getMediaLink();
+			$link = $this->getMediaLink();
 		} elseif ($this->IsEmbedCode()) {
-			return $this()->{EmbedCode::EmbedCodeFieldName};
+			$link = $this()->{EmbedCode::EmbedCodeFieldName};
+		} else {
+			$link = '';
 		}
+		return new \ArrayData([
+			'Link' => $link
+		]);
 	}
 
 	/**
