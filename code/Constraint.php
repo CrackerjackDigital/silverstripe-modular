@@ -2,6 +2,7 @@
 namespace Modular;
 
 use Modular\Exceptions\Exception;
+use SilverStripe\Control\Session;
 
 /**
  * Filters limit what models are displayed on page depending on user selection, they can further restrict models after Constraints are applied.
@@ -196,12 +197,12 @@ class Constraint extends Object {
 	 */
 	protected function clearSession() {
 		$len = strlen(self::SessionKeyPrefix);
-		foreach (\Session::get_all() as $name => $value) {
+		foreach (Session::get_all() as $name => $value) {
 			if (substr($name, 0, $len) == self::SessionKeyPrefix) {
-				\Session::clear($name);
+				Session::clear($name);
 			}
 		}
-		\Session::save();
+		Session::save();
 	}
 
 	protected function url($includeGetVars = false) {
@@ -360,7 +361,7 @@ class Constraint extends Object {
 				} else {
 					throw new Exception("Unknown persistance mode: $sessionPersistance");
 				}
-				\Session::set($key, $value);
+				Session::set($key, $value);
 			}
 		} else {
 

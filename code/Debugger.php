@@ -3,9 +3,10 @@ namespace Modular;
 
 use Modular\Exceptions\Exception;
 use Modular\Interfaces\Logger;
-use SS_Log;
-use SS_LogEmailWriter;
-use SS_LogFileWriter;
+use Modular\Traits\bitfield;
+use Modular\Traits\enabler;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Email\Email;
 
 class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 	use bitfield;
@@ -65,10 +66,10 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 			$this->info("End of logging at " . date('Y-m-d h:i:s'));
 
 			if ($body = file_get_contents($this->logFilePathName)) {
-				$email = new \Email(
+				$email = new Email(
 					$this->config()->get('send_emails_from'),
 					$this->emailLogFileTo,
-					'Debug log from: ' . \Director::protocolAndHost(),
+					'Debug log from: ' . Director::protocolAndHost(),
 					$body
 				);
 				$email->sendPlain();
@@ -131,7 +132,7 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 	public function env($env = SS_ENVIRONMENT_TYPE) {
 		return $this->config()->get('environment_levels')[ $env ];
 	}
-	
+
 	/**
 	 * Set levels and source and if flags indicate debugging to file screen or email initialise those aspects of debugging using defaults from config.
 	 *
@@ -181,7 +182,7 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 			"$severity:",
 			$source,
 			static::digest($message, $source),
-		]) . (\Director::is_cli() ? '' : '<br/>') . PHP_EOL;
+		]) . (Director::is_cli() ? '' : '<br/>') . PHP_EOL;
 	}
 
 	/**
@@ -300,7 +301,7 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 	public function toEmail($address, $level) {
 		if ($address) {
 			$this->logger->addWriter(
-				new SS_LogEmailWriter($address),
+				new LogEmailWriter($address),
 				$level
 			);
 		};
@@ -347,7 +348,7 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 		}
 
 		$this->logger->addWriter(
-			new SS_LogFileWriter($this->logFilePathName),
+			new FileWriter($this->logFilePathName),
 			$this->lvl($level),
 			"<="
 		);

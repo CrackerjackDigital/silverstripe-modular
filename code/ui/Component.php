@@ -1,6 +1,8 @@
 <?php
 namespace Modular\UI;
 
-class Component extends \CompositeField {
+use SilverStripe\Forms\CompositeField;
+
+class Component extends CompositeField {
 
 }

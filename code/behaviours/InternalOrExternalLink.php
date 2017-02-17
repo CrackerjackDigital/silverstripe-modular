@@ -1,12 +1,12 @@
 <?php
 namespace Modular\Behaviours;
 
-use Modular\Fields\InternalLink;
 use Modular\Fields\ExternalLink;
-use ClassInfo;
-use DropdownField;
-use FormField;
-use Modular\Interfaces\LinkType;
+use Modular\Fields\InternalLink;
+use SilverStripe\Control\Director;
+use SilverStripe\Core\ClassInfo;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FormField;
 
 /**
  * Binds InternalLink and ExternalLink fields with a LinkType field and attaches associated behaviours (display logic etc).
@@ -51,7 +51,7 @@ class InternalOrExternalLink extends \Modular\Field {
 	/**
 	 * Show/hide fields using display_logic depending on the LinkType field added by this extension.
 	 *
-	 * @param \FormField $field
+	 * @param FormField $field
 	 * @param array      $allFieldConstraints
 	 */
 	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
@@ -82,8 +82,8 @@ class InternalOrExternalLink extends \Modular\Field {
 		$link = '';
 		if ($this->IsExternal()) {
 			$externalLink = $this()->ExternalLink;
-			if (!\Director::is_absolute_url($externalLink)) {
-				$link = \Director::protocol() . $externalLink;
+			if (!Director::is_absolute_url($externalLink)) {
+				$link = Director::protocol() . $externalLink;
 			} else {
 				$link = $externalLink;
 			}

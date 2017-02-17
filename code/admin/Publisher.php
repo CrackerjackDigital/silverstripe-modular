@@ -1,11 +1,18 @@
 <?php
 namespace Modular\Admin;
 
+use Modular\Controller;
 use Modular\Debugger;
 use Modular\Traits\debugging;
 use Modular\Exceptions\Exception as Exception;
+use SilverStripe\Control\Director;
+use SilverStripe\Control\Session;
+use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\Versioning\Versioned;
+use SilverStripe\Security\Permission;
 
-class Publisher extends \Modular\Controller {
+class Publisher extends Controller {
 	use debugging;
 
 	private static $allowed_actions = [
@@ -52,7 +59,7 @@ class Publisher extends \Modular\Controller {
 	 */
 	protected function canDoItOrFail() {
 		// no Session.PublishAllLogFileName set up so check permissions, if we're in cli and that correct confirmation token is given
-		if (!\Director::is_cli() && !\Permission::check('ADMIN')) {
+		if (!Director::is_cli() && !Permission::check('ADMIN')) {
 			$this->debug_fail(new Exception("Not an admin and not cli"));
 		}
 		if (!$this->confirmationToken()) {
@@ -69,12 +76,12 @@ class Publisher extends \Modular\Controller {
 
 		if ($this->option('reset')) {
 			// force a first-time authentication etc
-			\Session::clear('PublishAllLogFileName');
+			Session::clear('PublishAllLogFileName');
 		}
 
-		if ($logFileName = \Session::get('PublishAllLogFileName')) {
+		if ($logFileName = Session::get('PublishAllLogFileName')) {
 			// clear it so if anything goes wrong we're not stuck, will be set again just before redirect later
-			\Session::clear('PublishAllLogFileName');
+			Session::clear('PublishAllLogFileName');
 
 			// write all output to file
 			static::debugger()->toFile(Debugger::DebugAll, $logFileName);
@@ -109,13 +116,13 @@ class Publisher extends \Modular\Controller {
 		// if set during loop then we will be redirecting back to this page, otherwise we are done
 		$response = false;
 
-		\Versioned::set_reading_mode('Stage.Stage');
+		Versioned::set_reading_mode('Stage.Stage');
 
-		/** @var \DataList $pages */
-		$pages = \DataObject::get("SiteTree", "", "ID asc", "", "$start,$limit");
+		/** @var DataList $pages */
+		$pages = DataObject::get("SiteTree", "", "ID asc", "", "$start,$limit");
 		$count = 0;
 
-		/** @var \Page|\Versioned $page */
+		/** @var \Page|Versioned $page */
 		foreach ($pages as $page) {
 			try {
 				if ($page->canPublish()) {
@@ -146,14 +153,14 @@ class Publisher extends \Modular\Controller {
 				$url = $request->getURL(false);
 
 				// set the publishall indicator to be picked up after redirect.
-				\Session::set('PublishAllLogFileName', $logFileName);
+				Session::set('PublishAllLogFileName', $logFileName);
 
 				$response = $this->redirect("$url?start=$start&limit=$limit&stop=$stop");
 			}
 		}
 		if (!$response) {
 			// we're done, make sure this is cleared
-			\Session::clear('PublishAllLogFileName');
+			Session::clear('PublishAllLogFileName');
 
 			$this->debug_info("Ending publish all");
 

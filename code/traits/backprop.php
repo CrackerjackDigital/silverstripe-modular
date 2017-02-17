@@ -1,9 +1,10 @@
 <?php
 namespace Modular;
 
-use DataObject;
 use Modular\Exceptions\Exception;
-use Versioned;
+use SilverStripe\Core\Config\Config_ForClass;
+use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\Versioning\Versioned;
 
 /**
  * Add this trait to models or model extensions to notify any 'backward' related models (via has_one back to has_many or via belongs_many_many)
@@ -24,7 +25,7 @@ trait backprop {
 	abstract public function __invoke();
 
 	/**
-	 * @return \Config_ForClass
+	 * @return Config_ForClass
 	 */
 	abstract public function config();
 

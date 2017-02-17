@@ -1,12 +1,13 @@
 <?php
 namespace Modular\Behaviours;
 
-use ClassInfo;
-use DropdownField;
-use FormField;
 use Modular\Fields\EmbedCode;
 use Modular\Fields\ExternalLink;
 use Modular\Fields\Media;
+use SilverStripe\Assets\File;
+use SilverStripe\Core\ClassInfo;
+use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\FormField;
 
 /**
  * Link type field and logic for a model which has an EmbedCode, Media and ExternalLink fields.
@@ -52,7 +53,7 @@ class MediaLinkType extends \Modular\Field {
 	/**
 	 * Show/hide External and EnbedCode fields depending on selected MediaLinkType.
 	 *
-	 * @param \FormField $field
+	 * @param FormField $field
 	 * @param array      $allFieldConstraints
 	 */
 	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
@@ -114,7 +115,7 @@ class MediaLinkType extends \Modular\Field {
 	}
 
 	/**
-	 * @return \File
+	 * @return File
 	 */
 	protected function getMediaObject() {
 		return $this()->{Media::single_field_name()}();

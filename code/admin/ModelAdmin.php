@@ -4,6 +4,6 @@ namespace Modular\Admin;
 
 use Modular\Traits\enabler;
 
-class ModelAdmin extends \ModelAdmin {
+class ModelAdmin extends \SilverStripe\Admin\ModelAdmin {
 	use enabler;
 }

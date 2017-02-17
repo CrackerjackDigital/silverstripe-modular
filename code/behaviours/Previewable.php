@@ -1,11 +1,12 @@
 <?php
 namespace Modular\Behaviours;
 
-use CMSPreviewable;
-use Controller;
-use LiteralField;
 use Modular\ModelExtension;
-use SilverStripeNavigator;
+use SilverStripe\Admin\CMSPreviewable;
+use SilverStripe\Control\Controller;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\LiteralField;
+use SilverStripe\CMS\Controllers\SilverStripeNavigator;
 
 /**
  * Adds preview pane to CMS for extended Models.
@@ -17,7 +18,7 @@ use SilverStripeNavigator;
 class Previewable extends ModelExtension {
 
 	/**
-	 * @param \Form $form
+	 * @param Form $form
 	 */
 	public function updateItemEditForm(&$form) {
 		$fields = $form->Fields();

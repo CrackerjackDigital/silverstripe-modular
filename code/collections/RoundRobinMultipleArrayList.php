@@ -1,10 +1,10 @@
 <?php
 namespace Modular\Collections;
 
-use ArrayList;
 use MultipleIterator;
-use DataList;
-use SS_List;
+use SilverStripe\ORM\ArrayList;
+use SilverStripe\ORM\DataList;
+use SilverStripe\ORM\SS_List;
 
 class RoundRobinMultipleArrayList extends ArrayList {
 	/**
