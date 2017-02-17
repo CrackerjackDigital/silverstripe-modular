@@ -26,8 +26,7 @@
 		"silverstripe-australia/gridfieldextensions": "1.x",
 		"unclecheese/betterbuttons": "1.3.x",
 		"silverstripe/tagfield": "*",
-		"crackerjackdigital/silverstripe-modular-types": "*",
-		"crackerjackdigital/silverstripe-modular-fields": "*"
+		"crackerjackdigital/silverstripe-modular-types": "*"
 	},
 	"repositories": [
 		{
