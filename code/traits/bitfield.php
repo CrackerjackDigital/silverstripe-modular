@@ -1,8 +1,8 @@
 <?php
-namespace Modular;
+namespace Modular\Traits;
 
 trait bitfield {
-	public static function bitfieldTest($bitFieldToCheck, $bitToTestIsSet) {
-		return $bitToTestIsSet === ($bitFieldToCheck & $bitToTestIsSet);
+	public static function testbits($bitFieldToCheck, $bitsToTestAreSet) {
+		return $bitsToTestAreSet === ( $bitFieldToCheck & $bitsToTestAreSet);
 	}
 }

@@ -17,9 +17,9 @@ class HasTags extends HasManyMany {
 
 	private static $can_create_tags = true;
 
-	private static $sortable = false;
+	private static $allow_sorting = false;
 
-	public function cmsFields() {
+	public function cmsFields($mode) {
 		return [
 			(new \TagField(
 				static::RelationshipName,
@@ -32,6 +32,7 @@ class HasTags extends HasManyMany {
 			),
 		];
 	}
+
 
 	protected function availableTags() {
 		return Tag::get()->sort('Title');

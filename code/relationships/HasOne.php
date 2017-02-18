@@ -1,20 +1,24 @@
 <?php
 namespace Modular\Relationships;
 
-class HasOne extends \Modular\Field {
+use Modular\Field;
+
+class HasOne extends Field {
 	const RelationshipName    = '';
 	const RelatedClassName    = '';
 	const RelatedKeyField     = 'ID';
 	const RelatedDisplayField = 'Title';
+	const Arity = 1;
 
 	private static $tab_name = 'Root.Main';
-
+	
 	/**
 	 * Add a drop-down with related classes from RelatedClassName using RelatedKeyField and RelatedDisplayField.
 	 *
+	 * @param $mode
 	 * @return array
 	 */
-	public function cmsFields() {
+	public function cmsFields($mode) {
 		return [
 			new \DropdownField(
 				static::related_field_name(),

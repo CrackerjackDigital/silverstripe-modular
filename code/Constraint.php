@@ -363,7 +363,7 @@ class Constraint extends Object {
 				\Session::set($key, $value);
 			}
 		} else {
-			// TODO if not in the cache then should we do anything?
+
 		}
 		return $value;
 	}

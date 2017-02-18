@@ -1,9 +1,12 @@
 <?php
 namespace Modular;
 
-use DataObject;
-use Quaff\Exceptions\Mapping;
-use Quaff\Mappers\AssociativeArray;
+use Modular\Traits\bitfield;
+use Modular\Traits\cache;
+use Modular\Traits\config;
+use Modular\Traits\debugging;
+use Modular\Traits\lang;
+use Modular\Traits\reflection;
 
 require_once 'traits/bitfield.php';
 require_once 'traits/cache.php';
@@ -35,6 +38,9 @@ class Object extends \Object {
 	 */
 	public function __invoke() {
 		return $this;
+	}
+	public static function class_name() {
+		return get_called_class();
 	}
 
 }

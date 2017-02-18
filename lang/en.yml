@@ -4,6 +4,16 @@ en:
     SINGULARNAME: 'Carousel Slide'
     PLURALNAME: 'Carousel Slides'
 # relationships
+  Modular\Relationships\HasBlocks:
+    Blocks:
+      Label: 'Content Blocks'
+  Modular\Relationships\VersionedHasBlocks:
+    Blocks:
+      Label: 'Content Blocks'
+  Modular\Relationships\HasGridListFilters:
+    GridListFilters:
+      Label: 'Associated filters'
+      Guide: 'Add filters here to keep the item shown when corresponding in-page filters is applied'
   Modular\Relationships\HasImages:
     Images:
       Label: 'Images'

@@ -1,5 +1,7 @@
 <?php
-namespace Modular;
+namespace Modular\Traits;
+use Modular\Model;
+
 /**
  * owned, has an owner and invoking this object will invoke the call on the owner, e.g. $this()->doSomething() will call $this->owner()->doSomething()
  *
@@ -12,7 +14,7 @@ trait owned {
 	}
 
 	/**
-	 * @return Model|\DataObject
+	 * @return Model|\DataObject|\Controller
 	 */
 	public function owner() {
 		if ($this instanceof \Extension) {

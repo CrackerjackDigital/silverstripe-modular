@@ -3,6 +3,8 @@ namespace Modular;
 
 use Director;
 use Modular\Exceptions\Exception;
+use Modular\Traits\config;
+use Modular\Traits\requirements;
 
 abstract class Module extends Object {
 	use requirements;
@@ -97,6 +99,7 @@ abstract class Module extends Object {
 	private static $decode_depth = 512;
 
 	/**
+	 * TODO refactor this sprawl
 	 * Check the path is inside the base folder or relative to base folder when safe paths are appended and the real path is resolved.
 	 *
 	 * e.g. if  config.allow_paths = [ '../logs' ]
@@ -232,12 +235,13 @@ abstract class Module extends Object {
 		}
 		return array_unique($paths);
 	}
-
+	
 	/**
 	 * Return a directory to put logs in.
 	 *
 	 * @param null $className
 	 * @return string
+	 * @throws \Modular\Exceptions\Exception
 	 */
 	public static function log_path($className = null) {
 		$path = static::config($className ?: get_called_class())->get('log_path');
@@ -533,7 +537,7 @@ abstract class Module extends Object {
 	 * @return string
 	 */
 	public static function module_path($append = '') {
-		if (get_called_class() == 'ModularModule') {
+		if (get_called_class() == __CLASS__) {
 			user_error('This method should be overridden in implementation');
 		}
 		// TODO fix so we can find directory of called class not this class's directory

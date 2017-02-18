@@ -2,20 +2,40 @@
 namespace Modular;
 
 use DataExtension;
+use Modular\Traits\config;
+use Modular\Traits\debugging;
+use Modular\Traits\enabler;
+use Modular\Traits\owned;
+use Modular\Traits\related;
 
 class ModelExtension extends DataExtension {
 	use config;
 	use enabler;
 	use owned;
 	use debugging;
-
+	use related;
+	
+	/**
+	 * Return the extended model.
+	 * @return \DataObject|\Modular\Model
+	 */
+	public function model() {
+		return $this();
+	}
+	
+	/**
+	 * Workaround for PHP which doesn't do static::class
+	 * @return string
+	 */
 	public static function class_name() {
 		return get_called_class();
 	}
+	
 	/**
 	 * Writes the extended model and returns it if write returns truthish, otherwise returns null.
 	 *
-	 * @return Model|null
+	 * @return \Modular\Model|null
+	 * @throws \ValidationException
 	 */
 	public function writeAndReturn() {
 		if ($this()->write()) {

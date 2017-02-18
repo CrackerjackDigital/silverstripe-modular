@@ -2,7 +2,7 @@
 
 namespace Modular\Admin;
 
-use Modular\enabler;
+use Modular\Traits\enabler;
 
 class ModelAdmin extends \ModelAdmin {
 	use enabler;

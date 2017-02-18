@@ -1,7 +1,7 @@
 <?php
 namespace Modular\Relationships;
 
-use Modular\cache;
+use Modular\Traits\cache;
 use Modular\GridField\GridField;
 use Modular\Helpers\Strings;
 
@@ -11,6 +11,7 @@ class HasManyMany extends RelatedModels {
 	const RelationshipPrefix  = '';
 	const ShowAsTagsField     = 'tags';
 	const GridFieldConfigName = 'Modular\GridField\HasManyManyGridFieldConfig';
+	const Arity = 3;
 
 	/**
 	 * Add a csv list of implementors of this class as token 'implementors'

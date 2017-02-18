@@ -1,5 +1,5 @@
 <?php
-namespace Modular;
+namespace Modular\Traits;
 
 trait tokens {
 	public static function detokenise($tokenised, array $tokens, $delimeters = [ '{', '}' ]) {

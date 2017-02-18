@@ -3,7 +3,7 @@ namespace Modular\Relationships;
 
 use FormField;
 use Modular\Interfaces\Imagery;
-use Modular\upload;
+use Modular\Traits\upload;
 
 class HasImages extends HasManyMany implements Imagery {
 	use upload;
@@ -13,13 +13,15 @@ class HasImages extends HasManyMany implements Imagery {
 	const DefaultUploadFolderName = 'images';
 
 	private static $allowed_image_files = 'image';
-
+	
 	/**
 	 * Adds a single Image single-selection UploadField
 	 *
+	 * @param $mode
 	 * @return array
+	 * @throws \Exception
 	 */
-	public function cmsFields() {
+	public function cmsFields($mode) {
 		return [
 			$this->makeUploadField(static::RelationshipName),
 		];

@@ -1,9 +1,9 @@
 <?php
 
-namespace Modular;
+namespace Modular\Traits;
 
-use UploadField;
 use Modular\Exceptions\Exception;
+use UploadField;
 
 /**
  * Trait adds functionality for dealing with upload fields
@@ -14,6 +14,15 @@ trait upload {
 	abstract public function __invoke();
 
 	/**
+	 * Check if allowing existing files to be attached is enabled in config via config.allow_attach_existing.
+	 *
+	 * @return bool true if can attach an existing file from storage, false otherwise.
+	 */
+	public function allowAttachExisting() {
+		return $this->config()->get('allow_attach_existing');
+	}
+
+	/**
 	 * Return an upload field wrapped in a DisplayLogicWrapper as they all should be when using displaylogic.
 	 *
 	 * @param string $relationshipName optional override the static field_name
@@ -22,7 +31,7 @@ trait upload {
 	 */
 	public function makeUploadField($relationshipName) {
 		$wrapper = (new \DisplayLogicWrapper(
-			$field = new \UploadField(
+			$field = new \SortableUploadField(
 				static::field_name()
 			)
 		))->setID($relationshipName)->setName($relationshipName);
@@ -31,10 +40,10 @@ trait upload {
 
 	/**
 	 * @param UploadField|\DisplayLogicWrapper $field
-	 * @param string                           $configVarName - allow you to switch config to check e.g. 'allowed_video_files'
+	 * @param string                           $allowedFilesConfigVar - allow you to switch config to check e.g. 'allowed_video_files'
 	 * @throws Exception
 	 */
-	protected function configureUploadField($field, $configVarName = 'allowed_files') {
+	protected function configureUploadField($field, $allowedFilesConfigVar = 'allowed_files') {
 		$fieldName = $field->getName();
 		if ($field instanceof \DisplayLogicWrapper) {
 			// drill down into wrapper to get actual UploadField
@@ -44,15 +53,15 @@ trait upload {
 		list($minlength, $maxlength, $pattern) = $this->fieldConstraints($fieldName, [0, 0, '']);
 
 		$field->setAllowedMaxFileNumber($maxlength ?: null);
+
 		// don't allow existing media to be re-attached it's a has_one so would be messy
-		$field->setCanAttachExisting(false);
+		$field->setCanAttachExisting($this->allowAttachExisting());
 		$field->setFolderName($this->uploadFolderName());
 
-		// could be string for category or an array of extensions
-		// try extension first, then model
+		// try extension first, then model for config.allowed_files (or whatever configVarName is passed in).
 
-		$extensions = $allowedFiles = $this->config()->get($configVarName)
-			?: $this()->config()->get($configVarName);
+		$extensions = $allowedFiles = $this->config()->get($allowedFilesConfigVar)
+			?: $this()->config()->get($allowedFilesConfigVar);
 
 		$categories = [];
 		if (!is_array($allowedFiles)) {
@@ -64,7 +73,7 @@ trait upload {
 			foreach ($categories as $category) {
 
 				if (isset($allCategoryExtensions[ $category ])) {
-					$extensions = $allCategoryExtensions[ $category];
+					$extensions = $allCategoryExtensions[ $category ];
 				} else {
 					$extensions = [$category];
 				}
@@ -81,7 +90,7 @@ trait upload {
 			// not an array so a category e.g. 'video'
 			$field->setAllowedFileCategories($allowedFiles);
 		} else {
-			throw new Exception("No $configVarName configuration set");
+			throw new Exception("No $allowedFilesConfigVar configuration set");
 		}
 
 		$field->setRightTitle($this->fieldDecoration(
@@ -104,7 +113,7 @@ trait upload {
 				?: $this()->config()->get('base_upload_folder'),
 			$this->config()->get('upload_folder')
 				?: ($this()->config()->get('upload_folder')
-					?: static::DefaultUploadFolderName)
+				?: static::DefaultUploadFolderName)
 		);
 	}
 
