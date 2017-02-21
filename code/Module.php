@@ -39,6 +39,8 @@ abstract class Module extends Object {
 	    'Modular\Debugger'
 	];
 
+	private static $log_path = '';
+
 	// should be set in application config or other providers path or self.DefaultSafePath with be used
 	private static $safe_paths = [];
 
@@ -235,9 +237,27 @@ abstract class Module extends Object {
 		}
 		return array_unique($paths);
 	}
-	
+
 	/**
-	 * Return a directory to put logs in.
+	 * Check if a path begins with a safe path.
+	 * @param string     $path
+	 * @param bool $failIfMissing return false if the path provided doesn't exist already (like realpath does)
+	 * @return bool
+	 */
+	public static function in_safe_path($path, $failIfMissing = false) {
+		if (!$real = realpath($path) && $failIfMissing) {
+			return false;
+		}
+		foreach (static::safe_paths() as $safe) {
+			if (substr($path, 0, strlen($safe)) == $safe) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Return a directory to put logs in from supplied classes config or module's.
 	 *
 	 * @param null $className
 	 * @return string
@@ -249,7 +269,7 @@ abstract class Module extends Object {
 	}
 
 	/**
-	 * Return a filename without a path to use for logging.
+	 * Return a filename without a path to use for logging from the supplied class or module's.
 	 */
 	public static function log_file($className = null) {
 		if (!$fileName = static::config($className ?: get_called_class())->get('log_file')) {
@@ -260,6 +280,15 @@ abstract class Module extends Object {
 			}
 		}
 		return $fileName;
+	}
+
+	/**
+	 * Return classes configured log_email or module's.
+	 * @param null $className
+	 * @return string
+	 */
+	public static function log_email($className = null) {
+		return static::config($className ?: get_called_class())->get('log_email');
 	}
 
 

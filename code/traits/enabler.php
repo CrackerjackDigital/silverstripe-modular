@@ -12,9 +12,9 @@ trait enabler {
 	 * If added to a field then only return fields if enabled.
 	 * @return array
 	 */
-	public function cmsFields() {
+	public function cmsFields($mode = null) {
 		if (static::enabled()) {
-			return parent::cmsFields();
+			return parent::cmsFields($mode);
 		}
 		return [];
 	}

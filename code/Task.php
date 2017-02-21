@@ -2,6 +2,8 @@
 namespace Modular;
 
 use Director;
+use Modular\Traits\debugging;
+use Modular\Traits\enabler;
 
 abstract class Task extends \BuildTask {
 	use enabler;
@@ -23,26 +25,24 @@ abstract class Task extends \BuildTask {
 	}
 
 	final public function run($request) {
+		$this->debugger()->toScreen(Debugger::DebugAll);
+
 		$taskName = get_class($this);
 
 		if ($this->canRun()) {
 			if (!Director::is_cli()) {
 				ob_start('nl2br');
 			}
-			$this->println("Starting task $taskName");
+			$this->debug_info("Starting task $taskName");
 
 			$this->execute($request);
 
-			$this->println("End of task $taskName");
+			$this->debug_info("End of task $taskName");
 
 			ob_end_flush();
 		} else {
-			$this->println("Task $taskName not allowed to run");
+			$this->debug_info("Task $taskName not allowed to run");
 		}
 	}
 
-	public static function println($line) {
-		$prefix = Director::is_cli() ? "\t" : "&nbsp;-&nbsp;";
-		echo date('Y-m-d_h:i:s') . "$prefix$line" . PHP_EOL;
-	}
 }

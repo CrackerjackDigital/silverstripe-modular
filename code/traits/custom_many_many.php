@@ -8,7 +8,6 @@ namespace Modular\Traits;
  * @package Modular\Traits
  */
 trait custom_many_many {
-
 	/**
 	 * Inject call to getCustomManyManyComponents so we get a VersionedManyManyList.
 	 *
@@ -36,7 +35,7 @@ trait custom_many_many {
 	public function getCustomManyManyComponents($componentName, $filter = null, $sort = null, $join = null, $limit = null) {
 		$oldClassName = '';
 		if ($listClassName = static::custom_many_many_list_class_name()) {
-			if ($listClassName != \ManyManyList::class) {
+			if ($listClassName != 'ManyManyList') {
 				/** @var string|\Object $oldClassName */
 				$oldClassName = \ManyManyList::getCustomClass('ManyManyList');
 				$oldClassName::useCustomClass('ManyManyList', $listClassName);
@@ -45,7 +44,7 @@ trait custom_many_many {
 
 		$list = parent::getManyManyComponents($componentName, $filter, $sort, $join, $limit);
 
-		if ($listClassName != \ManyManyList::class && $oldClassName) {
+		if ($listClassName != 'ManyManyList' && $oldClassName) {
 			$oldClassName::useCustomClass('ManyManyList', $oldClassName);
 		}
 		return $list;
@@ -57,5 +56,4 @@ trait custom_many_many {
 	private static function custom_many_many_list_class_name() {
 		return \Config::inst()->get(get_called_class(), 'custom_many_many_list_class_name');
 	}
-
 }
