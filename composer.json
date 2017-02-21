@@ -25,7 +25,8 @@
 		"silverstripe/display-logic": "1.4.x",
 		"silverstripe-australia/gridfieldextensions": "1.x",
 		"unclecheese/betterbuttons": "1.3.x",
-		"silverstripe/tagfield": "*"
+		"silverstripe/tagfield": "*",
+		"crackerjackdigital/silverstripe-modular-types": "*"
 	},
 	"repositories": [
 		{
