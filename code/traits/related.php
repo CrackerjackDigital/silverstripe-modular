@@ -1,5 +1,5 @@
 <?php
-namespace Modular;
+namespace Modular\Traits;
 
 use Modular\Helpers\Reflection as ArityInfo;
 

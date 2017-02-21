@@ -37,7 +37,7 @@ class LinkAttributeField extends \Modular\Field {
 		parent::updateCMSFields($fields);
 	}
 
-	public function cmsFields($mode) {
+	public function cmsFields($mode = null) {
 		$types = [
 			self::ExternalLinkValue => $this->fieldDecoration('LinkType', 'ExternalLink', 'External Link'),
 			self::InternalLinkValue => $this->fieldDecoration('LinkType', 'InternalLink', 'Internal Link'),

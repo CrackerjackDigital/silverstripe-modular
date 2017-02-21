@@ -1,0 +1,21 @@
+---
+Name: modular-models-config
+---
+Modular\Models\Slide:
+  extensions:
+    - Modular\Fields\Content
+    - Modular\Behaviours\InternalOrExternalLink
+    - Modular\Fields\InternalLink
+    - Modular\Fields\ExternalLink
+    - Modular\Fields\LinkTitle
+    - Modular\Fields\Image
+Modular\Models\Tag:
+  extensions:
+    - Modular\Fields\ModelTag
+Modular\Models\InternalOrExternalLink:
+  extensions:
+    - Modular\Behaviours\InternalOrExternalLink
+    - Modular\Fields\InternalLink
+    - Modular\Fields\ExternalLink
+    - Modular\Fields\ModelTag
+    - Modular\Fields\Thumbnail

@@ -11,14 +11,14 @@ class HasOne extends Field {
 	const Arity = 1;
 
 	private static $tab_name = 'Root.Main';
-	
+
 	/**
 	 * Add a drop-down with related classes from RelatedClassName using RelatedKeyField and RelatedDisplayField.
 	 *
 	 * @param $mode
 	 * @return array
 	 */
-	public function cmsFields($mode) {
+	public function cmsFields($mode = null) {
 		return [
 			new \DropdownField(
 				static::related_field_name(),

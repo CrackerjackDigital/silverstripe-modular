@@ -42,7 +42,7 @@ class InternalOrExternalLink extends \Modular\Field {
 		);
 	}
 
-	public function cmsFields($mode) {
+	public function cmsFields($mode = null) {
 		return [
 			new DropdownField(self::LinkTypeFieldName, 'Link type', $this->linkOptions())
 		];

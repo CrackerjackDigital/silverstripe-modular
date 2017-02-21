@@ -15,7 +15,7 @@ class HasFiles extends HasManyMany {
 
 	private static $allowed_files = 'download';
 
-	public function cmsFields($mode) {
+	public function cmsFields($mode = null) {
 		return [
 			new \UploadField(
 				static::RelationshipName

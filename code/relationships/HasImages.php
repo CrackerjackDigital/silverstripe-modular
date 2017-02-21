@@ -13,7 +13,7 @@ class HasImages extends HasManyMany implements Imagery {
 	const DefaultUploadFolderName = 'images';
 
 	private static $allowed_image_files = 'image';
-	
+
 	/**
 	 * Adds a single Image single-selection UploadField
 	 *
@@ -21,7 +21,7 @@ class HasImages extends HasManyMany implements Imagery {
 	 * @return array
 	 * @throws \Exception
 	 */
-	public function cmsFields($mode) {
+	public function cmsFields($mode = null) {
 		return [
 			$this->makeUploadField(static::RelationshipName),
 		];

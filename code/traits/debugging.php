@@ -4,6 +4,7 @@ namespace Modular\Traits;
 use Modular\Debugger;
 use Modular\Interfaces\Exception as ExceptionInterface;
 use Modular\Exceptions\Exception;
+use Modular\ScopedReference;
 
 trait debugging {
 	/**
@@ -102,4 +103,20 @@ trait debugging {
 	public function debug_fail(\Exception $exception) {
 		$this->debugger()->fail($exception->getMessage(), ($exception->getFile() . ':' . $exception->getLine()), $exception);
 	}
+
+	/**
+	 * Sets the debugger current source to provided source or to the function that called this function, then resets when the function exits to what it was
+	 * before.
+	 *
+	 * @param string $source to use as the debug 'source', if not supplied then the caller function name will be used (using debug_backtrace so may be slow)
+	 * @return ScopedReference which will set the source back to original source when it is destroyed
+	 */
+	public static function debug_source($source = null) {
+		$debugger = static::debugger();
+		$oldSource = $debugger->source();
+		$debugger->source($source ?: debug_backtrace(false, 1)[1]['function']);
+
+		return new ScopedReference($debugger, function() use ($debugger, $oldSource) { $debugger->source($oldSource); } );
+	}
+
 }

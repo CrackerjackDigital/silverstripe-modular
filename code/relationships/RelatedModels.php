@@ -34,14 +34,14 @@ class RelatedModels extends \Modular\Field {
 	private static $can_create_tags = false;
 
 	private static $multiple_select = true;
-	
+
 	/**
 	 * Customise if shows as a GridField or a TagField depending on config.show_as
 	 *
 	 * @param $mode
 	 * @return array
 	 */
-	public function cmsFields($mode) {
+	public function cmsFields($mode = null) {
 		if ($this->config()->get('show_as') == self::ShowAsTagsField) {
 			$fields = $this->tagFields();
 		} else {

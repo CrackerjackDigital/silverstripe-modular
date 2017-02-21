@@ -2,8 +2,7 @@
 namespace Modular\Fields;
 
 use DataObject;
-use Modular\GridField\GridFieldConfig;
-use Modular\GridField\GridFieldOrderableRows;
+use Modular\Field;
 use Modular\Model;
 use Versioned;
 
@@ -20,7 +19,7 @@ abstract class Relationship extends Field {
 	const RelatedClassName    = '';
 	const GridFieldConfigName = 'Modular\GridField\GridFieldConfig';
 
-	const GridFieldOrderableRowsFieldName = GridFieldOrderableRows::SortFieldName;
+	const GridFieldOrderableRowsFieldName = 'Sort';
 
 	// should models related by this relationship be published when the extended model is pubished
 	private static $publish_related = true;
@@ -54,7 +53,7 @@ abstract class Relationship extends Field {
 	 *
 	 * @return array
 	 */
-	public function cmsFields() {
+	public function cmsFields($mode = null) {
 		return $this->gridFields();
 	}
 

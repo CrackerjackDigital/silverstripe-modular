@@ -39,7 +39,7 @@ class MediaLinkType extends \Modular\Field {
 		);
 	}
 
-	public function cmsFields($mode) {
+	public function cmsFields($mode = null) {
 		return [
 			new DropdownField(self::MediaLinkTypeFieldName, 'Link type', [
 				EmbedCode::EmbedCodeOption       => $this->fieldDecoration(EmbedCode::EmbedCodeOption, 'Label', 'Embed Code'),

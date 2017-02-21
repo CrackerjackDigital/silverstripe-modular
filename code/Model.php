@@ -1,5 +1,6 @@
 <?php
 namespace Modular;
+
 use Modular\Traits\debugging;
 use Modular\Traits\lang;
 use Modular\Traits\reflection;
@@ -26,11 +27,11 @@ class Model extends \DataObject implements Type {
 	public function __invoke() {
 		return $this;
 	}
-	
+
 	public function model() {
 		return $this();
 	}
-	
+
 	/**
 	 * Returns the model's class with '_' instead of namespace seperator.
 	 * @return string

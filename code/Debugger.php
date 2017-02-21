@@ -2,12 +2,14 @@
 namespace Modular;
 
 use Modular\Exceptions\Exception;
-use Modular\Interfaces\Logger;
-use SS_Log;
+use Modular\Interfaces\Debugger as DebuggerInterface;
+use Modular\Interfaces\Logger as LoggerInterface;
+use Modular\Traits\bitfield;
+use Modular\Traits\enabler;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
 
-class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
+class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	use bitfield;
 	use enabler;
 
@@ -131,7 +133,7 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 	public function env($env = SS_ENVIRONMENT_TYPE) {
 		return $this->config()->get('environment_levels')[ $env ];
 	}
-	
+
 	/**
 	 * Set levels and source and if flags indicate debugging to file screen or email initialise those aspects of debugging using defaults from config.
 	 *
@@ -158,7 +160,7 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 			$this->toScreen($level);
 		}
 		if ($this->testbits($level, self::DebugEmail)) {
-			if ($email = $this->config()->get('log_email')) {
+			if ($email = static::log_email()) {
 				static::toEmail($email, $level);
 			}
 		}
@@ -323,11 +325,11 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 				$filePathName .= ".log";
 			}
 		} else {
-			$filePathName = $this->config()->get('log_file') ?: Application::log_file();
+			$filePathName = static::log_path();
 		}
 
 		if (trim(dirname($filePathName), '.') == '') {
-			$filePathName = ($this->config()->get('log_path') ?: Application::log_path()) . '/' . $filePathName;
+			$filePathName = (static::log_path()) . '/' . $filePathName;
 		}
 		if ($path = Application::make_safe_path(dirname($filePathName))) {
 			$this->logFilePathName = Controller::join_links(
@@ -336,7 +338,7 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 			);
 		};
 		if (!$this->logFilePathName) {
-			$this->logFilePathName = Application::log_path() . '/' . Application::log_file();
+			$this->logFilePathName = static::log_path() . '/' . static::log_file();
 		}
 
 		// if truncate is specified then do so on the log file
@@ -397,15 +399,15 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 	 * @throws \Modular\Exceptions\Application
 	 */
 	protected function makeLogFileName() {
-		if ($filePathName = static::config()->get('log_file')) {
+		if ($filePathName = static::log_file()) {
 			// if no path then dirname returns '.' we don't want that but empty path instead
 			$path = trim(dirname($filePathName), '.');
 			if (!$path) {
-				$path = static::config()->get('log_path');
+				$path = static::log_path();
 			}
 			$fileName = basename($filePathName, '.log');
 		} else {
-			$path = static::config()->get('log_path');
+			$path = static::log_path();
 			$date = date('Ymd_his');
 
 			$prefix = $this->source ?: "$date-";
@@ -414,5 +416,17 @@ class Debugger extends Object implements Logger, \Modular\Interfaces\Debugger  {
 		}
 		$path = Application::make_safe_path($path, false);
 		return "$path/$fileName.log";
+	}
+
+	public static function log_file() {
+		return static::config()->get('log_file') ?: Application::log_file();
+	}
+
+	public static function log_path() {
+		return static::config()->get('log_path') ?: Application::log_path();
+	}
+
+	public static function log_email() {
+		return static::config()->get('log_email') ?: Application::log_email();
 	}
 }
