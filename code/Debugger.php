@@ -331,7 +331,7 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 		if (trim(dirname($filePathName), '.') == '') {
 			$filePathName = (static::log_path()) . '/' . $filePathName;
 		}
-		if ($path = Application::make_safe_path(dirname($filePathName))) {
+		if ($path = \Application::make_safe_path(dirname($filePathName))) {
 			$this->logFilePathName = Controller::join_links(
 				$path,
 				basename($filePathName)
@@ -357,7 +357,7 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 		$this->info("Start of logging at " . date('Y-m-d h:i:s'));
 
 		// log an warning if we got an invalid path above so we know this and can fix
-		if ($filePathName && !Application::make_safe_path(dirname($originalFilePathName))) {
+		if ($filePathName && !\Application::make_safe_path(dirname($originalFilePathName))) {
 			$this->warn("Invalid file path outside of web root '$filePathName' using '$this->logFilePathName' instead");
 		}
 		if ($filePathName && !is_dir(dirname($originalFilePathName))) {
@@ -414,19 +414,19 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 
 			$fileName = basename(tempnam($path, "silverstripe-$prefix"));
 		}
-		$path = Application::make_safe_path($path, false);
+		$path = \Application::make_safe_path($path, false);
 		return "$path/$fileName.log";
 	}
 
 	public static function log_file() {
-		return static::config()->get('log_file') ?: Application::log_file();
+		return static::config()->get('log_file') ?: \Application::log_file();
 	}
 
 	public static function log_path() {
-		return static::config()->get('log_path') ?: Application::log_path();
+		return static::config()->get('log_path') ?: \Application::log_path();
 	}
 
 	public static function log_email() {
-		return static::config()->get('log_email') ?: Application::log_email();
+		return static::config()->get('log_email') ?: \Application::log_email();
 	}
 }

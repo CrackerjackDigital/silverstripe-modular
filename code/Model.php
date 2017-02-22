@@ -5,7 +5,6 @@ use Modular\Traits\debugging;
 use Modular\Traits\lang;
 use Modular\Traits\reflection;
 use Modular\Traits\related;
-use Modular\Types\Type;
 
 /**
  * Model
@@ -13,7 +12,7 @@ use Modular\Types\Type;
  * @package Modular
  * @property int ID
  */
-class Model extends \DataObject implements Type {
+class Model extends \DataObject {
 	use lang;
 	use related;
 	use reflection;

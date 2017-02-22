@@ -2,7 +2,11 @@
 namespace Modular\Traits;
 
 trait timestamp {
-	public static function timestamp() {
+	/**
+	 * @param null $init not used
+	 * @return int
+	 */
+	public static function timestamp($init = null) {
 		return time();
 	}
 }
