@@ -24,7 +24,7 @@ interface Debugger
 	const DebugTruncate = 256;     // truncate log files
 	const DebugShared   = 4096;    // use the shared Application Log (not implemented), truncate is not obeyed in this case
 
-	const DebugEnvDev  = 103;      // screen | file | trace
+	const DebugEnvDev  = 39;       // file | trace
 	const DebugEnvTest = 165;      // file | email | notice
 	const DebugEnvLive = 164;      // file | email | warn
 

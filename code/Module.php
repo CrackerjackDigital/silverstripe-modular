@@ -219,6 +219,8 @@ abstract class Module extends Object {
 		$paths = [];
 		$injector = \Injector::inst();
 
+		return static::config()->get('safe_paths');
+
 		if ($providers = static::config()->get('safe_path_providers')) {
 			foreach ($providers as $serviceOrClassName) {
 				if ($injector->hasService($serviceOrClassName)) {
@@ -239,7 +241,7 @@ abstract class Module extends Object {
 			// no providers defined, just use those defined on the application
 			$paths = array_merge(
 				$paths,
-				\Injector::inst()->get('Application')->safe_paths() ?: []
+				\Injector::inst()->get('Application')->config()->get('safe_paths') ?: []
 			);
 		}
 
