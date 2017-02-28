@@ -17,10 +17,6 @@ trait owned {
 	 * @return Model|\DataObject|\Controller
 	 */
 	public function owner() {
-		if ($this instanceof \Extension) {
-			return $this->owner;
-		} else {
-			return $this;
-		}
+		return $this->owner;
 	}
 }
