@@ -37,18 +37,32 @@ trait requirements {
 	 * @return $this
 	 */
 	public function requirements($beforeOrAfterInit = Module::BothInit, $modulePath = '') {
-		if (is_a(get_parent_class(), 'Modular\Module', true)) {
-			// if parent is also a Module then do it's requirements first
-			$parent = parent::requirements($beforeOrAfterInit);
+		$ancestry = array_slice(\ClassInfo::ancestry(get_class()), 0, -1);
+		foreach ($ancestry as $className) {
+			if (is_a($className, 'Modular\Module', true)) {
+				$this->addRequirements($beforeOrAfterInit, $className);
+			}
 		}
+		// finish off ourselves with possibly custom module path
+		$this->addRequirements($beforeOrAfterInit, get_class($this), $modulePath);
+	}
+
+	/**
+	 * @param string $beforeOrAfterInit
+	 * @param string $className
+	 * @param string $modulePath
+	 * @return $this
+	 */
+	protected function addRequirements($beforeOrAfterInit, $className, $modulePath = '') {
 		// we want the config for the actual class instance we are in as we will be doing Config::UNINHERITED
 		// to read from that level first.
-		$config = self::config(get_class());
 
-		if ($requirements = array_filter($config->get('requirements', \Config::UNINHERITED) ?: [])) {
+		if ($requirements = array_filter(\Config::inst()->get($className, 'requirements', \Config::UNINHERITED) ?: [])) {
+			$config = \Config::inst()->forClass($className);
+
 			$modulePath = $modulePath
 				?: $config->get('module_path', \Config::UNINHERITED)
-				?: \SSViewer::get_theme_folder();
+					?: \SSViewer::get_theme_folder();
 
 			if (isset($requirements[ $beforeOrAfterInit ])) {
 				// exclude any requirements which have been set to 'false' in config
@@ -71,6 +85,7 @@ trait requirements {
 
 	/**
 	 * Add file to SS requirements depending on extension (.js or other atm).
+	 *
 	 * @param $requirement
 	 * @return string
 	 */

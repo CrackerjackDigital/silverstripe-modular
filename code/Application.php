@@ -1,7 +1,7 @@
 <?php
 namespace Modular;
 
-use Modular\Controllers\Model;
+use Modular\Controllers\Model as ModelController;
 use Modular\Exceptions\Application as Exception;
 use Modular\Traits\reflection;
 use Modular\Traits\requirements;
@@ -9,7 +9,6 @@ use SSViewer;
 
 class Application extends Module {
 	use reflection;
-	use requirements;
 
 	// the name of the service expected by Injector e.g. in factory method
 	const ServiceName = 'Application';
@@ -70,7 +69,7 @@ class Application extends Module {
 	protected static function register_model_controllers() {
 		$config = \Config::inst();
 
-		$controllers = Model::subclasses();
+		$controllers = ModelController::subclasses();
 		/** @var string|Model $className */
 		foreach ($controllers as $className) {
 			$route = $className::route();
