@@ -4,8 +4,7 @@ namespace Modular\Interfaces;
 use Modular\Exceptions\Debug;
 use SS_Log;
 
-interface Debugger
-{
+interface Debugger {
 	// options in numerically increasing order, IMO Zend did this the wrong way, 0 should always be 'no' or least
 	const DebugNone   = -1;
 	const DebugErr    = SS_Log::ERR;        // 3
@@ -24,7 +23,7 @@ interface Debugger
 	const DebugTruncate = 256;     // truncate log files
 	const DebugShared   = 4096;    // use the shared Application Log (not implemented), truncate is not obeyed in this case
 
-	const DebugEnvDev  = 103;      // screen | file | trace
+	const DebugEnvDev  = 39;       // file | trace
 	const DebugEnvTest = 165;      // file | email | notice
 	const DebugEnvLive = 164;      // file | email | warn
 
@@ -40,6 +39,7 @@ interface Debugger
 
 	/**
 	 * Returns provided parameters in a common format, used by all the debug methods log, info, trace etc
+	 *
 	 * @param        $message
 	 * @param        $severity
 	 * @param string $source
@@ -95,7 +95,6 @@ interface Debugger
 	 * @throws Debug
 	 */
 	public function fail($message, $source = '');
-
 
 	/**
 	 * @param int $level

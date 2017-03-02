@@ -155,7 +155,7 @@ class Application extends Module {
 				static::debug_trace("Found system admin email via extension call: '$email'");
 
 			} else {
-				static::debug_warn(
+				static::debug_trace(
 					"Site config should really have a 'SystemAdminEmail' field, using '$email' from config instead"
 				);
 			}
