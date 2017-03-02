@@ -2,6 +2,8 @@
 namespace Modular\Traits;
 
 use \Requirements as Requirement;
+use \Modular\Application;
+use \Modular\Module;
 
 trait requirements {
 
@@ -42,7 +44,7 @@ trait requirements {
 				$parent = parent::requirements($beforeOrAfterInit);
 			}
 
-			if ($requirements = array_filter($config->get('requirements', \Config::UNINHERITED))) {
+			if ($requirements = array_filter($config->get('requirements', \Config::UNINHERITED) ?: [])) {
 				$modulePath = $modulePath
 					?: $config->get('module_path', \Config::UNINHERITED)
 					?: \SSViewer::get_theme_folder();

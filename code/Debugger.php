@@ -35,7 +35,7 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	private static $log_file = '';
 
 	// path to create log file in relative to base folder
-	private static $log_path = '';
+	private static $log_path = ASSETS_PATH;
 
 	private $logger;
 
