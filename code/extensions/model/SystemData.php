@@ -24,7 +24,9 @@ class SystemData extends TypedField implements BoolType {
 
 	public function augmentSQL(SQLQuery &$query) {
 		if (static::enabled()) {
-			$query->addWhere('"' . $this()->baseTable() . '"."' . static::field_name() . '" = ' . self::NoValue);
+			if (!\Permission::check('ADMIN')) {
+				$query->addWhere( '"' . $this()->baseTable() . '"."' . static::field_name() . '" = ' . self::NoValue );
+			}
 		}
 		parent::augmentSQL($query);
 	}
