@@ -13,24 +13,6 @@ use Modular\Traits\owned;
  */
 class Content extends \Extension {
 	use owned;
-	use debugging;
-
-	const ApplicationServiceClassName = 'Application';
-	
-	public function onBeforeInit() {
-		// expect an Application object derived from ModularModule to be configured.
-		Injector::inst()->get(static::ApplicationServiceClassName)
-			->requirements($this(), Module::BeforeInit);
-	}
-	
-	/**
-	 *
-	 */
-	public function onAfterInit() {
-		// expect an Application object derived from ModularModule to be configured.
-		Injector::inst()->get(static::ApplicationServiceClassName)
-			->requirements($this(), Module::AfterInit);
-	}
 
 	public function ActionLink($action) {
 		return $this()->join_links(

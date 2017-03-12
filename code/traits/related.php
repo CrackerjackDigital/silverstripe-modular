@@ -22,7 +22,7 @@ trait related {
 	 * @param array|mixed $arities single or array of numeric arities from Reflection, or 'has_one', 'many_many' etc
 	 * @return array e.g. [ 'Members' => [ 'Member' => 2 ], 'Thumbnail' => [ 'Image', 1 ] ]
 	 */
-	public function relationships($arities = [
+	public function definedRelationships($arities = [
 		ArityInfo::HasOne,
 		ArityInfo::HasMany,
 		ArityInfo::ManyMany,
@@ -35,7 +35,7 @@ trait related {
 				// recursively call this method in 'single' mode and merge results into output
 				$out = array_merge(
 					$out,
-					$this->relationships($type)
+					$this->definedRelationships($type)
 				);
 			}
 		} else {
@@ -67,8 +67,8 @@ trait related {
 	 * @return array map of relationship name => model class e.g. [ 'Members' => 'Member' ]
 	 *                                 or empty array if not a valid relationship from the model.
 	 */
-	public function hasRelationship($relationshipName) {
-		$relationships = $this->relationships();
+	public function hasDefinedRelationship($relationshipName) {
+		$relationships = $this->definedRelationships();
 
 		return isset($relationships[$relationshipName])
 			? [ $relationshipName => $relationships[ $relationshipName ] ]

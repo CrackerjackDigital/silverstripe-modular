@@ -35,8 +35,6 @@ abstract class Module extends Object {
 	 *  Each safe path provider can have its own config.safe_paths to add, if none set then DefaultSafePath will be used (see make_safe_path).
 	 */
 	private static $safe_path_providers = [
-		'Modular\Application',
-	    'Modular\Debugger'
 	];
 
 	private static $log_path = '';
@@ -220,21 +218,33 @@ abstract class Module extends Object {
 	public static function safe_paths() {
 		$paths = [];
 		$injector = \Injector::inst();
-		foreach (static::config()->get('safe_path_providers') as $serviceOrClassName) {
-			if ($injector->hasService($serviceOrClassName)) {
 
-				$append = $injector->get($serviceOrClassName)->config()->get('safe_paths') ?: [];
+		return static::config()->get('safe_paths');
 
-			} else if (\ClassInfo::exists($serviceOrClassName)) {
+		if ($providers = static::config()->get('safe_path_providers')) {
+			foreach ($providers as $serviceOrClassName) {
+				if ($injector->hasService($serviceOrClassName)) {
 
-				$append = \Config::inst()->get($serviceOrClassName, 'safe_paths') ?: [];
+					$append = $injector->get($serviceOrClassName)->config()->get('safe_paths') ?: [];
 
-			} else {
+				} else if (\ClassInfo::exists($serviceOrClassName)) {
 
-				$append = [];
+					$append = \Config::inst()->get($serviceOrClassName, 'safe_paths') ?: [];
+
+				} else {
+
+					$append = [];
+				}
+				$paths = array_merge($paths, array_filter($append));
 			}
-			$paths = array_merge($paths, array_filter($append));
+		} else {
+			// no providers defined, just use those defined on the application
+			$paths = array_merge(
+				$paths,
+				\Injector::inst()->get('Application')->config()->get('safe_paths') ?: []
+			);
 		}
+
 		return array_unique($paths);
 	}
 

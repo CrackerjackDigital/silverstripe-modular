@@ -6,13 +6,14 @@ use Modular\Traits\config;
 use Modular\Traits\debugging;
 use Modular\Traits\enabler;
 use Modular\Traits\owned;
+use Modular\Traits\related;
 
 class ModelExtension extends DataExtension {
 	use config;
 	use enabler;
 	use owned;
 	use debugging;
-	use \Modular\Traits\related;
+	use related;
 
 	/**
 	 * Return the extended model.

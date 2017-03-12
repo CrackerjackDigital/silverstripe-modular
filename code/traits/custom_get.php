@@ -56,17 +56,10 @@ trait custom_get {
 	}
 
 	/**
-	 * @return string custom model class to use if set via config.custom_class_name on exhibiting class, should be derived from DataObject
-	 */
-	private static function custom_class_name() {
-		return \Config::inst()->get(get_called_class(), 'custom_class_name');
-	}
-
-	/**
 	 * @return string custom list class to use if set via config.custom_list_class_name on exhibiting class, should be derived from DataList
 	 */
-	private static function custom_list_class_name() {
-		return \Config::inst()->get(get_called_class(), 'custom_list_class_name');
+	public static function custom_list_class_name() {
+		return \Config::inst()->get(get_called_class(), 'custom_list_class_name') ?: 'DataList';
 	}
 
 }

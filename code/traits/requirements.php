@@ -32,40 +32,72 @@ trait requirements {
 	 *  'after' => array( ... )'                //  these will be loaded onAfterInit of extended controller
 	 * )
 	 *
-	 * @param string $beforeOrAfterInit wether to include before or after requirements
-	 * @param string $modulePath        path to load scripts, css etc from if not the them
+	 * @param string $beforeOrAfterInit whether to include before or after requirements, or both
+	 * @param string $modulePath        path to load scripts, css etc from if not the theme
+	 * @return $this
 	 */
 	public function requirements($beforeOrAfterInit = Module::BothInit, $modulePath = '') {
-		if ($application = Application::factory()) {
-			$config = $application->config();
-
-			if (is_a(get_parent_class(), 'Modular\Module', true)) {
-				// if parent is also a Module then do it's requirements first
-				$parent = parent::requirements($beforeOrAfterInit);
+		$ancestry = array_slice(\ClassInfo::ancestry(get_class()), 0, -1);
+		foreach ($ancestry as $className) {
+			if (is_a($className, 'Modular\Module', true)) {
+				$this->addRequirements($beforeOrAfterInit, $className);
 			}
+		}
+		// finish off ourselves with possibly custom module path
+		$this->addRequirements($beforeOrAfterInit, get_class($this), $modulePath);
+	}
 
-			if ($requirements = array_filter($config->get('requirements', \Config::UNINHERITED) ?: [])) {
-				$modulePath = $modulePath
-					?: $config->get('module_path', \Config::UNINHERITED)
+	/**
+	 * @param string $beforeOrAfterInit
+	 * @param string $className
+	 * @param string $modulePath
+	 * @return $this
+	 */
+	protected function addRequirements($beforeOrAfterInit, $className, $modulePath = '') {
+		// we want the config for the actual class instance we are in as we will be doing Config::UNINHERITED
+		// to read from that level first.
+
+		if ($requirements = array_filter(\Config::inst()->get($className, 'requirements', \Config::UNINHERITED) ?: [])) {
+			$config = \Config::inst()->forClass($className);
+
+			$modulePath = $modulePath
+				?: $config->get('module_path', \Config::UNINHERITED)
 					?: \SSViewer::get_theme_folder();
 
-				if (isset($requirements[ $beforeOrAfterInit ])) {
-					// exclude any requirements which have been set to 'false' in config
-					$requirements = array_filter($requirements[ $beforeOrAfterInit ]);
-				}
+			if (isset($requirements[ $beforeOrAfterInit ])) {
+				// exclude any requirements which have been set to 'false' in config
+				$requirements = array_filter($requirements[ $beforeOrAfterInit ]);
+			}
 
-				foreach ($requirements as $requirement => $info) {
+			foreach ($requirements as $requirement => $info) {
+				// atm info is just a boolean so parent requirements can be turned off in config
+				if ($info) {
 					if (substr($requirement, 0, 1) != '/') {
+						// prepend module path as not 'absolute' path (relative to web root)
 						$requirement = \Controller::join_links($modulePath, $requirement);
 					}
-					if (substr($requirement, -3) == '.js') {
-						Requirement::javascript(substr($requirement, 1));
-					} else {
-						Requirement::css(substr($requirement, 1));
-					}
+					$this->requireFile($requirement);
 				}
 			}
 		}
+		return $this;
+	}
+
+	/**
+	 * Add file to SS requirements depending on extension (.js or other atm).
+	 *
+	 * @param $requirement
+	 * @return string
+	 */
+	private function requireFile($requirement) {
+		if ($requirement = trim($requirement, DIRECTORY_SEPARATOR)) {
+			if (substr($requirement, -3) == '.js') {
+				Requirement::javascript($requirement);
+			} else {
+				Requirement::css($requirement);
+			}
+		}
+		return $requirement;
 
 	}
 }

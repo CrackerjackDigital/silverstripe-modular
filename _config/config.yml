@@ -10,7 +10,8 @@ Injector:
 ContentController:
   extensions:
     - Modular\Extensions\Controller\Content
-    - Modular\Extensions\Controller\Requirements
+#    - Modular\Extensions\Controller\Requirements # added by mosaic
+
 Modular\Controllers\Model:
   extensions:
     - Modular\Extensions\Controller\Model

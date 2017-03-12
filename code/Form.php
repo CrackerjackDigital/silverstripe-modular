@@ -4,6 +4,7 @@ namespace Modular;
 use Modular\Helpers\Strings;
 use \ContentController;
 use \FieldList;
+use Modular\Traits\config;
 use \RequiredFields;
 use \Session;
 use \LiteralField;
@@ -21,6 +22,14 @@ class Form extends \Form {
 	const TabIDSuffix = 'Tab';
 
 	private static $show_tab_strip_in_form = false;
+
+	/**
+	 * Invoking a Form returns Form
+	 * @return $this
+	 */
+	public function __invoke() {
+		return $this;
+	}
 
 	/**
 	 * @param      $action

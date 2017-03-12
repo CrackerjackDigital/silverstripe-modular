@@ -2,6 +2,7 @@
 namespace Modular\Extensions\Model;
 
 use Modular\Traits\enabler;
+use SocialModelExtension;
 use SQLQuery;
 
 /**

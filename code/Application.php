@@ -1,7 +1,7 @@
 <?php
 namespace Modular;
 
-use Modular\Controllers\Model;
+use Modular\Controllers\Model as ModelController;
 use Modular\Exceptions\Application as Exception;
 use Modular\Traits\reflection;
 use Modular\Traits\requirements;
@@ -9,7 +9,6 @@ use SSViewer;
 
 class Application extends Module {
 	use reflection;
-	use requirements;
 
 	// the name of the service expected by Injector e.g. in factory method
 	const ServiceName = 'Application';
@@ -48,22 +47,6 @@ class Application extends Module {
 	// set in ctor, url requested for this application run
 	private $url;
 
-	/**
-	 * Return an instance of Application as registered with Injector or the called class.
-	 *
-	 * @return Application
-	 */
-	public static function factory() {
-		$injector = \Injector::inst();
-
-		if ($injector->hasService(static::ServiceName)) {
-			$application = $injector::inst()->get(static::ServiceName, true, func_get_args());
-		} else {
-			$application = $injector::inst()->get(get_called_class(), true, func_get_args());
-		}
-
-		return $application;
-	}
 
 	public function __construct() {
 		$this->runID = microtime();
@@ -86,7 +69,7 @@ class Application extends Module {
 	protected static function register_model_controllers() {
 		$config = \Config::inst();
 
-		$controllers = Model::subclasses();
+		$controllers = ModelController::subclasses();
 		/** @var string|Model $className */
 		foreach ($controllers as $className) {
 			$route = $className::route();
