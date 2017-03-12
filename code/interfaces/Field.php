@@ -1,8 +1,8 @@
 <?php
 namespace Modular\Interfaces;
 
-use Modular\Types\Type;
+use Modular\Types\TypeInterface;
 
-interface Field extends Type {
+interface Field extends TypeInterface {
 	public function cmsFields($mode = null);
 }
