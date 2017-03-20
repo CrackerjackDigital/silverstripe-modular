@@ -9,7 +9,10 @@ namespace Modular\Traits;
  */
 trait enabler {
 	/**
-	 * If added to a field then only return fields if enabled.
+	 * If this trait is added to a field then only return fields if the field is enabled (will only override if the field is a subclass of the
+	 * class which has cmsFields method in = trait inheritance. If cmsFields is implemented in class this trait is added to then this check will
+	 * need to made in that method).
+	 *
 	 * @return array
 	 */
 	public function cmsFields($mode = null) {

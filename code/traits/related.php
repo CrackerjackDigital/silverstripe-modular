@@ -61,7 +61,7 @@ trait related {
 	}
 
 	/**
-	 * Check if a relationship is on the exhibiting class
+	 * Check if a relationship is on the exhibiting class, e.g. 'Members'
 	 *
 	 * @param string $relationshipName e.g. 'Members'
 	 * @return array map of relationship name => model class e.g. [ 'Members' => 'Member' ]
