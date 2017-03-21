@@ -61,5 +61,4 @@ interface HTTP {
 	const NotExtended_510 = 510;
 	const NetworkAuthenticationRequired_511 = 511;
 
-
 }

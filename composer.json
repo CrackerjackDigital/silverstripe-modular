@@ -41,5 +41,8 @@
 	"extra": {
 		"installer-name": "modular"
 	},
+	"autoload": {
+		"files": [ "autoloader.php" ]
+	},
 	"minimum-stability": "dev"
 }
