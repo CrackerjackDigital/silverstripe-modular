@@ -52,7 +52,7 @@ trait messages {
 			$tokens
 		);
 		$subKey  = $subKey ?: $actionOrKey;
-		$default = is_null( $default ) ? "{action}" : $default;
+		$default = is_null( $default ) ? "{Action}" : $default;
 		if ( false !== strpos( $subKey, '.' ) ) {
 			// use key verbatim as contains a '.'
 			$message = _t( $subKey, $default, $tokens );
