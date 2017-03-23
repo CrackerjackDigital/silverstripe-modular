@@ -31,9 +31,9 @@ trait messages {
 	 * @return string
 	 */
 	public function actionMessage( $modelOrClassName, $actionOrKey, $subKey = '', $default = null, $tokens = [] ) {
-		$model = is_object($modelOrClassName)
+		$model = is_object( $modelOrClassName )
 			? $modelOrClassName
-			: singleton($modelOrClassName);
+			: singleton( $modelOrClassName );
 
 		$modelClass = Reflection::derive_class_name(
 			is_object( $modelOrClassName ) ? get_class( $modelOrClassName ) : $modelOrClassName,
@@ -42,29 +42,26 @@ trait messages {
 		/** @var \DataObject $modelClass */
 		$tokens  = array_merge(
 			[
-				'singular' => $model->i18n_singular_name(),
-				'plural'   => $model->i18n_plural_name(),
-				'class'    => $model->ClassName,
-				'id'       => $model->ID ?: '[none]',
-				'action'   => $actionOrKey,
+				'ModelNiceName'  => $model->i18n_singular_name(),
+				'PluralNiceName' => $model->i18n_plural_name(),
+				'ModelClass'     => $model->ClassName,
+				'ModelID'        => $model->ID ?: '[none]',
+				'Action'         => $actionOrKey,
 			],
 			$model->toMap(),
 			$tokens
 		);
-		$subKey     = $subKey ?: $actionOrKey;
+		$subKey  = $subKey ?: $actionOrKey;
 		$default = is_null( $default ) ? "{action}" : $default;
-
 		if ( false !== strpos( $subKey, '.' ) ) {
 			// use key verbatim as contains a '.'
 			$message = _t( $subKey, $default, $tokens );
 		} else {
 			$extensionClass = get_class( $this );
-
 			// lang yml keys in order they are tried before default is returned if not found
 			$key1 = "$modelClass.$subKey";                     // Member.Confirmed or Member.confirm
 			$key2 = "$extensionClass.$subKey.$modelClass";     // ConfirmableExtension.Confirmed.Member or ConfirmableExtension.confirm.Member
 			$key3 = "$extensionClass.$subKey";                 // ConfirmableExtension.Confirmed or ConfirmableExtension.confirm
-
 			if ( ! $message = _t( $key1, '', $tokens ) ) {
 				if ( ! $message = _t( $key2, '', $tokens ) ) {
 					$message = _t( $key3, $default, $tokens );
