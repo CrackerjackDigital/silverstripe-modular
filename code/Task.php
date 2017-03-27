@@ -2,10 +2,11 @@
 namespace Modular;
 
 use Director;
+use Modular\Interfaces\Service;
 use Modular\Traits\debugging;
 use Modular\Traits\enabler;
 
-abstract class Task extends \BuildTask {
+abstract class Task extends \BuildTask implements Service {
 	use enabler;
 	use debugging;
 
@@ -14,7 +15,14 @@ abstract class Task extends \BuildTask {
 	// can't use 'enabled' as that is a member var on BuildTask
 	private static $task_enabled = true;
 
-	abstract public function execute($request);
+	/**
+	 * Service interface method.
+	 *
+	 * @param null $params
+	 *
+	 * @return mixed
+	 */
+	abstract public function execute($params = null);
 
 	/**
 	 * Task can run if enabled and either is_cli or logged in as ADMIN.

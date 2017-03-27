@@ -19,7 +19,7 @@ trait json {
 	 * @return Model
 	 */
 	abstract public function model();
-	
+
 	/**
 	 * Return model fields as a json string.
 	 *
@@ -32,7 +32,7 @@ trait json {
 		// TODO data should be trimmed according to mode, e.g. only certain fields encoded
 		return Helper::encode($data);
 	}
-	
+
 	/**
 	 * Update model fields from array or json encoded string.
 	 *

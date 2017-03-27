@@ -100,7 +100,7 @@ class Application extends Module {
 			'member-' . self::SystemAdmin,
 			static::cache(
 				'email-' . self::SystemAdmin,
-				static::find_system_admin()
+				static::system_admin_email()
 			)
 		);
 
@@ -108,7 +108,7 @@ class Application extends Module {
 			'member-' . self::Admin,
 			static::cache(
 				'email-' . self::Admin,
-				static::find_admin_email()
+				static::admin_email()
 			)
 		);
 	}
@@ -119,9 +119,9 @@ class Application extends Module {
 	 *
 	 * @return string
 	 */
-	protected static function find_system_admin() {
+	public static function find_system_admin() {
 		// hardcoded from config or use admin as default
-		$email = static::config()->get('system_admin_email') ?: static::find_admin_email();
+		$email = static::config()->get('system_admin_email') ?: static::admin_email();
 
 		// try site config
 		if ($siteConfig = \SiteConfig::current_site_config()) {
@@ -144,7 +144,7 @@ class Application extends Module {
 			}
 		}
 
-		return $email;
+		return \Member::get()->filter(['Email' => $email])->first();
 	}
 
 	/**
@@ -153,7 +153,7 @@ class Application extends Module {
 	 *
 	 * @return string
 	 */
-	public static function find_admin_email() {
+	public static function admin_email() {
 		// default to configured options if not set in siteconfig
 		$email = static::config()->get('admin_email')
 			?: \Email::config()->get('admin_email')
