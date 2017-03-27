@@ -15,6 +15,7 @@ abstract class Task extends \BuildTask implements Service {
 	// can't use 'enabled' as that is a member var on BuildTask
 	private static $task_enabled = true;
 
+
 	/**
 	 * Service interface method.
 	 *
@@ -23,6 +24,22 @@ abstract class Task extends \BuildTask implements Service {
 	 * @return mixed
 	 */
 	abstract public function execute($params = null);
+
+	/**
+	 * Simple singleton
+	 *
+	 * @param null   $options
+	 * @param string $env
+	 *
+	 * @return static
+	 */
+	public static function get( $options = null, $env = '' ) {
+		static $instance;
+		if (!$instance) {
+			$instance = new static( $options, $env );
+		}
+		return $instance;
+	}
 
 	/**
 	 * Task can run if enabled and either is_cli or logged in as ADMIN.

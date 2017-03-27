@@ -9,6 +9,6 @@ interface AsyncService extends Service {
 	 *
 	 * @return mixed
 	 */
-	public function dispatch( $params = null );
+	public static function dispatch( $params = null );
 
 }
