@@ -52,14 +52,16 @@ class Application extends Module {
 		$this->runID = microtime();
 		$this->url   = isset($_REQUEST['url']) ? $_REQUEST['url'] : '[unknown url]';
 
-		$this->debugger()->info("START: $this->runID ($this->url)", get_called_class());
-
 		parent::__construct();
 
 		static::register_modules();
 		static::register_members_and_emails();
 		static::register_model_controllers();
 		static::register_paths();
+	}
+
+	public function start() {
+		$this->debugger()->info( "START: $this->runID ($this->url)", get_called_class() );
 	}
 
 	public function __destruct() {
@@ -145,6 +147,16 @@ class Application extends Module {
 		}
 
 		return \Member::get()->filter(['Email' => $email])->first();
+	}
+
+	/**
+	 * Find a system admin and return the Email address.
+	 * @return string
+	 */
+	public static function system_admin_email() {
+		/** @var \Member $sysAdmin */
+		$sysAdmin = static::find_system_admin();
+		return $sysAdmin ? $sysAdmin->Email : \Member::default_admin()->Email;
 	}
 
 	/**
