@@ -98,10 +98,13 @@ trait debugging {
 
 	/**
 	 * @param \Exception $exception to log message from
+	 *
+	 * @return bool
 	 * @throws Exception
 	 */
 	public function debug_fail(\Exception $exception) {
 		$this->debugger()->fail($exception->getMessage(), ($exception->getFile() . ':' . $exception->getLine()), $exception);
+		return false;
 	}
 
 	/**

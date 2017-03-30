@@ -5,25 +5,29 @@ use Director;
 use Modular\Interfaces\Service;
 use Modular\Traits\debugging;
 use Modular\Traits\enabler;
+use Modular\Traits\trackable;
+use SS_HTTPRequest;
 
 abstract class Task extends \BuildTask implements Service {
 	use enabler;
 	use debugging;
+	use trackable;
 
 	const EnablerConfigVar = 'task_enabled';
 
 	// can't use 'enabled' as that is a member var on BuildTask
 	private static $task_enabled = true;
 
-
 	/**
 	 * Service interface method.
 	 *
-	 * @param null $params
+	 * @param null   $params
+	 *
+	 * @param string $resultMessage
 	 *
 	 * @return mixed
 	 */
-	abstract public function execute($params = null);
+	abstract public function execute($params = null, &$resultMessage = '');
 
 	/**
 	 * Simple singleton
@@ -49,25 +53,29 @@ abstract class Task extends \BuildTask implements Service {
 		return static::enabled() && (Director::isDev() || Director::is_cli() || \Permission::check('ADMIN'));
 	}
 
+	/**
+	 *
+	 * @param SS_HttpRequest $request
+	 */
 	final public function run($request) {
 		$this->debugger()->toScreen(Debugger::DebugAll);
 
+		$this->trackable_start( __METHOD__);
+
 		$taskName = get_class($this);
 
+		$message = '';
 		if ($this->canRun()) {
 			if (!Director::is_cli()) {
 				ob_start('nl2br');
 			}
-			$this->debug_info("Starting task $taskName");
-
-			$this->execute($request);
-
-			$this->debug_info("End of task $taskName");
+			$this->execute($request->requestVars(), $message);
 
 			ob_end_flush();
 		} else {
 			$this->debug_info("Task $taskName not allowed to run");
 		}
+		$this->trackable_end($message);
 	}
 
 }
