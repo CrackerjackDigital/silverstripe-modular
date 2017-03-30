@@ -59,10 +59,6 @@ class Application extends Module {
 		static::register_paths();
 	}
 
-	public function start() {
-		$this->debugger()->info( "START: $this->runID ($this->url)", get_called_class() );
-	}
-
 	public function __destruct() {
 		static::end();
 	}
