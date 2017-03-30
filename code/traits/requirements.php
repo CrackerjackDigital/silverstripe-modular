@@ -2,7 +2,6 @@
 namespace Modular\Traits;
 
 use \Requirements as Requirement;
-use \Modular\Application;
 use \Modular\Module;
 
 trait requirements {

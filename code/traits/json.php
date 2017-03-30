@@ -24,13 +24,16 @@ trait json {
 	 * Return model fields as a json string.
 	 *
 	 * @param string $mode
-	 * @return string
-	 * @internal param array $options
+	 * @return string|null
 	 */
 	public function encode($mode = HasMode::DefaultMode) {
-		$data = $this->model()->toMap();
-		// TODO data should be trimmed according to mode, e.g. only certain fields encoded
-		return Helper::encode($data);
+		if ($model = $this->model()) {
+			$data = $model->toMap();
+
+			// TODO data should be trimmed according to mode, e.g. only certain fields encoded
+			return Helper::encode( $data );
+		}
+		return null;
 	}
 
 	/**
@@ -41,11 +44,13 @@ trait json {
 	 * @return array the decoded data if it was encoded
 	 */
 	public function decode($data, $mode = HasMode::DefaultMode) {
-		if (!is_array($data)) {
-			$data = Helper::decode($data);
+		if ($model = $this->model()) {
+			if ( ! is_array( $data ) ) {
+				$data = Helper::decode( $data );
+			}
+			// TODO data should be sanitised before updating the model according to mode
+			$model->update( $data );
 		}
-		// TODO data should be sanitised before updating the model according to mode
-		$this->model()->update($data);
 		return $data;
 	}
 

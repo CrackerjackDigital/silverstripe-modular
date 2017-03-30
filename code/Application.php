@@ -3,57 +3,56 @@ namespace Modular;
 
 use Modular\Controllers\Model as ModelController;
 use Modular\Exceptions\Application as Exception;
+use Modular\Extensions\Model\SiteConfig;
 use Modular\Traits\reflection;
 use Modular\Traits\requirements;
 use SSViewer;
 
 class Application extends Module {
 	use reflection;
-
 	// the name of the service expected by Injector e.g. in factory method
-	const ServiceName = 'Application';
-
+	const ServiceName  = 'Application';
 	const ThemeMobile  = 'mobile';
 	const ThemeDesktop = 'desktop';
 	const ThemeDefault = 'default';
-
-	const SystemAdmin = 'SystemAdmin';
-	const Admin       = 'Admin';
-
 	// base dir for loading requirements from, if not set then theme folder will be used (e.g. themes/default/)
 	private static $requirements_path;
-
 	// map theme names to domains, these need to be in reverse specificity as config will append to the map so
 	// most specific must be last so are checked first.
 	private static $theme_domains = [
 		self::ThemeDefault => [ '*' ],
 		#	self::ThemeMobile => [ 'm.*' ],
 	];
-
 	private static $safe_paths = [];
 
 	// use this
 	private static $default_theme = self::ThemeDefault;
 
-	// who to send errors, logs etc
+	// who to send errors, logs etc, SiteConfig will be tried with precedence
 	private static $system_admin_email = '';
 
-	// who to send administrative alerts, requests etc to
+	// who to send administrative alerts, requests etc to, SiteConfig will be tried with precedence
 	private static $admin_email = '';
+
+	// field name of of the system admin email field e.g. on SiteConfig, change via config if some other field holds this info
+	private static $system_admin_field_name = \Modular\Extensions\Model\SiteConfig::SystemAdminFieldName;
+
+	// field name of of the admin email field e.g. on SiteConfig, change via config if some other field holds this info
+	private static $admin_field_name = \Modular\Extensions\Model\SiteConfig::AdminFieldName;
 
 	// set in ctor, used to track application startup/shutdown logging
 	private $runID;
-
 	// set in ctor, url requested for this application run
 	private $url;
-
 
 	public function __construct() {
 		$this->runID = microtime();
 		$this->url   = isset($_REQUEST['url']) ? $_REQUEST['url'] : '[unknown url]';
 
-		parent::__construct();
+		$this->debugger()->info("START: $this->runID ($this->url)", get_called_class());
 
+		parent::__construct();
+		static::start();
 		static::register_modules();
 		static::register_members_and_emails();
 		static::register_model_controllers();
@@ -65,52 +64,59 @@ class Application extends Module {
 	}
 
 	public function __destruct() {
-		$this->debugger()->info("END: $this->runID ($this->url)", get_called_class());
+		static::end();
+	}
+
+	/** Log a 'Start' message
+	 *
+	 * @param string $message for log
+	 */
+	protected static function start( $message = 'START' ) {
+		static::debug_trace( $message );
+	}
+
+	protected static function end( $message = 'END' ) {
+		static::debug_trace( $message );
 	}
 
 	protected static function register_model_controllers() {
-		$config = \Config::inst();
-
+		$config      = \Config::inst();
 		$controllers = ModelController::subclasses();
 		/** @var string|Model $className */
-		foreach ($controllers as $className) {
+		foreach ( $controllers as $className ) {
 			$route = $className::route();
-
-			static::debug_trace("rule $route -> $className");
-
-			$config->update('Director', 'rules', [ "$route" => $className ]);
+			static::debug_trace( "rule $route -> $className" );
+			$config->update( 'Director', 'rules', [ "$route" => $className ] );
 		}
 	}
 
 	protected static function register_paths() {
-
 	}
 
 	protected static function register_modules() {
 	}
 
-	public static function email($for) {
-		return static::cache("email-$for");
+	public static function email( $for ) {
+		return static::cache( "email-$for" );
 	}
 
-	public static function member($for) {
-		return static::cache("member-$for");
+	public static function member( $for ) {
+		return static::cache( "member-$for" );
 	}
 
 	protected static function register_members_and_emails() {
 		static::cache(
-			'member-' . self::SystemAdmin,
+			'member-' . static::system_admin_field_name(),
 			static::cache(
 				'email-' . self::SystemAdmin,
-				static::system_admin_email()
+				static::find_system_admin()
 			)
 		);
-
 		static::cache(
-			'member-' . self::Admin,
+			'member-' . static::admin_field_name(),
 			static::cache(
 				'email-' . self::Admin,
-				static::admin_email()
+				static::find_admin_email()
 			)
 		);
 	}
@@ -121,9 +127,9 @@ class Application extends Module {
 	 *
 	 * @return string
 	 */
-	public static function find_system_admin() {
+	protected static function find_system_admin() {
 		// hardcoded from config or use admin as default
-		$email = static::config()->get('system_admin_email') ?: static::admin_email();
+		$email = static::config()->get('system_admin_email') ?: static::find_admin_email();
 
 		// try site config
 		if ($siteConfig = \SiteConfig::current_site_config()) {
@@ -141,7 +147,7 @@ class Application extends Module {
 
 			} else {
 				static::debug_trace(
-					"Site config should really have a 'SystemAdminEmail' field, using '$email' from config instead"
+					"Site config should really have a '" . static::system_admin_field_name() . "' field, using '$email' from config instead"
 				);
 			}
 		}
@@ -167,24 +173,19 @@ class Application extends Module {
 	 */
 	public static function admin_email() {
 		// default to configured options if not set in siteconfig
-		$email = static::config()->get('admin_email')
-			?: \Email::config()->get('admin_email')
+		$email = static::config()->get( 'admin_email' )
+			?: \Email::config()->get( 'admin_email' )
 				?: \Member::default_admin()->Email;
 
-		if ($siteConfig = \SiteConfig::current_site_config()) {
-			$for = self::Admin;
-
-			if ($siteConfig->hasField('AdminEmail')) {
-
-				$email = $siteConfig->AdminEmail;
-				static::debug_trace("Found system admin email via site config: '$email'");
-
-			} elseif ($options = $siteConfig->extend('provideEmail', $for) ?: []) {
-
+		if ( $siteConfig = \SiteConfig::current_site_config() ) {
+			$for = static::admin_field_name();
+			if ( $siteConfig->hasField( static::admin_field_name() ) && $siteConfig->{static::admin_field_name()} ) {
+				$email = $siteConfig->{static::admin_field_name()};
+				static::debug_trace( "Found system admin email via site config: '$email'" );
+			} elseif ( $options = $siteConfig->extend( 'provideEmail', $for ) ?: [] ) {
 				// use the first one returned
-				$email = reset($options);
-				static::debug_trace("Found system admin email via extension call: '$email'");
-
+				$email = reset( $options );
+				static::debug_trace( "Found system admin email via extension call: '$email'" );
 			} else {
 				static::debug_warn(
 					"Site config should really have an 'AdminEmail' field, using '$email' from config instead"
@@ -196,6 +197,23 @@ class Application extends Module {
 	}
 
 	/**
+	 * Returns the name used throughout the system (e.g. on SiteConfig) where the SystemAdminEmail is stored
+	 * @return string
+	 */
+	public static function system_admin_field_name() {
+		return static::config()->get( 'system_admin_field_name' );
+	}
+
+	/**
+	 * Returns the name used throughout the system (e.g. on SiteConfig) where the AdminEmail is stored
+	 *
+	 * @return string
+	 */
+	public static function admin_field_name() {
+		return static::config()->get( 'admin_field_name' );
+	}
+
+	/**
 	 * Try to get page from Director and if in CMS then get it from CMS page, fallback to
 	 * Controller url via page_for_path.
 	 *
@@ -203,20 +221,20 @@ class Application extends Module {
 	 */
 	public static function get_current_page() {
 		$page = null;
-		if (\Director::is_ajax()) {
-			if ($path = self::ajax_path_for_request(\Controller::curr()->getRequest())) {
-				$page = self::page_for_path($path);
+		if ( \Director::is_ajax() ) {
+			if ( $path = self::ajax_path_for_request( \Controller::curr()->getRequest() ) ) {
+				$page = self::page_for_path( $path );
 			}
 		} else {
-			if ($page = \Director::get_current_page()) {
-				if ($page instanceof \CMSMain) {
+			if ( $page = \Director::get_current_page() ) {
+				if ( $page instanceof \CMSMain ) {
 					$page = $page->currentPage();
 				}
 			}
-			if (!$page && $controller = Controller::curr()) {
-				if ($controller = Controller::curr()) {
-					if ($request = $controller->getRequest()) {
-						$page = Application::page_for_path($request->getURL());
+			if ( ! $page && $controller = Controller::curr() ) {
+				if ( $controller = Controller::curr() ) {
+					if ( $request = $controller->getRequest() ) {
+						$page = Application::page_for_path( $request->getURL() );
 					}
 				}
 			}
@@ -231,7 +249,7 @@ class Application extends Module {
 	 * @return string
 	 */
 	public static function requirements_path() {
-		return static::config()->get('requirements_path') ?: SSViewer::get_theme_folder();
+		return static::config()->get( 'requirements_path' ) ?: SSViewer::get_theme_folder();
 	}
 
 	/**
@@ -247,20 +265,22 @@ class Application extends Module {
 	 *
 	 * @param \SS_HTTPRequest $request
 	 * @param array           $requestVars check these get vars looking for a path
+	 *
 	 * @return mixed|string
 	 */
-	public static function ajax_path_for_request($request = null, $requestVars = [
+	public static function ajax_path_for_request(
+		$request = null, $requestVars = [
 		'CMSMainCurrentPageID',
 		'path',
 		'url',
-	]) {
+	]
+	) {
 		$request = $request ?: Controller::curr()->getRequest();
-
-		foreach ($requestVars as $varName) {
-			if ($path = $request->requestVar($varName)) {
-				if (is_numeric($path)) {
+		foreach ( $requestVars as $varName ) {
+			if ( $path = $request->requestVar( $varName ) ) {
+				if ( is_numeric( $path ) ) {
 					/** @var \SiteTree $page */
-					if ($page = \SiteTree::get()->byID($path)) {
+					if ( $page = \SiteTree::get()->byID( $path ) ) {
 						$path = $page->Link();
 					} else {
 						continue;
@@ -270,8 +290,8 @@ class Application extends Module {
 				return $path;
 			}
 		}
-		if (isset($_SERVER['HTTP_REFERER'])) {
-			$path = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH);
+		if ( isset( $_SERVER['HTTP_REFERER'] ) ) {
+			$path = parse_url( $_SERVER['HTTP_REFERER'], PHP_URL_PATH );
 		} else {
 			$path = $request->getURL();
 		}
@@ -283,22 +303,20 @@ class Application extends Module {
 	 * Walk the site-tree to find a page given a nested path.
 	 *
 	 * @param $path
+	 *
 	 * @return \DataObject|\Page
 	 */
-	public static function page_for_path($path) {
-		$path = trim($path, '/');
-
-		if ($path == '') {
+	public static function page_for_path( $path ) {
+		$path = trim( $path, '/' );
+		if ( $path == '' ) {
 			return \Page::get()->first();
 		}
 		/** @var \Page $page */
-		$page = null;
-
-		$parts    = explode('/', $path);
-		$children = \Page::get()->filter('ParentID', 0);
-
-		while ($segment = array_shift($parts)) {
-			if (!$page = $children->find('URLSegment', $segment)) {
+		$page     = null;
+		$parts    = explode( '/', $path );
+		$children = \Page::get()->filter( 'ParentID', 0 );
+		while ( $segment = array_shift( $parts ) ) {
+			if ( ! $page = $children->find( 'URLSegment', $segment ) ) {
 				break;
 			}
 			$children = $page->Children();
@@ -314,16 +332,15 @@ class Application extends Module {
 	 */
 	public static function domain_theme() {
 		$hostName = static::hostname();
-
-		foreach (array_reverse(static::get_config_setting('theme_domains'), true) as $theme => $domains) {
-			foreach ($domains as $pattern) {
-				if (fnmatch($pattern, $hostName)) {
+		foreach ( array_reverse( static::get_config_setting( 'theme_domains' ), true ) as $theme => $domains ) {
+			foreach ( $domains as $pattern ) {
+				if ( fnmatch( $pattern, $hostName ) ) {
 					return $theme;
 				}
 			}
 		}
 
-		return static::get_config_setting('default_theme');
+		return static::get_config_setting( 'default_theme' );
 	}
 
 	/**
@@ -334,11 +351,10 @@ class Application extends Module {
 	 * @throws Exception
 	 */
 	public static function hostname() {
-		if (!$hostname = parse_url(\Director::protocolAndHost(), PHP_URL_HOST)) {
-			throw new Exception("Can't determine hostname");
+		if ( ! $hostname = parse_url( \Director::protocolAndHost(), PHP_URL_HOST ) ) {
+			throw new Exception( "Can't determine hostname" );
 		}
 
 		return $hostname;
 	}
-
 }

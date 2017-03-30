@@ -6,6 +6,7 @@ use \ContentController;
 use \FieldList;
 use Modular\Traits\config;
 use \RequiredFields;
+use Requirements;
 use \Session;
 use \LiteralField;
 use \FormField;
