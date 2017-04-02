@@ -64,7 +64,7 @@ class HasManyManyGridField extends HasManyMany {
 	 * @param $configClassName
 	 * @return GridFieldConfig
 	 */
-	protected function gridFieldConfig($relationshipName, $configClassName) {
+	protected function gridFieldConfig($relationshipName = '', $configClassName = '') {
 		$configClassName = $configClassName
 			?: static::GridFieldConfigName
 				?: get_class($this) . 'GridFieldConfig';
