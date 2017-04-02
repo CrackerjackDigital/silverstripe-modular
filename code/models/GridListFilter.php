@@ -4,6 +4,7 @@ namespace Modular\Models;
  * @property string ModelTag
  */
 use Modular\Fields\ModelTag;
+use Modular\Fields\Title;
 
 class GridListFilter extends \Modular\Model {
 	const TagFieldName = ModelTag::SingleFieldName;

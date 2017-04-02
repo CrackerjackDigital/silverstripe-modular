@@ -3,11 +3,11 @@
 namespace Modular\Blocks;
 
 use DataObject;
+use GridListBlock;
 use HiddenField;
 use Modular\Application;
 use Modular\Interfaces\LinkType;
-use Modular\Model;
-use Modular\Relationships\HasBlocks;
+use Modular\Models\GridListFilter;
 use RelationList;
 
 /**
@@ -36,8 +36,9 @@ class Block extends \Modular\VersionedModel implements LinkType {
 	private static $link_type = '';
 
 	private static $prefix_duplicated_fields = [
-		'Title' => 'Copy of '
+		'Title' => 'Copy of ',
 	];
+
 
 	/**
 	 * Create a duplicate of this model and it's db field values if we specify 'write' then we will also duplicate any related models
@@ -99,12 +100,13 @@ class Block extends \Modular\VersionedModel implements LinkType {
 			}
 		}
 		// for blocks we don't want to copy belongs_many_many
-		if ( $manyMany = $sourceObject->config()->get('many_many')) {
+		if ( $manyMany = $sourceObject->config()->get( 'many_many' ) ) {
 			foreach ( $manyMany as $name => $foreignModelClass ) {
-				// skip r
+				// skip relationships to pages, gridlist blocks and gridlist filters we don't want to copy them
 				if ( is_a( $foreignModelClass, 'Page', true ) ) {
-					$this->duplicateRelations( $sourceObject, $destinationObject, $name );
+					continue;
 				}
+				$this->duplicateRelations( $sourceObject, $destinationObject, $name );
 			}
 		}
 
@@ -127,10 +129,18 @@ class Block extends \Modular\VersionedModel implements LinkType {
 				if ( $relations->Count() > 0 ) {
 					// with more than one thing it is related to
 					foreach ( $relations as $related ) {
-						// create a copy of the existing related model
-						if ( $newTo = $related->duplicate( true ) ) {
-							// related the copy to the model we're copying relationships onto
-							$destinationObject->$relationshipName()->add( $newTo );
+						$name = $related->class;
+
+						// don't duplicate these blocks
+						$skipDuplicateClasses = $this->config()->get( 'skip_duplicate_related_classes' ) ?: [];
+
+						if ( ! in_array( $name, $skipDuplicateClasses ) ) {
+
+							// create a copy of the existing related model
+							if ( $newTo = $related->duplicate( true ) ) {
+								// related the copy to the model we're copying relationships onto
+								$destinationObject->$relationshipName()->add( $newTo );
+							}
 						}
 					}
 				}
@@ -139,10 +149,17 @@ class Block extends \Modular\VersionedModel implements LinkType {
 				/** @var \DataObject $existingTo */
 				if ( $existingTo = $destinationObject->{$relationshipName}() ) {
 					if ( $existingTo->exists() ) {
-						// create a copy of the existing related object
-						if ( $newTo = $existingTo->duplicate( true ) ) {
-							// related the copy to the model we're copying relationship onto
-							$destinationObject->{"{$relationshipName}ID"} = $newTo->ID;
+						$name = $existingTo->class;
+
+						// don't duplicate these blocks
+						$skipDuplicateClasses = $this->config()->get('skip_duplicate_related_classes') ?: [];
+
+						if ( !in_array($name, $skipDuplicateClasses)) {
+							// create a copy of the existing related object
+							if ( $newTo = $existingTo->duplicate( true ) ) {
+								// related the copy to the model we're copying relationship onto
+								$destinationObject->{"{$relationshipName}ID"} = $newTo->ID;
+							}
 						}
 					}
 				}
