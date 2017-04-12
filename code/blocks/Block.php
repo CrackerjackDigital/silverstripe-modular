@@ -37,9 +37,8 @@ class Block extends \Modular\VersionedModel implements LinkType {
 	private static $prefix_duplicated_fields = [
 		#	'Title' => 'Copy of ',
 	];
-
-	// set in modular/_config/config.yml
-	private static $skip_duplicate_related_classes = [
+	// classes listed here will not be duplicated at all when related to a model being duplicated via a has_one or many_many relationship
+	private static $relationship_duplication_rules = [
 	];
 
 	/**

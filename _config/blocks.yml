@@ -1,6 +1,15 @@
 ---
 Name: modular-blocks
 ---
+Modular\Blocks\Block:
+  prefix_duplicated_fields:
+    'Title': ''
+  default_relationship_duplication_rule: 6    # deep copy models related to blocks (implies copy relationship)
+  relationship_duplication_rules:
+    'File': 1                                 # 1 = don't duplicate File or relationship to File
+    'Page': 2                                 # 2 - duplicate relationship to existing Page
+    'Modular\Models\Tag': 2                   # 2 - duplicate relationship to existing Tag
+    'Modular\Models\GridListFilter': 2        # 2 - duplicate relationship to existing GridListFilter
 Modular\Blocks\Download:
   extensions:
     - Modular\Fields\Download

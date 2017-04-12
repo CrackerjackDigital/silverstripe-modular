@@ -2,11 +2,14 @@
 namespace Modular\Extensions\Views;
 
 use Modular\Blocks\Block;
+use Modular\enabler;
 use Modular\Fields\Field;
 use Modular\Fields\Title;
 use Modular\Relationships\HasBlocks;
 
 class AddDefaultBlocks extends Field {
+	use enabler;
+
 	const SingleFieldName = 'AddDefaultBlocks';
 	const SingleFieldSchema = 'Boolean';
 
@@ -16,6 +19,8 @@ class AddDefaultBlocks extends Field {
 		#   'ContentBlock',
 		#   'FootnotesBlock'
 	];
+
+	private static $enabled = true;
 
 	/**
 	 * Add controls to the same tab as the blocks.
@@ -39,54 +44,57 @@ class AddDefaultBlocks extends Field {
 
 	public function onAfterWrite() {
 		parent::onAfterWrite();
-		if ($this()->hasExtension(HasBlocks::class_name())) {
-			/** @var \ManyManyList $existing */
-			$existing = $this()->{HasBlocks::relationship_name()}();
+		if (static::enabled()) {
 
-			if ($this()->{self::SingleFieldName} || $this()->WasNew) {
+			if ($this()->hasExtension(HasBlocks::class_name())) {
+				/** @var \ManyManyList $existing */
+				$existing = $this()->{HasBlocks::relationship_name()}();
 
-				if ($defaultBlockClasses = $this->getDefaultBlockClasses()) {
-					// get class names along with count of each expected
-					$expected = array_count_values($defaultBlockClasses);
-					$sort = $existing->count() + 1;
+				if ($this()->{self::SingleFieldName} || $this()->WasNew) {
 
-					foreach ($expected as $blockClass => $expectedCount) {
-						if (!\ClassInfo::exists($blockClass)) {
-							continue;
-						}
+					if ($defaultBlockClasses = $this->getDefaultBlockClasses()) {
+						// get class names along with count of each expected
+						$expected = array_count_values($defaultBlockClasses);
+						$sort = $existing->count() + 1;
 
-						$existingCount = $existing->filter('ClassName', $blockClass)->count();
-						if ($existingCount < $expectedCount) {
-							for ($i = $existingCount; $i < $expectedCount; $i++) {
+						foreach ($expected as $blockClass => $expectedCount) {
+							if (!\ClassInfo::exists($blockClass)) {
+								continue;
+							}
 
-								// generate a default title for the block from lang
-								// e.g. ContentBlock.DefaultTitle
+							$existingCount = $existing->filter('ClassName', $blockClass)->count();
+							if ($existingCount < $expectedCount) {
+								for ($i = $existingCount; $i < $expectedCount; $i++) {
 
-								$templateVars = [
-									'pagetitle' => $this()->{Title::SingleFieldName},
-									'singular'  => singleton($blockClass)->i18n_singular_name(),
-									'index'     => $i + 1,
-								];
-								// try the block class.DefaultTitle and then Block.DefaultTitle
-								$title = _t(
-									"$blockClass.DefaultTitle",
-									_t(
-										'Block.DefaultTitle',
-										'{pagetitle} {singular} - {index}',
+									// generate a default title for the block from lang
+									// e.g. ContentBlock.DefaultTitle
+
+									$templateVars = [
+										'pagetitle' => $this()->{Title::SingleFieldName},
+										'singular'  => singleton($blockClass)->i18n_singular_name(),
+										'index'     => $i + 1,
+									];
+									// try the block class.DefaultTitle and then Block.DefaultTitle
+									$title = _t(
+										"$blockClass.DefaultTitle",
+										_t(
+											'Block.DefaultTitle',
+											'{pagetitle} {singular} - {index}',
+											$templateVars
+										),
 										$templateVars
-									),
-									$templateVars
-								);
-								/** @var Block $block */
-								$block = new $blockClass();
-								$block->update([
-									'Title' => $title
-								]);
-								$block->write();
+									);
+									/** @var Block $block */
+									$block = new $blockClass();
+									$block->update([
+										'Title' => $title
+									]);
+									$block->write();
 
-								$existing->add($block, [
-									'Sort' => $sort++,
-								]);
+									$existing->add($block, [
+										'Sort' => $sort++,
+									]);
+								}
 							}
 						}
 					}
