@@ -8,6 +8,7 @@ use HiddenField;
 use Modular\Application;
 use Modular\Interfaces\LinkType;
 use Modular\Models\GridListFilter;
+use Modular\Models\Tag;
 use RelationList;
 
 /**
@@ -39,6 +40,12 @@ class Block extends \Modular\VersionedModel implements LinkType {
 		'Title' => 'Copy of ',
 	];
 
+	private static $skip_duplicate_related_classes = [
+		'Page',
+	    'MasterFilter',
+	    'Modular\Models\Tag',
+		'Modular\Models\GridListFilter'
+	];
 
 	/**
 	 * Create a duplicate of this model and it's db field values if we specify 'write' then we will also duplicate any related models
@@ -102,10 +109,6 @@ class Block extends \Modular\VersionedModel implements LinkType {
 		// for blocks we don't want to copy belongs_many_many
 		if ( $manyMany = $sourceObject->config()->get( 'many_many' ) ) {
 			foreach ( $manyMany as $name => $foreignModelClass ) {
-				// skip relationships to pages, gridlist blocks and gridlist filters we don't want to copy them
-				if ( is_a( $foreignModelClass, 'Page', true ) ) {
-					continue;
-				}
 				$this->duplicateRelations( $sourceObject, $destinationObject, $name );
 			}
 		}
@@ -129,43 +132,49 @@ class Block extends \Modular\VersionedModel implements LinkType {
 				if ( $relations->Count() > 0 ) {
 					// with more than one thing it is related to
 					foreach ( $relations as $related ) {
-						$name = $related->class;
-
-						// don't duplicate these blocks
-						$skipDuplicateClasses = $this->config()->get( 'skip_duplicate_related_classes' ) ?: [];
-
-						if ( ! in_array( $name, $skipDuplicateClasses ) ) {
-
-							// create a copy of the existing related model
-							if ( $newTo = $related->duplicate( true ) ) {
-								// related the copy to the model we're copying relationships onto
-								$destinationObject->$relationshipName()->add( $newTo );
-							}
+						if ( $this->shouldDeepCopyClass( $related->class ) ) {
+							$related = $related->duplicate( true );
 						}
+						// relate either the copy or the existing related class
+						$destinationObject->$relationshipName()->add( $related );
 					}
 				}
 			} else {
 				// one-to-one related, we need to create a copy of the 'to' model and add that
-				/** @var \DataObject $existingTo */
-				if ( $existingTo = $destinationObject->{$relationshipName}() ) {
-					if ( $existingTo->exists() ) {
-						$name = $existingTo->class;
+				/** @var \DataObject $related */
+				if ( $related = $destinationObject->{$relationshipName}() ) {
+					if ( $related->exists() ) {
 
-						// don't duplicate these blocks
-						$skipDuplicateClasses = $this->config()->get('skip_duplicate_related_classes') ?: [];
-
-						if ( !in_array($name, $skipDuplicateClasses)) {
-							// create a copy of the existing related object
-							if ( $newTo = $existingTo->duplicate( true ) ) {
-								// related the copy to the model we're copying relationship onto
-								$destinationObject->{"{$relationshipName}ID"} = $newTo->ID;
-							}
+						if ( $this->shouldDeepCopyClass( $related->class ) ) {
+							$related = $related->duplicate( true );
 						}
+						// relate either the copy or the existing related class
+						$destinationObject->{"{$relationshipName}ID"} = $related->ID;
+
 					}
 				}
 
 			}
 		}
+	}
+
+	/**
+	 * Given a class name check if it is an instance of one of our config.skip_duplicate_related_classes class names, if so return true, otherwise false.
+	 *
+	 * @param $relatedClassName
+	 *
+	 * @return bool
+	 */
+	protected function shouldDeepCopyClass( $relatedClassName ) {
+		// don't duplicate these blocks
+		$skipDuplicateClasses = $this->config()->get( 'skip_duplicate_related_classes' ) ?: [];
+		foreach ( $skipDuplicateClasses as $skipClassName ) {
+			if ( is_a( $relatedClassName, $skipClassName, true ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
