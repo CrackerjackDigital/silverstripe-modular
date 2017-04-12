@@ -33,8 +33,9 @@ class Block extends \Modular\VersionedModel implements LinkType {
 
 	private static $link_type = '';
 
+	// for each field as key this will be prefixed to the value on duplication
 	private static $prefix_duplicated_fields = [
-		'Title' => 'Copy of ',
+		#	'Title' => 'Copy of ',
 	];
 
 	// set in modular/_config/config.yml
