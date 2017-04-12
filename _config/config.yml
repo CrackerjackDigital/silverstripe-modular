@@ -14,3 +14,9 @@ Injector:
     class: Modular\Application
   Debugger:
     class: Modular\Debugger
+Modular\Blocks\Block:
+  skip_duplicate_related_classes:
+    - 'Page'
+    - 'File'
+    - 'Modular\Models\Tag'
+    - 'Modular\Models\GridListFilter'
