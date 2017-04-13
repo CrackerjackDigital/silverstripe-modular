@@ -266,7 +266,7 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	/**
 	 * @param string|int           $message
 	 * @param string               $source
-	 * @param \Exception|Exception $exception
+	 * @param \Exception|Exception $exception if passed will be thrown
 	 * @return $this
 	 * @throws \Modular\Exceptions\Exception
 	 */
@@ -283,12 +283,7 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 			}
 			throw $exception;
 		}
-		$this->log($message, self::DebugErr, $source, [
-			'file'      => $exception->getFile(),
-			'line'      => $exception->getLine(),
-			'code'      => $exception->getCode(),
-			'backtrace' => $exception->getTraceAsString()
-		]);
+		$this->log($message, self::DebugErr, $source);
 		return $this;
 	}
 
