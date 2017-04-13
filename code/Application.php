@@ -122,8 +122,9 @@ class Application extends Module {
 	 * this apps config.admin_email, Email.admin_email or Member.default_admin's Email.
 	 *
 	 * @return string
+	 * @throws \InvalidArgumentException
 	 */
-	protected static function find_system_admin() {
+	public static function find_system_admin() {
 		// hardcoded from config or use admin as default
 		$email = static::config()->get('system_admin_email') ?: static::find_admin_email();
 
