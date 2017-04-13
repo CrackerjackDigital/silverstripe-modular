@@ -66,12 +66,7 @@ abstract class Task extends \BuildTask implements Service {
 
 		$message = '';
 		if ($this->canRun()) {
-			if (!Director::is_cli()) {
-				ob_start('nl2br');
-			}
 			$this->execute($request->requestVars(), $message);
-
-			ob_end_flush();
 		} else {
 			$this->debug_info("Task $taskName not allowed to run");
 		}
