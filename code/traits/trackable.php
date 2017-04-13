@@ -15,9 +15,9 @@ trait trackable {
 		$className = get_called_class();
 		$signature = md5(microtime());
 		$this->debugger()->source("$className:$what@$signature");
-		$this->debugger()->info("Starting with message '$message'");
+		$this->debugger()->info("Starting" . ($message ? (" with message '$message'") : ''));
 	}
-	
+
 	/**
 	 * @param string $result will be output through print_r, so dont' pass anything sensitive
 	 */
