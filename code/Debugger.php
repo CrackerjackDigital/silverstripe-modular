@@ -447,6 +447,23 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 		return "$path/$fileName.log";
 	}
 
+	/**
+	 * Sets an error handler which will throw an exception of the same class as the passed exception
+	 * or just base \Exception if null.
+	 *
+	 * @param \Exception $exception
+	 *
+	 * @return callable the previous error handler
+	 */
+	public static function set_error_exception(\Exception $exception = null) {
+		return set_error_handler(
+			function ( $code, $message ) use ( $exception ) {
+				$exceptionClass = $exception ? get_class( $exception ) : \Exception::class;
+				throw new $exceptionClass( $message, $code);
+			}
+		);
+	}
+
 	public static function log_file() {
 		return static::config()->get( 'log_file' );
 	}

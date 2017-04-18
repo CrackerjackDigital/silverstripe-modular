@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular\Interfaces;
 
 interface Service {
@@ -16,10 +17,11 @@ interface Service {
 	/**
 	 * Get the service to do something.
 	 *
-	 * @param string $params (i.e. method name to call)
+	 * @param array|\ArrayAccess $params e.g. to merge into fields or configure service execution
+	 * @param string $resultMessage
 	 *
 	 * @return mixed
 	 */
-	public function execute( $params = null );
+	public function execute( $params = [], &$resultMessage = '' );
 
 }

@@ -1,20 +1,19 @@
 <?php
+
 namespace Modular\Interfaces;
+
+use Modular\Fields\QueuedState;
 
 interface Task {
 	/**
-	 * Get the task to do something.
+	 * Get the task to do something, this is the default method called
+	 * when a task is called as a BuildTask or as a QueuedTask.
 	 *
-	 * @param null   $params
+	 * @param array|\ArrayAccess $params
 	 * @param string $resultMessage
 	 *
 	 * @return mixed
 	 */
-	public function execute($params = null, &$resultMessage = '');
+	public function execute( $params = [], &$resultMessage = '' );
 
-	/**
-	 * Finish the task and perhaps delete it or update it to an 'archived' state.
-	 * @return mixed
-	 */
-	public function archive();
 }

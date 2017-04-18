@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular;
 
 use Modular\Controllers\Model as ModelController;
@@ -10,6 +11,10 @@ use SSViewer;
 
 class Application extends Module {
 	use reflection;
+	// convenience constants for referencing string constants
+	const SystemAdmin = 'SystemAdmin';
+	const Admin       = 'Admin';
+
 	// the name of the service expected by Injector e.g. in factory method
 	const ServiceName  = 'Application';
 	const ThemeMobile  = 'mobile';
@@ -47,9 +52,9 @@ class Application extends Module {
 
 	public function __construct() {
 		$this->runID = microtime();
-		$this->url   = isset($_REQUEST['url']) ? $_REQUEST['url'] : '[unknown url]';
+		$this->url   = isset( $_REQUEST['url'] ) ? $_REQUEST['url'] : '[unknown url]';
 
-		$this->debugger()->info("START: $this->runID ($this->url)", get_called_class());
+		$this->debugger()->info( "START: $this->runID ($this->url)", get_called_class() );
 
 		parent::__construct();
 		static::start();
@@ -112,35 +117,36 @@ class Application extends Module {
 			'member-' . static::admin_field_name(),
 			static::cache(
 				'email-' . self::Admin,
-				static::find_admin_email()
+				static::admin_email()
 			)
 		);
 	}
 
 	/**
 	 * Try to find admin email address via extension call to provideEmail, otherwise try from
-	 * this apps config.admin_email, Email.admin_email or Member.default_admin's Email.
+	 * this apps config.admin_email, Email.admin_email or Member.default_admin's Email. If all else fails
+	 * returns the default_admin according to \Member.
 	 *
 	 * @return string
 	 * @throws \InvalidArgumentException
 	 */
 	public static function find_system_admin() {
 		// hardcoded from config or use admin as default
-		$email = static::config()->get('system_admin_email') ?: static::find_admin_email();
+		$email = static::config()->get( 'system_admin_email' ) ?: static::admin_email();
 
 		// try site config
-		if ($siteConfig = \SiteConfig::current_site_config()) {
+		if ( $siteConfig = \SiteConfig::current_site_config() ) {
 			$for = self::SystemAdmin;
 
-			if ($siteConfig->hasField('SystemAdminEmail')) {
+			if ( $siteConfig->hasField( 'SystemAdminEmail' ) ) {
 
 				$email = $siteConfig->SystemAdminEmail;
-				static::debug_trace("Found system admin email via site config: '$email'");
+				static::debug_trace( "Found system admin email via site config: '$email'" );
 
-			} elseif ($options = $siteConfig->extend('provideEmail', $for) ?: []) {
+			} elseif ( $options = $siteConfig->extend( 'provideEmail', $for ) ?: [] ) {
 
-				$email = reset($options);
-				static::debug_trace("Found system admin email via extension call: '$email'");
+				$email = reset( $options );
+				static::debug_trace( "Found system admin email via extension call: '$email'" );
 
 			} else {
 				static::debug_trace(
@@ -149,16 +155,19 @@ class Application extends Module {
 			}
 		}
 
-		return \Member::get()->filter(['Email' => $email])->first();
+		return \Member::get()->filter( [ 'Email' => $email ] )->first() ?: \Member::default_admin();
 	}
 
 	/**
 	 * Find a system admin and return the Email address.
+	 *
 	 * @return string
+	 * @throws \InvalidArgumentException
 	 */
 	public static function system_admin_email() {
 		/** @var \Member $sysAdmin */
 		$sysAdmin = static::find_system_admin();
+
 		return $sysAdmin ? $sysAdmin->Email : \Member::default_admin()->Email;
 	}
 
@@ -195,6 +204,7 @@ class Application extends Module {
 
 	/**
 	 * Returns the name used throughout the system (e.g. on SiteConfig) where the SystemAdminEmail is stored
+	 *
 	 * @return string
 	 */
 	public static function system_admin_field_name() {

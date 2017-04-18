@@ -18,6 +18,9 @@ class Model extends \DataObject {
 	use reflection;
 	use debugging;
 
+	// extensions, e.g. Fields, will add to this, can also be configured via normal config mechanisms
+	private static $validation = [];
+
 	/**
 	 * Invoking a type returns itself.
 	 *
@@ -29,6 +32,14 @@ class Model extends \DataObject {
 
 	public function model() {
 		return $this();
+	}
+
+	/**
+	 * Get all validation rules from Fields extending this Model which should have updated the model via config mechanism.
+	 * @return array
+	 */
+	public function validationRules() {
+		return $this->config()->get('validation');
 	}
 
 	/**

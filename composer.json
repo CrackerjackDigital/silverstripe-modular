@@ -31,10 +31,6 @@
 		{
 			"type": "vcs",
 			"url": "https://github.com/CrackerjackDigital/silverstripe-modular-types.git"
-		},
-		{
-			"type": "vcs",
-			"url": "https://github.com/CrackerjackDigital/silverstripe-modular-fields.git"
 		}
 	],
 	"extra": {

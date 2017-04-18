@@ -1,14 +1,16 @@
 <?php
+
 namespace Modular;
 
 use Director;
-use Modular\Interfaces\Service;
+use Modular\Interfaces\Service as ServiceInterface;
+use Modular\Interfaces\Task as TaskInterface;
 use Modular\Traits\debugging;
 use Modular\Traits\enabler;
 use Modular\Traits\trackable;
 use SS_HTTPRequest;
 
-abstract class Task extends \BuildTask implements Service {
+abstract class Task extends \BuildTask implements ServiceInterface, TaskInterface {
 	use enabler;
 	use debugging;
 	use trackable;
@@ -21,13 +23,12 @@ abstract class Task extends \BuildTask implements Service {
 	/**
 	 * Service interface method.
 	 *
-	 * @param null   $params
-	 *
-	 * @param string $resultMessage
+	 * @param array|\ArrayAccess $params
+	 * @param string             $resultMessage
 	 *
 	 * @return mixed
 	 */
-	abstract public function execute($params = null, &$resultMessage = '');
+	abstract public function execute( $params = [], &$resultMessage = '' );
 
 	/**
 	 * Simple singleton
@@ -39,38 +40,32 @@ abstract class Task extends \BuildTask implements Service {
 	 */
 	public static function get( $options = null, $env = '' ) {
 		static $instance;
-		if (!$instance) {
+		if ( ! $instance ) {
 			$instance = new static( $options, $env );
 		}
-		return $instance;
-	}
 
-	/**
-	 * Task can run if enabled and either is_cli or logged in as ADMIN.
-	 * @return bool
-	 */
-	public function canRun() {
-		return static::enabled() && (Director::isDev() || Director::is_cli() || \Permission::check('ADMIN'));
+		return $instance;
 	}
 
 	/**
 	 *
 	 * @param SS_HttpRequest $request
 	 */
-	final public function run($request) {
-		$this->debugger()->toScreen(Debugger::DebugAll);
+	final public function run( $request ) {
+		$this->debugger()->toScreen( Debugger::DebugAll );
 
-		$this->trackable_start( __METHOD__);
+		$taskName = get_class( $this );
+		$resultMessage = '';
 
-		$taskName = get_class($this);
+		$this->trackable_start( __METHOD__ );
 
-		$message = '';
-		if ($this->canRun()) {
-			$this->execute($request->requestVars(), $message);
+		$runnable = static::enabled() && ( Director::isDev() || Director::is_cli() || \Permission::check( 'ADMIN' ) );
+		if ( $runnable ) {
+			$this->execute( $request->requestVars(), $resultMessage );
 		} else {
-			$this->debug_info("Task $taskName not allowed to run");
+			$this->debug_info( "Task $taskName not allowed to run" );
 		}
-		$this->trackable_end($message);
+		$this->trackable_end( $resultMessage );
 	}
 
 }
