@@ -451,15 +451,19 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	 * Sets an error handler which will throw an exception of the same class as the passed exception
 	 * or just base \Exception if null.
 	 *
+	 * @param string     $message will receive the error message
+	 * @param null       $code    will receive the error code
 	 * @param \Exception $exception
 	 *
 	 * @return callable the previous error handler
 	 */
-	public static function set_error_exception(\Exception $exception = null) {
+	public static function set_error_exception( &$message, &$code = null, \Exception $exception = null ) {
 		return set_error_handler(
-			function ( $code, $message ) use ( $exception ) {
+			function ( $errorCode, $errorMessage ) use ( &$message, &$code, $exception ) {
 				$exceptionClass = $exception ? get_class( $exception ) : \Exception::class;
-				throw new $exceptionClass( $message, $code);
+				$message        = $errorMessage;
+				$code           = $errorCode;
+				throw new $exceptionClass( $errorMessage, $errorCode );
 			}
 		);
 	}

@@ -1,6 +1,8 @@
 <?php
 namespace Modular\Traits;
 
+use Modular\Helpers\Strings;
+
 require_once 'config.php';
 
 trait lang {
@@ -31,12 +33,8 @@ trait lang {
 
 		$tokens = array_merge(
 			$extraTokens,
-			[
-				'singular' => $this->singularName(),
-				'plural'   => $this->pluralName(),
-			],
-			($field instanceof \FormField)
-				? ['label' => $field->Title()]
+			( $field instanceof \FormField )
+				? [ 'label' => $field->Title() ]
 				: [],
 			$tokens
 		);
@@ -57,7 +55,8 @@ trait lang {
 				if (!$value = _t("$extensionClass.$fieldName.$decoration", '', $tokens)) {
 					// try again extension with 'ID'
 					if (!$value = _t("$extensionClass.$fieldName.{$decoration}ID", '', $tokens)) {
-						$value = _t('IntentionallyGoingToFail', $default, $tokens);
+						// no lang strings found, return detokenised default
+						$value = Strings::detokenise($default, $tokens);
 					}
 				}
 			}
@@ -71,12 +70,19 @@ trait lang {
 	 * will be filled into decoration text placeholder {token-name}
 	 *
 	 * @return array
+	 *
 	 */
 	protected function fieldDecorationTokens() {
+		/** @var \DataObject $model */
 		$model = $this();
+		$single = $this->singularName();
+		$plural = $this->pluralName();
+
 		return [
-			'singlename' => $this->singularName(),
-		    'pluralname' => $this->pluralName(),
+			'singlename' => $single,
+		    'pluralname' => $plural,
+		    'singular' => $single,
+		    'plural' => $plural,
 		    'title' => $model ? $model->Title : '',
 		    'id' => $model->isInDB() ? $model->ID : _t('Global.New', 'new')
 		];

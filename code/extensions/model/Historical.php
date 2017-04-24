@@ -2,14 +2,13 @@
 namespace Modular\Extensions\Model;
 
 use Modular\Traits\enabler;
-use SocialModelExtension;
 use SQLQuery;
 
 /**
  * Extension which makes models not really delete when delete is called but instead flag as
  * deleted and when selecting models ignore those flagged as deleted.
  */
-class Historical extends SocialModelExtension {
+class Historical extends \Modular\ModelExtension {
 	use enabler;
 
     private static $db = [
