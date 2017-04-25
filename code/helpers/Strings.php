@@ -4,32 +4,10 @@ namespace Modular\Helpers;
 
 use Modular\Debugger;
 use Modular\Object;
+use Modular\Traits\tokens;
 
 class Strings extends Object {
-
-	/**
-	 * Replace {token} in string from provided map of token => value
-	 *
-	 * @param       $string
-	 * @param array $replaceWith
-	 * @return mixed
-	 */
-	public static function detokenise($string, array $replaceWith) {
-		$tokens = array_map(
-			function ($token) {
-				return '{' . $token . '}';
-			},
-			array_keys(
-				$replaceWith
-			)
-		);
-
-		return str_replace(
-			$tokens,
-			array_values($replaceWith),
-			$string
-		);
-	}
+	use tokens;
 
 	/**
 	 * Given a CamelCASEString returns a 'Proper CASE String' preserving acronyms

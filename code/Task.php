@@ -7,6 +7,7 @@ use Modular\Interfaces\Service as ServiceInterface;
 use Modular\Interfaces\Task as TaskInterface;
 use Modular\Traits\debugging;
 use Modular\Traits\enabler;
+use Modular\Traits\timeout;
 use Modular\Traits\trackable;
 use SS_HTTPRequest;
 
@@ -14,6 +15,7 @@ abstract class Task extends \BuildTask implements ServiceInterface, TaskInterfac
 	use enabler;
 	use debugging;
 	use trackable;
+	use timeout;
 
 	const EnablerConfigVar = 'task_enabled';
 
@@ -52,6 +54,8 @@ abstract class Task extends \BuildTask implements ServiceInterface, TaskInterfac
 	 * @param SS_HttpRequest $request
 	 */
 	final public function run( $request ) {
+		set_time_limit( $this->timeout() );
+
 		$this->debugger()->toScreen( Debugger::DebugAll );
 
 		$taskName = get_class( $this );
