@@ -28,7 +28,6 @@ class Application extends Module {
 		self::ThemeDefault => [ '*' ],
 		#	self::ThemeMobile => [ 'm.*' ],
 	];
-	private static $safe_paths = [];
 
 	// use this
 	private static $default_theme = self::ThemeDefault;
@@ -53,8 +52,6 @@ class Application extends Module {
 	public function __construct() {
 		$this->runID = microtime();
 		$this->url   = isset( $_REQUEST['url'] ) ? $_REQUEST['url'] : '[unknown url]';
-
-		$this->debugger()->info( "START: $this->runID ($this->url)", get_called_class() );
 
 		parent::__construct();
 		static::start();

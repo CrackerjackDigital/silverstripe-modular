@@ -1,5 +1,9 @@
 <?php
+
 namespace Modular;
+
+use Modular\Traits\logging;
+use \Modular\Interfaces\Logger as LoggerInterface;
 
 /**
  * Non-static based version of SS_Log allowing multiple different loggers to be instanced.
@@ -46,13 +50,18 @@ namespace Modular;
  * @package    framework
  * @subpackage dev
  */
+class Logger extends Object implements LoggerInterface {
+	use logging;
 
-class Logger extends Object {
 	const ERR    = \Zend_Log::ERR;
 	const WARN   = \Zend_Log::WARN;
 	const NOTICE = \Zend_Log::NOTICE;
 	const INFO   = \Zend_Log::INFO;
 	const DEBUG  = \Zend_Log::DEBUG;
+
+	// format for prefix to log file name in format understood by 'date' function
+	// default to one log file per day
+	const LogFilePrefixDateFormat = 'Ymd';
 
 	/**
 	 * Logger class to use.
@@ -66,6 +75,9 @@ class Logger extends Object {
 	 * @var object
 	 */
 	protected $logger;
+
+
+	protected $level;
 
 	/**
 	 * @var array Logs additional context from PHP's superglobals.
@@ -85,21 +97,28 @@ class Logger extends Object {
 		),
 	);
 
+	public function level( $level = null) {
+		if (func_num_args()) {
+			$this->level = $level;
+		}
+		return $this->level;
+	}
+
 	/**
 	 * Get the logger currently in use, or create a new one if it doesn't exist.
 	 *
 	 * @return \SS_ZendLog
 	 */
 	public function logger() {
-		if (!$this->logger) {
+		if ( ! $this->logger ) {
 			// Create default logger
 			$this->logger = new static::$logger_class;
 
 			// Add default context (shouldn't change until the actual log event happens)
-			foreach (static::$log_globals as $globalName => $keys) {
-				foreach ($keys as $key) {
-					$val = isset($GLOBALS[ $globalName ][ $key ]) ? $GLOBALS[ $globalName ][ $key ] : null;
-					$this->logger->setEventItem(sprintf('$%s[\'%s\']', $globalName, $key), $val);
+			foreach ( static::$log_globals as $globalName => $keys ) {
+				foreach ( $keys as $key ) {
+					$val = isset( $GLOBALS[ $globalName ][ $key ] ) ? $GLOBALS[ $globalName ][ $key ] : null;
+					$this->logger->setEventItem( sprintf( '$%s[\'%s\']', $globalName, $key ), $val );
 				}
 			}
 
@@ -128,25 +147,27 @@ class Logger extends Object {
 	 *
 	 * @param object $writer Zend_Log_Writer_Abstract instance
 	 */
-	public function removeWriter($writer) {
-		$this->logger()->removeWriter($writer);
+	public function removeWriter( $writer ) {
+		$this->logger()->removeWriter( $writer );
 	}
 
 	/**
 	 * Add a writer instance to the logger.
 	 *
-	 * @param object $writer     Zend_Log_Writer_Abstract instance
-	 * @param const  $priority   Priority. Possible values: SS_Log::ERR, SS_Log::WARN or SS_Log::NOTICE
-	 * @param        $comparison Priority comparison operator.  Acts on the integer values of the error
-	 *                           levels, where more serious errors are lower numbers.  By default this is "=", which means only
-	 *                           the given priority will be logged.  Set to "<=" if you want to track errors of *at least*
-	 *                           the given priority.
+	 * @param object $writer                       Zend_Log_Writer_Abstract instance
+	 * @param string $priority                     Priority. Possible values: SS_Log::ERR, SS_Log::WARN or SS_Log::NOTICE
+	 * @param string $comparison                   Priority comparison operator.  Acts on the integer values of the error
+	 *                                             levels, where more serious errors are lower numbers.  By default this is "=", which means only
+	 *                                             the given priority will be logged.  Set to "<=" if you want to track errors of *at least*
+	 *                                             the given priority.
+	 *
+	 * @throws \Zend_Log_Exception
 	 */
-	public function addWriter($writer, $priority = null, $comparison = '=') {
-		if ($priority) {
-			$writer->addFilter(new \Zend_Log_Filter_Priority($priority, $comparison));
+	public function addWriter( $writer, $priority = null, $comparison = '=' ) {
+		if ( $priority ) {
+			$writer->addFilter( new \Zend_Log_Filter_Priority( $priority, $comparison ) );
 		}
-		$this->logger()->addWriter($writer);
+		$this->logger()->addWriter( $writer );
 	}
 
 	/**
@@ -157,33 +178,33 @@ class Logger extends Object {
 	 * along a list of debug information for the writer to handle, such as
 	 * error code, error line, error context (backtrace).
 	 *
-	 * @param mixed  $message  Exception object or array of error context variables
-	 * @param const  $priority Priority. Possible values: SS_Log::ERR, SS_Log::WARN or SS_Log::NOTICE
-	 * @param  mixed $extras   Extra information to log in event
+	 * @param string $message  Exception object or array of error context variables
+	 * @param string $priority Priority. Possible values: SS_Log::ERR, SS_Log::WARN or SS_Log::NOTICE
+	 * @param string $extras   Extra information to log in event
 	 */
-	public function log($message, $priority, $extras = null) {
-		if ($message instanceof \Exception) {
+	public function log( $message, $priority, $extras = null ) {
+		if ( $message instanceof \Exception ) {
 			$message = array(
 				'errno'      => '',
 				'errstr'     => $message->getMessage(),
 				'errfile'    => $message->getFile(),
 				'errline'    => $message->getLine(),
-				'errcontext' => $message->getTrace()
+				'errcontext' => $message->getTrace(),
 			);
-		} elseif (is_string($message)) {
-			$trace = \SS_Backtrace::filtered_backtrace();
+		} elseif ( is_string( $message ) ) {
+			$trace     = \SS_Backtrace::filtered_backtrace();
 			$lastTrace = $trace[0];
-			$message = array(
+			$message   = array(
 				'errno'      => '',
 				'errstr'     => $message,
-				'errfile'    => isset($lastTrace['file']) ? $lastTrace['file'] : null,
-				'errline'    => isset($lastTrace['line']) ? $lastTrace['line'] : null,
-				'errcontext' => $trace
+				'errfile'    => isset( $lastTrace['file'] ) ? $lastTrace['file'] : null,
+				'errline'    => isset( $lastTrace['line'] ) ? $lastTrace['line'] : null,
+				'errcontext' => $trace,
 			);
 		}
 		try {
-			$this->logger()->log($message, $priority, $extras);
-		} catch (\Exception $e) {
+			$this->logger()->log( $message, $priority, $extras );
+		} catch ( \Exception $e ) {
 		}
 	}
 

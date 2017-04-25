@@ -2,13 +2,16 @@
 namespace Modular;
 
 use Director;
-use Modular\Exceptions\Exception;
 use Modular\Traits\config;
+use Modular\Traits\logging;
 use Modular\Traits\requirements;
+use Modular\Traits\safe_paths;
 
 abstract class Module extends Object {
 	use requirements;
 	use config;
+	use logging;
+	use safe_paths;
 
 	// handled file types which for simplicity are also the file extensions
 	const FileTypeCSS                = 'css';
@@ -30,17 +33,10 @@ abstract class Module extends Object {
 	/** @var string path to module relative to site root, override in derived class or set in config */
 	private static $module_path;
 
-	/** @var array of class names or injector service names which can provide an array of safe paths which the application can write to
-	 *  Applicaiton and Debugger should be defined in Modular configuration or overridden in application configuration.
-	 *  Each safe path provider can have its own config.safe_paths to add, if none set then DefaultSafePath will be used (see make_safe_path).
-	 */
-	private static $safe_path_providers = [
+	// add paths it is safe for the application to write to here.
+	private static $safe_paths = [
+		ASSETS_DIR
 	];
-
-	private static $log_path = '';
-
-	// should be set in application config or other providers path or self.DefaultSafePath with be used
-	private static $safe_paths = [];
 
 	// what we load and when to load, configure in e.g. a requirements.yml for the module or application.
 	private static $requirements = [
@@ -97,200 +93,6 @@ abstract class Module extends Object {
 	private static $json_decode_options = 0;
 
 	private static $decode_depth = 512;
-
-	/**
-	 * TODO refactor this sprawl
-	 * Check the path is inside the base folder or relative to base folder when safe paths are appended and the real path is resolved.
-	 *
-	 * e.g. if  config.allow_paths = [ '../logs' ]
-	 *      and web root is /var/sites/website/htdocs
-	 *
-	 *      then
-	 *          is_safe_path('/var/sites/website/logs') will return true
-	 *      but
-	 *          is_safe_path('/var/sites/website/conf') will return false
-	 *
-	 * by default configuration the assets folder is always a safe path.
-	 *
-	 * @param string $path              (no filename)
-	 * @param bool   $fail              throw an exception if test fails
-	 * @param bool   $createIfNotExists create the directory if it doesn't exist (and is in assets folder only).
-	 * @return bool|string path or false if not safe
-	 * @throws \Modular\Exceptions\Exception
-	 */
-	public static function make_safe_path($path, $fail = false, $createIfNotExists = true) {
-		$path = rtrim($path, '.');
-
-		if ($fail && !$path) {
-			throw new Exception("Empty path passed");
-		}
-		// output this path in errors before realpath etc
-		$originalPath = $path;
-
-		$basePath = rtrim(BASE_PATH, DIRECTORY_SEPARATOR);
-		$assetsPath = rtrim(ASSETS_PATH, DIRECTORY_SEPARATOR);
-		if (false !== strpos($path, '.')) {
-
-			$path = realpath($basePath . DIRECTORY_SEPARATOR . $path);
-
-		} elseif (substr($path, 0, 1) == DIRECTORY_SEPARATOR) {
-			// absolute from server root (not web root), but up one so e.g. '../logs' will work
-			// TODO: this is not nice, seems arbitrary, fix
-			$rpath = dirname(realpath($path));
-
-			if (substr($rpath, 0, strlen(dirname($basePath))) != dirname($basePath)) {
-				// we are absolute from assets folder
-				$path = $assetsPath . DIRECTORY_SEPARATOR . $path;
-			} else {
-				$path = $rpath . DIRECTORY_SEPARATOR . basename($path);
-			}
-		} else {
-			// relative to assets folder
-			$path = static::safe_path();
-		}
-
-		// rebuild path with parent 'realnamed' so we can at least be one path segment out ok (realpath fails if a dir doesn't exist)
-		if ($parentPath = realpath(dirname($path))) {
-			// parent exists so use that with the last bit of the
-			$path = rtrim($parentPath, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . basename($path);
-		} else {
-			// iterate through safe paths finding one that exists or null
-			$path = static::safe_path();
-		}
-
-		$found = false;
-
-		// loop through each candidate path and append to the web root or use if absolute path to test against the passed path
-		// paths are normalised to exclude trailing '/'
-		$safePaths = static::safe_paths();
-
-		foreach ($safePaths as $candidate) {
-			$candidate = rtrim($candidate, DIRECTORY_SEPARATOR);
-
-			if (realpath($candidate) == $candidate) {
-				// if it's a real path then try that
-				$test = rtrim($candidate, DIRECTORY_SEPARATOR);
-			} else {
-				// else treat as relative to base folder try that
-				$test = rtrim(realpath($basePath . DIRECTORY_SEPARATOR . $candidate), DIRECTORY_SEPARATOR);
-			}
-			// e.g. "/var/sites/website/logs"
-			if (substr($path, 0, strlen($test)) == $test) {
-				// it matches one of the registered config.safe_paths so break;
-				$found = true;
-				break;
-			}
-		}
-		$path = rtrim(realpath($path), DIRECTORY_SEPARATOR);
-
-		// create if requested and in assets folder
-		if (!is_dir($path) && $createIfNotExists && (substr($path, 0, strlen(ASSETS_PATH)) == ASSETS_PATH)) {
-			\Filesystem::makeFolder($path);
-		}
-		if ($fail && !($found && is_dir($path))) {
-			throw new Exception("Not a safe path or path doesn't exist: '$originalPath");
-		}
-		return $found ? $path : false;
-	}
-
-	/**
-	 * Returns a path from safe_paths that exists, or self.DefaultSafePath. Any trailing directory separator will be stripped.
-	 * @return mixed|string
-	 */
-	public static function safe_path() {
-		$basePath = rtrim(BASE_PATH, DIRECTORY_SEPARATOR);
-		$safePaths = static::safe_paths();
-		$path = '';
-		foreach ($safePaths as $path) {
-			if ($path = realpath($basePath . DIRECTORY_SEPARATOR . $path)) {
-				break;
-			}
-		}
-		if (!$path) {
-			$path = static::DefaultSafePath;
-		}
-		return rtrim($path, DIRECTORY_SEPARATOR);
-	}
-
-	/**
-	 * @return array
-	 */
-	public static function safe_paths() {
-		$paths = [];
-		$injector = \Injector::inst();
-
-		return static::config()->get('safe_paths');
-
-		if ($providers = static::config()->get('safe_path_providers')) {
-			foreach ($providers as $serviceOrClassName) {
-				if ($injector->hasService($serviceOrClassName)) {
-
-					$append = $injector->get($serviceOrClassName)->config()->get('safe_paths') ?: [];
-
-				} else if (\ClassInfo::exists($serviceOrClassName)) {
-
-					$append = \Config::inst()->get($serviceOrClassName, 'safe_paths') ?: [];
-
-				} else {
-
-					$append = [];
-				}
-				$paths = array_merge($paths, array_filter($append));
-			}
-		} else {
-			// no providers defined, just use those defined on the application
-			$paths = array_merge(
-				$paths,
-				\Injector::inst()->get('Application')->config()->get('safe_paths') ?: []
-			);
-		}
-
-		return array_unique($paths);
-	}
-
-	/**
-	 * Check if a path begins with a safe path.
-	 * @param string     $path
-	 * @param bool $failIfMissing return false if the path provided doesn't exist already (like realpath does)
-	 * @return bool
-	 */
-	public static function in_safe_path($path, $failIfMissing = false) {
-		if (!$real = realpath($path) && $failIfMissing) {
-			return false;
-		}
-		foreach (static::safe_paths() as $safe) {
-			if (substr($path, 0, strlen($safe)) == $safe) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Return a directory to put logs in from supplied classes config or module's.
-	 *
-	 * @param null $className
-	 * @return string
-	 * @throws \Modular\Exceptions\Exception
-	 */
-	public static function log_path($className = null) {
-		$path = static::config($className ?: get_called_class())->get('log_path');
-		return static::make_safe_path($path, false, true);
-	}
-
-	/**
-	 * Return a filename without a path to use for logging from the supplied class or module's.
-	 */
-	public static function log_file($className = null) {
-		if (!$fileName = static::config($className ?: get_called_class())->get('log_file')) {
-			if (defined('SS_ERROR_LOG')) {
-				$fileName = basename(SS_ERROR_LOG);
-			} else {
-				$fileName = 'silverstripe.log';
-			}
-		}
-		return $fileName;
-	}
 
 	/**
 	 * Return classes configured log_email or module's.
@@ -364,98 +166,7 @@ abstract class Module extends Object {
 		}
 		return [];
 	}
-/*  Moved to requirements trait
-	/**
-	 * Adds javascript files to requirements based on them ending in '.js'
-	 * using config.install_dir as base path.
-	 *
-	 * @param        $controller
-	 * @param string $when - look at before or after components.
-	 *\/
-	public static function requirements($controller, $when) {
-		$forClass = get_called_class();
 
-		// have to save and pass as later calls will be this class not the real caller.
-		$moduleName = $forClass::module_name();
-
-		if ($when == self::Block) {
-
-			static::block(static::get_config_setting('requirements', self::Block, $forClass));
-
-		} else {
-			$requirements = static::get_config_setting('requirements', $when, $forClass);
-
-			$required = static::add_requirements($controller, $requirements, $moduleName);
-
-			if (static::config()->get('combine')) {
-				static::combine($required, $moduleName);
-			}
-		}
-	}
-
-	/**
-	 * Iterate through configured requirements and require if:
-	 *
-	 * - The type (jst, etc from FileTypeABC constants) is enabled
-	 * - The settings for the file match e.g. the current runtime environment
-	 * (dev, test etc)
-	 * - The file exists (this may be loosened once backend requirements can
-	 * handle non-existant files)
-	 *
-	 * @param       $controller
-	 * @param array $requirements
-	 * @param       $moduleName
-	 * @return array
-	 *\/
-	protected static function add_requirements($controller, array $requirements, $moduleName) {
-		if ($requirements) {
-
-			// files to get combined get added here under key of file type, e.g. 'js', or 'css'
-			$required = self::include_script_types();
-
-			$envType = Director::get_environment_type();
-
-			foreach ($requirements as $key => $path) {
-				if (is_numeric($key)) {
-					$info = true;
-				} else {
-					// map has file path as key, information as value, if info is false then don't include
-					$info = $path;
-					$path = $key;
-				}
-				if (!$info) {
-					// info is falsish, skip this requirement.
-					continue;
-				}
-				if (is_array($info)) {
-					// info is an array of environments in which to load this requirement,
-					// test if any matches current environment
-					if (!in_array($envType, $info)) {
-						continue;
-					}
-				}
-
-				$path = static::requirement_path($path);
-
-				if (!is_file(Controller::join_links(Director::baseFolder(), $path))) {
-					user_error("No such requirement file: '$path'");
-				}
-				foreach (static::include_script_types() as $extension => $_) {
-					if (substr($path, -strlen($extension)) == $extension) {
-
-						// MAGIC METHOD CALL through to self::js, self::css etc
-						static::$extension($controller, $path, $info);
-
-						$required[ $extension ][ basename($path) ] = $path;
-					}
-				}
-
-			}
-			return $required;
-		}
-		return [];
-	}
-*/
 	/**
 	 * SilverStripe require CSS
 	 *

@@ -7,12 +7,14 @@ use Modular\Interfaces\Debugger as DebuggerInterface;
 use Modular\Interfaces\Logger as LoggerInterface;
 use Modular\Traits\bitfield;
 use Modular\Traits\enabler;
+use Modular\Traits\logging;
 use SS_LogEmailWriter;
 use SS_LogFileWriter;
 
 class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	use bitfield;
 	use enabler;
+	use logging;
 
 	const DefaultSendEmailsFrom = 'servers@moveforward.co.nz';
 
@@ -32,17 +34,6 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 
 	private static $send_emails_from = self::DefaultSendEmailsFrom;
 
-	// name of log file to create if none supplied to toFile
-	private static $log_file = '';
-
-	// path to create log file in relative to base folder
-	private static $log_path = ASSETS_PATH;
-
-	private $logger;
-
-	// set when toFile is called.
-	private $logFilePathName;
-
 	private $safe_paths = [];
 
 	// when destructor is called on the logger email the log file to this address
@@ -56,7 +47,6 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 
 	public function __construct( $level = self::LevelFromEnv, $source = '' ) {
 		parent::__construct();
-		$this->logger = new \Modular\Logger();
 		$this->init( $level, $source );
 	}
 
@@ -79,9 +69,26 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 		}
 	}
 
+	/**
+	 * Return instance of a logger to log things to.
+	 * @return \Modular\Logger
+	 */
+	public function logger() {
+		if (!$this->logger) {
+			$this->logger = new Logger();
+		}
+		return $this->logger;
+	}
+
+	/**
+	 * Return instance of a debugger class to do debugging calls on (including logging).
+	 * @param int|null $level
+	 * @param string   $source
+	 *
+	 * @return mixed
+	 */
 	public static function debugger( $level = self::LevelFromEnv, $source = '' ) {
 		$class = get_called_class();
-
 		return new $class( $level, $source );
 	}
 
@@ -119,17 +126,6 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	}
 
 	/**
-	 * @return null|string
-	 */
-	public function readLog() {
-		if ( $this->logFilePathName ) {
-			return file_get_contents( $this->logFilePathName );
-		}
-
-		return null;
-	}
-
-	/**
 	 * Return the level for a given environment.
 	 *
 	 * @param string $env 'dev', 'test', 'live'
@@ -144,14 +140,14 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	/**
 	 * Set levels and source and if flags indicate debugging to file screen or email initialise those aspects of debugging using defaults from config.
 	 *
-	 * @param      $level
-	 * @param null $source
+	 * @param        $level
+	 * @param string $source
 	 *
 	 * @return $this
-	 * @throws \Modular\Exceptions\Application
+	 * @throws \Zend_Log_Exception
 	 */
 	protected function init( $level, $source = null ) {
-		$this->logger->clearWriters();
+		$this->logger()->clearWriters();
 
 		$this->level( $level );
 		$this->source( $source );
@@ -160,9 +156,7 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 		$level = $this->level();
 
 		if ( $this->testbits( $level, self::DebugFile ) ) {
-			if ( $logFile = $this->makeLogFileName() ) {
-				$this->toFile( $level, $logFile );
-			}
+			$this->toFile( $level );
 		}
 		if ( $this->testbits( $level, self::DebugScreen ) ) {
 			$this->toScreen( $level );
@@ -226,7 +220,7 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 		$message = static::digest( $message, $source, $tokens );
 
 		if ( $level = $this->lvl( $facilities ) ) {
-			$this->logger->log( ( $source ? "$source: " : '' ) . $message . PHP_EOL, $level );
+			$this->logger()->log( ( $source ? "$source: " : '' ) . $message . PHP_EOL, $level );
 		}
 
 		return $this;
@@ -314,14 +308,15 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	/**
 	 * Set the email address to send emails to
 	 *
-	 * @param $address
-	 * @param $level
+	 * @param int    $address
+	 * @param string $level
 	 *
 	 * @return $this
+	 * @throws \Zend_Log_Exception
 	 */
 	public function toEmail( $address, $level ) {
 		if ( $address ) {
-			$this->logger->addWriter(
+			$this->logger()->addWriter(
 				new SS_LogEmailWriter( $address ),
 				$level
 			);
@@ -338,29 +333,16 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	 * @param  string $filePathName log to this file or if not supplied generate one
 	 *
 	 * @return $this
+	 * @throws \Zend_Log_Exception
 	 */
 	public function toFile( $level, $filePathName = '' ) {
 		$originalFilePathName = $filePathName;
 
-		if ( $filePathName ) {
-			if ( substr( $filePathName, - 4 ) != '.log' ) {
-				$filePathName .= ".log";
-			}
-		} else {
-			$filePathName = static::log_path();
+		if ( ! $filePathName ) {
+			$filePathName = static::log_path_name( '.log' );
 		}
-
-		if ( trim( dirname( $filePathName ), '.' ) == '' ) {
-			$filePathName = ( static::log_path() ) . '/' . $filePathName;
-		}
-		if ( $path = Application::make_safe_path( dirname( $filePathName ) ) ) {
-			$this->logFilePathName = Controller::join_links(
-				$path,
-				basename( $filePathName )
-			);
-		};
-		if ( ! $this->logFilePathName ) {
-			$this->logFilePathName = static::log_path() . '/' . basename( $filePathName );
+		if ( substr( $filePathName, - 4 ) != '.log' ) {
+			$filePathName .= ".log";
 		}
 
 		// if truncate is specified then do so on the log file
@@ -370,7 +352,7 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 			}
 		}
 
-		$this->logger->addWriter(
+		$this->logger()->addWriter(
 			new SS_LogFileWriter( $this->logFilePathName ),
 			$this->lvl( $level ),
 			"<="
@@ -390,15 +372,16 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	}
 
 	/**
-	 * @param int $level
+	 * @param int|null $level
 	 *
 	 * @return $this
+	 * @throws \Zend_Log_Exception
 	 */
 	public function toScreen( $level = self::LevelFromEnv ) {
 		if ( is_null( $level ) || $level === self::LevelFromEnv ) {
 			$level = $this->config()->get( 'environment_levels' )[ SS_ENVIRONMENT_TYPE ];
 		}
-		$this->logger->addWriter( new \LogOutputWriter( $level ) );
+		$this->logger()->addWriter( new \LogOutputWriter( $level ) );
 
 		return $this;
 	}
@@ -417,37 +400,6 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	}
 
 	/**
-	 * Returns a log file path and name relative to the assets folder using config.log_path. If path doesn't exist
-	 * and is in the assets folder then will try and create it (recursively). If it is outside
-	 * the assets folder then will not try and create the path.
-	 *
-	 * @return string
-	 * @throws \Modular\Exceptions\Exception
-	 */
-	protected function makeLogFileName() {
-		$filePathName = static::log_file();
-
-		if ( $filePathName ) {
-			// if no path then dirname returns '.' we don't want that but empty path instead
-			$path = trim( dirname( $filePathName ), '.' );
-			if ( ! $path ) {
-				$path = static::log_path();
-			}
-			$fileName = basename( $filePathName, '.log' );
-		} else {
-			$path = static::log_path();
-			$date = date( 'Ymd_his' );
-
-			$prefix = $this->source ?: "$date-";
-
-			$fileName = basename( tempnam( $path, "silverstripe-$prefix" ) );
-		}
-		$path = Application::make_safe_path( $path, false );
-
-		return "$path/$fileName.log";
-	}
-
-	/**
 	 * Sets an error handler which will throw an exception of the same class as the passed exception
 	 * or just base \Exception if null.
 	 *
@@ -455,21 +407,13 @@ class Debugger extends Object implements LoggerInterface, DebuggerInterface {
 	 *
 	 * @return callable the previous error handler
 	 */
-	public static function set_error_exception(\Exception $exception = null) {
+	public static function set_error_exception( \Exception $exception = null ) {
 		return set_error_handler(
 			function ( $code, $message ) use ( $exception ) {
 				$exceptionClass = $exception ? get_class( $exception ) : \Exception::class;
-				throw new $exceptionClass( $message, $code);
+				throw new $exceptionClass( $message, $code );
 			}
 		);
-	}
-
-	public static function log_file() {
-		return static::config()->get( 'log_file' );
-	}
-
-	public static function log_path() {
-		return static::config()->get( 'log_path' );
 	}
 
 	public static function log_email() {

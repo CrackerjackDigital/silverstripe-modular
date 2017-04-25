@@ -3,6 +3,18 @@ namespace Modular\Interfaces;
 
 interface Logger {
 	/**
+	 * Return the target we are logging to, e.g. for a file then the log file name.
+	 * @return mixed
+	 */
+	public static function log_target();
+
+	/**
+	 * Return a logger instance we can log to.
+	 * @return mixed
+	 */
+	public function logger();
+
+	/**
 	 * @param string     $message
 	 * @param int        $facilities a level to compare to current set level and any other output options such as Screen etc
 	 * @param string     $source
