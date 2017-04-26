@@ -2,7 +2,7 @@
 
 namespace Modular;
 
-use Modular\Traits\logging;
+use Modular\Traits\logging_file;
 use \Modular\Interfaces\Logger as LoggerInterface;
 
 /**
@@ -51,7 +51,7 @@ use \Modular\Interfaces\Logger as LoggerInterface;
  * @subpackage dev
  */
 class Logger extends Object implements LoggerInterface {
-	use logging;
+	use logging_file;
 
 	const ERR    = \Zend_Log::ERR;
 	const WARN   = \Zend_Log::WARN;
@@ -64,7 +64,7 @@ class Logger extends Object implements LoggerInterface {
 	const LogFilePrefixDateFormat = 'Ymd';
 
 	/**
-	 * Logger class to use.
+	 * Logger class to use to actually write to files etc.
 	 *
 	 * @see SS_Log::get_logger()
 	 * @var string
@@ -72,12 +72,14 @@ class Logger extends Object implements LoggerInterface {
 	public static $logger_class = 'SS_ZendLog';
 
 	/**
-	 * @var object
+	 * @var int current logging level
+	 */
+	protected $level;
+
+	/**
+	 * @var \SS_ZendLog
 	 */
 	protected $logger;
-
-
-	protected $level;
 
 	/**
 	 * @var array Logs additional context from PHP's superglobals.
@@ -97,6 +99,11 @@ class Logger extends Object implements LoggerInterface {
 		),
 	);
 
+	public function __construct() {
+		parent::__construct();
+		$this->logger = $this->createLogger();
+	}
+
 	public function level( $level = null) {
 		if (func_num_args()) {
 			$this->level = $level;
@@ -104,26 +111,30 @@ class Logger extends Object implements LoggerInterface {
 		return $this->level;
 	}
 
+	public function logger() {
+		if (!$this->logger) {
+			$this->logger = $this->createLogger();
+		}
+		return $this->logger;
+	}
+
 	/**
 	 * Get the logger currently in use, or create a new one if it doesn't exist.
 	 *
 	 * @return \SS_ZendLog
 	 */
-	public function logger() {
-		if ( ! $this->logger ) {
-			// Create default logger
-			$this->logger = new static::$logger_class;
+	public function createLogger() {
+		/** @var \SS_ZendLog $logger */
+		$logger = new static::$logger_class;
 
-			// Add default context (shouldn't change until the actual log event happens)
-			foreach ( static::$log_globals as $globalName => $keys ) {
-				foreach ( $keys as $key ) {
-					$val = isset( $GLOBALS[ $globalName ][ $key ] ) ? $GLOBALS[ $globalName ][ $key ] : null;
-					$this->logger->setEventItem( sprintf( '$%s[\'%s\']', $globalName, $key ), $val );
-				}
+		// Add default context (shouldn't change until the actual log event happens)
+		foreach ( static::$log_globals as $globalName => $keys ) {
+			foreach ( $keys as $key ) {
+				$val = isset( $GLOBALS[ $globalName ][ $key ] ) ? $GLOBALS[ $globalName ][ $key ] : null;
+				$logger->setEventItem( sprintf( '$%s[\'%s\']', $globalName, $key ), $val );
 			}
-
 		}
-		return $this->logger;
+		return $logger;
 	}
 
 	/**
@@ -181,6 +192,8 @@ class Logger extends Object implements LoggerInterface {
 	 * @param string $message  Exception object or array of error context variables
 	 * @param string $priority Priority. Possible values: SS_Log::ERR, SS_Log::WARN or SS_Log::NOTICE
 	 * @param string $extras   Extra information to log in event
+	 *
+	 * @return $this|void
 	 */
 	public function log( $message, $priority, $extras = null ) {
 		if ( $message instanceof \Exception ) {
