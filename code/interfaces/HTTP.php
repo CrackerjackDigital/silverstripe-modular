@@ -75,4 +75,11 @@ interface HTTP {
 	const SchemeHTTP  = 'http';
 	const SchemeHTTPS = 'https';
 
+	const EncodeRawURL = 'rawurlencode';
+	const EncodeURL = 'urlencode';
+	const EncodeEnitites = 'htmlentities';
+	const EncodeSpaces = 'encodeSpaces';
+
+	const QueryStringEncode = self::EncodeURL;
+
 }
