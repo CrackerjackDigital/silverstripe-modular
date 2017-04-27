@@ -3,14 +3,14 @@ namespace Modular;
 
 use Director;
 use Modular\Traits\config;
-use Modular\Traits\logging;
+use Modular\Traits\logging_file;
 use Modular\Traits\requirements;
 use Modular\Traits\safe_paths;
 
 abstract class Module extends Object {
 	use requirements;
 	use config;
-	use logging;
+	use logging_file;
 	use safe_paths;
 
 	// handled file types which for simplicity are also the file extensions
@@ -94,16 +94,10 @@ abstract class Module extends Object {
 
 	private static $decode_depth = 512;
 
-	/**
-	 * Return classes configured log_email or module's.
-	 * @param null $className
-	 * @return string
-	 */
-	public static function log_email($className = null) {
-		return static::config($className ?: get_called_class())->get('log_email');
+
+	public function logger() {
+		
 	}
-
-
 	/**
 	 * Iterate config.$configVariable map and return map excluding false values
 	 * and with 'true' values as []
