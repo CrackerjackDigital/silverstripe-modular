@@ -96,7 +96,7 @@ abstract class Module extends Object {
 
 
 	public function logger() {
-		
+
 	}
 	/**
 	 * Iterate config.$configVariable map and return map excluding false values
@@ -241,7 +241,7 @@ abstract class Module extends Object {
 
 	/**
 	 * Return path in suitable format for Requirements either from the module
-	 * install dir or from web root depending on path staring with '/' or not.
+	 * install dir or from web root depending on path staring with DIRECTORY_SEPARATOR or not.
 	 *
 	 * @param string      $path
 	 * @param string|null $baseDir to use building path or null for the current
@@ -287,7 +287,7 @@ abstract class Module extends Object {
 		// TODO fix so we can find directory of called class not this class's directory
 		return Controller::join_links(
 			ltrim(static::config()->get('module_path')
-				?: Director::makeRelative(realpath(__DIR__ . '/../')), '/'),
+				?: Director::makeRelative(realpath(Controller::join_links(__DIR__, '..')))),
 			$append
 		);
 	}

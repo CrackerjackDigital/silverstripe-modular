@@ -1,6 +1,8 @@
 <?php
 namespace Modular\Traits;
 
+use Controller;
+
 trait safe_paths {
 	/**
 	 * @param null $className
@@ -26,16 +28,16 @@ trait safe_paths {
 	 * @return bool
 	 */
 	public static function in_safe_path( $path ) {
-		if ( substr( $path, 0, 1 ) == '/' || substr( $path, 0, 2 ) == '..' ) {
+		if ( substr( $path, 0, 1 ) == '/'|| substr( $path, 0, 2 ) == '..' ) {
 			// make absolute
-			$path = BASE_PATH . DIRECTORY_SEPARATOR . trim( $path, DIRECTORY_SEPARATOR );
+			$path = Controller::join_links(BASE_PATH, $path);
 		} else {
-			$path = ASSETS_PATH . DIRECTORY_SEPARATOR . $path;
+			$path = Controller::join_links(ASSETS_PATH, $path);
 		}
 		$real = realpath( $path );
 		if ( $real ) {
 			foreach ( static::safe_paths() as $safePath ) {
-				$safe = BASE_PATH . DIRECTORY_SEPARATOR . trim( $safePath, DIRECTORY_SEPARATOR );
+				$safe = Controller::join_links(BASE_PATH, trim( $safePath, '/' ));
 
 				if ( substr( $real, 0, strlen( $safe ) ) == $safe ) {
 					return true;

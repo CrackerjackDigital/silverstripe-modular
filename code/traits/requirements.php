@@ -89,7 +89,7 @@ trait requirements {
 	 * @return string
 	 */
 	private function requireFile($requirement) {
-		if ($requirement = trim($requirement, DIRECTORY_SEPARATOR)) {
+		if ($requirement = trim($requirement, '/')) {
 			if (substr($requirement, -3) == '.js') {
 				Requirement::javascript($requirement);
 			} else {

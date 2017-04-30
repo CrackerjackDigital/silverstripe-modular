@@ -311,7 +311,7 @@ class Application extends Module {
 	 * @return \DataObject|\Page
 	 */
 	public static function page_for_path( $path ) {
-		$path = trim( $path, '/' );
+		$path = trim( $path, '/');
 		if ( $path == '' ) {
 			return \Page::get()->first();
 		}
