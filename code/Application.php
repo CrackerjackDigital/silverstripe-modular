@@ -54,7 +54,7 @@ class Application extends Module {
 		$this->url   = isset( $_REQUEST['url'] ) ? $_REQUEST['url'] : '[unknown url]';
 
 		parent::__construct();
-		static::start();
+		$this->start();
 		static::register_modules();
 		static::register_members_and_emails();
 		static::register_model_controllers();
@@ -62,18 +62,18 @@ class Application extends Module {
 	}
 
 	public function __destruct() {
-		static::end();
+		$this->end();
 	}
 
 	/** Log a 'Start' message
 	 *
 	 * @param string $message for log
 	 */
-	protected static function start( $message = 'START' ) {
+	protected function start( $message = 'START' ) {
 		static::debug_trace( $message );
 	}
 
-	protected static function end( $message = 'END' ) {
+	protected function end( $message = 'END' ) {
 		static::debug_trace( $message );
 	}
 
