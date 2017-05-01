@@ -4,8 +4,6 @@ Name: modular-config
 Injector:
   Application:
     class: Modular\Application
-  Debugger:
-    class: Modular\Debugger
 
 ContentController:
   extensions:
