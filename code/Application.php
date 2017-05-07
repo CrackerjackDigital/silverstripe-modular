@@ -133,14 +133,20 @@ class Application extends Module {
 
 		// try site config
 		if ( $siteConfig = \SiteConfig::current_site_config() ) {
+			// put into var for later extension call
 			$for = self::SystemAdmin;
 
 			if ( $siteConfig->hasField( 'SystemAdminEmail' ) ) {
 
-				$email = $siteConfig->SystemAdminEmail;
-				static::debug_trace( "Found system admin email via site config: '$email'" );
+				if ( $siteConfig->SystemAdminEmail ) {
+					$email = $siteConfig->SystemAdminEmail;
 
-			} elseif ( $options = $siteConfig->extend( 'provideEmail', $for ) ?: [] ) {
+					static::debug_trace( "Found system admin email via site config: '$email'" );
+				} else {
+					static::debug_trace( "No value set for siteconfig SystemAdminEmail, using '$email'" );
+				}
+
+			} elseif ( $options = array_filter( $siteConfig->extend( 'provideEmail', $for ) ?: [] ) ) {
 
 				$email = reset( $options );
 				static::debug_trace( "Found system admin email via extension call: '$email'" );
@@ -151,8 +157,11 @@ class Application extends Module {
 				);
 			}
 		}
+		if ( ! $member = \Member::get()->filter( [ 'Email' => $email ] )->first() ) {
+			static::debug_warn( "Email '$email' doesn't have a corresponding user, will use default admin instead" );
+		}
 
-		return \Member::get()->filter( [ 'Email' => $email ] )->first() ?: \Member::default_admin();
+		return $member ?: \Member::default_admin();
 	}
 
 	/**
@@ -183,9 +192,13 @@ class Application extends Module {
 		if ( $siteConfig = \SiteConfig::current_site_config() ) {
 			$for = static::admin_field_name();
 			if ( $siteConfig->hasField( static::admin_field_name() ) && $siteConfig->{static::admin_field_name()} ) {
-				$email = $siteConfig->{static::admin_field_name()};
-				static::debug_trace( "Found system admin email via site config: '$email'" );
-			} elseif ( $options = $siteConfig->extend( 'provideEmail', $for ) ?: [] ) {
+				if ( $siteConfig->{static::admin_field_name()} ) {
+					$email = $siteConfig->{static::admin_field_name()};
+					static::debug_trace( "Found system admin email via site config: '$email'" );
+				} else {
+					static::debug_trace( "No value set for siteconfig AdminEmail, using '$email'" );
+				}
+			} elseif ( $options = array_filter($siteConfig->extend( 'provideEmail', $for ) ?: []) ) {
 				// use the first one returned
 				$email = reset( $options );
 				static::debug_trace( "Found system admin email via extension call: '$email'" );
@@ -271,6 +284,7 @@ class Application extends Module {
 	 * @param array           $requestVars check these get vars looking for a path
 	 *
 	 * @return mixed|string
+	 * @throws \InvalidArgumentException
 	 */
 	public static function ajax_path_for_request(
 		$request = null, $requestVars = [
@@ -309,9 +323,10 @@ class Application extends Module {
 	 * @param $path
 	 *
 	 * @return \DataObject|\Page
+	 * @throws \InvalidArgumentException
 	 */
 	public static function page_for_path( $path ) {
-		$path = trim( $path, '/');
+		$path = trim( $path, '/' );
 		if ( $path == '' ) {
 			return \Page::get()->first();
 		}
