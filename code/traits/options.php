@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular\Traits;
 
 trait options {
@@ -12,27 +13,37 @@ trait options {
 	 *                                  if true then will be merged in (if an array)
 	 *                                  or logical ored (if an int)
 	 *                                  or set otherwise
+	 *
 	 * @return null
 	 */
-	public function options($options = [], $merge = true) {
-		if (func_num_args()) {
-			if (!$merge) {
+	public function options( $options = [], $merge = true ) {
+		if ( func_num_args() ) {
+			if ( ! $merge ) {
 				$this->options = $options;
-			} elseif (is_array($options)) {
-				$this->options = array_merge_recursive($this->options, $options);
-			} elseif (is_int($options)) {
+			} elseif ( is_array( $options ) ) {
+				$this->options = array_merge_recursive( $this->options, $options );
+			} elseif ( is_int( $options ) ) {
 				$this->options |= $options;
 			} else {
 				$this->options = $options;
 			}
 		}
+
 		return $this->options;
 	}
 
-	public function option($name, $key = null) {
-		$option = array_key_exists($name, $this->options) ? $this->options[ $name ] : null;
-		if (func_num_args() == 2) {
-			if (is_array($option) && array_key_exists($key, $option)) {
+	/**
+	 * Return an option from the configured options by name as key and then by key as key into that if it was provided.
+	 *
+	 * @param string $name
+	 * @param string $key
+	 *
+	 * @return mixed|null
+	 */
+	public function option( $name, $key = null ) {
+		$option = array_key_exists( $name, $this->options ) ? $this->options[ $name ] : null;
+		if ( func_num_args() == 2 ) {
+			if ( is_array( $option ) && array_key_exists( $key, $option ) ) {
 				$option = $option[ $key ];
 			}
 		}
