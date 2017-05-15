@@ -2,6 +2,8 @@
 
 namespace Modular\Traits;
 
+use Director;
+
 /**
  * Trait adds simple md5 hashing functions
  *
@@ -35,7 +37,7 @@ trait md5 {
 	 */
 	public static function hash_file( $fileName, $seed = null, &$method = 'md5' ) {
 		$method = 'md5';
-		return md5_file( $fileName );
+		return md5_file( Director::getAbsFile($fileName ));
 	}
 
 	/**

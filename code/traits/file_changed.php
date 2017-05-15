@@ -16,6 +16,15 @@ trait file_changed {
 	abstract public function model();
 
 	/**
+	 * Return hash of provided file name. Some reason can't have abstract statics in traits however declaring here for informative reasons.
+	 *
+	 * @param string $fileName
+	 *
+	 * @return string hash of file content
+	 */
+	// abstract static public function hash_file($fileName = '');
+
+	/**
 	 * Check if the model exhibiting the extension (or the extended mode if an extension) has changed
 	 *
 	 * @param string $previousFileName
