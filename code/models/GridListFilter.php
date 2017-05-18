@@ -1,5 +1,7 @@
 <?php
+
 namespace Modular\Models;
+
 /**
  * @property string ModelTag
  */
@@ -7,21 +9,28 @@ use Modular\Fields\ModelTag;
 use Modular\Fields\Title;
 
 class GridListFilter extends \Modular\Model {
-	const TagFieldName = ModelTag::SingleFieldName;
+	const TagFieldName  = ModelTag::SingleFieldName;
+	const SortFieldName = 'GridListFilterSort';
 
 	private static $db = [
-		'Sort' => 'Int'
+		self::SortFieldName => 'Int',
 	];
+
+	private static $default_sort = 'GridListFilterSort DESC, Title ASC';
+
+	private static $summary_fields = [ Title::SingleFieldName, self::TagFieldName ];
 
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
-		$fields->replaceField('Sort', new \ReadonlyField('Sort', 'Sort order'));
+		$fields->replaceField( self::SortFieldName, new \ReadonlyField( self::SortFieldName, 'Sort order' ) );
+
 		return $fields;
 
 	}
 
 	/**
-	 * GridListFilters should have ModelTag extension so use that as the Filter value in page etc.
+	 * Return the filter tag from the extended model.
+	 *
 	 * @return string
 	 */
 	public function Filter() {
