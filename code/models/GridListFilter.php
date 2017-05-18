@@ -18,7 +18,7 @@ class GridListFilter extends \Modular\Model {
 
 	private static $default_sort = 'GridListFilterSort DESC, Title ASC';
 
-	private static $summary_fields = [ Title::SingleFieldName, self::TagFieldName ];
+	private static $summary_fields = [ \Modular\Fields\Title::SingleFieldName, self::TagFieldName ];
 
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
