@@ -2,7 +2,8 @@
 
 namespace Modular\Admin;
 
-use Modular\GridField\GridFieldOrderableRows;
+use GridFieldSortableRows;
+use Modular\Models\GridListFilter;
 
 class GridListFilters extends ModelAdmin {
 	private static $allowed_actions = [
@@ -16,8 +17,6 @@ class GridListFilters extends ModelAdmin {
 		'Modular\Models\GridListFilter'
 	];
 
-	private static $default_sort = 'Sort';
-
 	/**
 	 * Add GridFieldOrderableRows to the GridField
 	 * @param null $request
@@ -28,9 +27,14 @@ class GridListFilters extends ModelAdmin {
 		$fields = $form->Fields();
 
 		/** @var \GridField $gridField */
-		if ($gridField = $fields->dataFieldByName('Modular-Models-GridListFilters')) {
+		if ($gridField = $fields->dataFieldByName('Modular-Models-GridListFilter')) {
+			/** @var \GridFieldConfig $config */
 			if ($config = $gridField->getConfig()) {
-				$config->addComponent(new GridFieldOrderableRows('Sort'));
+				$config->addComponent(new GridFieldSortableRows(GridListFilter::SortFieldName));
+				/** @var \GridFieldPaginator $paginator */
+				if ($paginator = $config->getComponentByType( \GridFieldPaginator::class)) {
+					$paginator->setItemsPerPage( $gridField->getList()->count());
+				}
 			}
 		}
 		return $form;
