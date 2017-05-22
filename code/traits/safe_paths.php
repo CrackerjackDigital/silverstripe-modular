@@ -27,12 +27,12 @@ trait safe_paths {
 	 *
 	 * @return bool
 	 */
-	public static function in_safe_path( $path ) {
+	public static function in_safe_path( $path, $fallback = ASSETS_PATH ) {
 		if ( substr( $path, 0, 1 ) == '/'|| substr( $path, 0, 2 ) == '..' ) {
 			// make absolute
 			$path = Controller::join_links(BASE_PATH, $path);
 		} else {
-			$path = Controller::join_links(ASSETS_PATH, $path);
+			$path = Controller::join_links($fallback, $path);
 		}
 		$real = realpath( $path );
 		if ( $real ) {
@@ -44,7 +44,6 @@ trait safe_paths {
 				}
 			}
 		}
-
 		return false;
 	}
 

@@ -11,11 +11,13 @@ abstract class Service extends Object implements \Modular\Interfaces\Service {
 	/**
 	 * Service interface method.
 	 *
-	 * @param null $params
+	 * @param null   $params
+	 *
+	 * @param string $resultMessage
 	 *
 	 * @return mixed
 	 */
-	abstract public function execute( $params = null );
+	abstract public function execute( $params = null, &$resultMessage = '' );
 
 	/**
 	 * Return a configured instance of the service via config.service_name, self.ServiceName or the called class name.

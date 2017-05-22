@@ -11,19 +11,70 @@ use Session;
  * @package Modular\Traits
  */
 trait transients {
+	/**
+	 * Sets all passed values as transients, e.g. from a form post so returning to form will restore values.
+	 *
+	 * @param array  $values    map of [ name => value ] pairs to set
+	 *
+	 * @param string $className optional to filter what fields are returned, e.g. the className against which the transient was stored.
+	 *                          if this is set to '' then a 'global' setting is selected.
+	 *
+	 * @return array map of all transient [ name => value ] pairs currently set which match the key of those passed in
+	 *
+	 */
+	public static function transient_values( array $values = [], $className = null ) {
+		foreach ( $values as $key => $value ) {
+			self::transient_value( $key, $value, $className );
+		}
+		$prefix       = explode('.', self::transient_key( '', $className ));
+		$out          = [];
+
+		$allValues = Session::get_all();
+		foreach ( $allValues as $key => $value ) {
+			// e.g. key is 'TXV' and value is [ 'FormName' => [ 'FieldName' => value ]]
+			$pfx = $prefix;
+			while ( $part = array_shift( $pfx ) ) {
+				// e.g. part is TXV, then FormName then FieldName
+				if ($part == $key) {
+					if (isset($value[$part])) {
+						$key = $value[$part];
+					}
+				}
+			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Clear matching transient values from session.
+	 *
+	 * @param null $className
+	 */
+	public static function transient_values_clear( $className = null ) {
+		$prefix       = self::transient_key( '', $className );
+		$prefixLength = strlen( $prefix );
+
+		foreach ( Session::get_all() as $key => $value ) {
+			if ( substr( $key, 0, $prefixLength ) == $prefix ) {
+				Session::clear( $key );
+			}
+		}
+	}
 
 	/**
 	 * Sets or returns a value for passing e.g. between page views etc. ('transient values')
 	 *
 	 * @param string $fieldName
 	 * @param mixed  $value if parameter is provided will be set, if null then value will be unset
+	 * @param string $className
 	 *
 	 * @return mixed
 	 */
-	public static function transient_value( $fieldName, $value = null) {
+	public static function transient_value( $fieldName, $value = null, $className = null ) {
 		static $transients = [];
 
-		$key = self::transient_key( $fieldName );
+		$key = self::transient_key( $fieldName, $className );
 
 		if ( func_num_args() > 1 ) {
 			if ( is_null( $value ) ) {
@@ -49,11 +100,14 @@ trait transients {
 	/**
 	 * Return a unique key for stashing things ('transient values') in the session between e.g. pages or form renders.
 	 *
-	 * @param string $fieldName
+	 * @param string $name      , e.g. of a field
+	 * @param string $className if not passed (or default null) then called class will be used, if '' then no class name will be used.
 	 *
 	 * @return string
 	 */
-	public static function transient_key( $fieldName ) {
-		return get_called_class() . '.' . $fieldName;
+	public static function transient_key( $name, $className = null ) {
+		$className = is_null( $className ) ? get_called_class() : '';
+
+		return rtrim( "TXV.$className.$name", '.' );
 	}
 }
