@@ -26,24 +26,27 @@ trait transients {
 		foreach ( $values as $key => $value ) {
 			self::transient_value( $key, $value, $className );
 		}
-		$prefix       = explode('.', self::transient_key( '', $className ));
-		$out          = [];
+		$prefix     = explode( '.', self::transient_key( '', $className ) );
+		$transients = [];
 
-		$allValues = Session::get_all();
-		foreach ( $allValues as $key => $value ) {
-			// e.g. key is 'TXV' and value is [ 'FormName' => [ 'FieldName' => value ]]
+		$sessionValues = Session::get_all();
+
+		foreach ( $sessionValues as $key => $value ) {
 			$pfx = $prefix;
-			while ( $part = array_shift( $pfx ) ) {
-				// e.g. part is TXV, then FormName then FieldName
-				if ($part == $key) {
-					if (isset($value[$part])) {
-						$key = $value[$part];
+			if ( ( $key == array_shift( $pfx ) ) && is_array( $value ) ) {
+				// e.g. key is 'TXV' and value is [ 'FormName' => [ 'FieldName' => value ]]
+				// then key is 'FormName' and value is [ 'FieldName' => value ]
+				// then key is 'FieldName' and value is value
+				while ( $part = array_shift( $pfx ) ) {
+					if ( ! array_key_exists( $part, $value ) ) {
+						break;
 					}
+					$transients = $value[ $part ];
 				}
 			}
 		}
 
-		return $out;
+		return $transients ?: [];
 	}
 
 	/**
@@ -52,14 +55,8 @@ trait transients {
 	 * @param null $className
 	 */
 	public static function transient_values_clear( $className = null ) {
-		$prefix       = self::transient_key( '', $className );
-		$prefixLength = strlen( $prefix );
-
-		foreach ( Session::get_all() as $key => $value ) {
-			if ( substr( $key, 0, $prefixLength ) == $prefix ) {
-				Session::clear( $key );
-			}
-		}
+		$prefix = self::transient_key( '', $className );
+		Session::clear($prefix);
 	}
 
 	/**
