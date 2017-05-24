@@ -11,6 +11,7 @@ use SSViewer;
 
 class Application extends Module {
 	use reflection;
+
 	// convenience constants for referencing string constants
 	const SystemAdmin = 'SystemAdmin';
 	const Admin       = 'Admin';
