@@ -10,7 +10,6 @@ use Modular\Traits\safe_paths;
 abstract class Module extends Object {
 	use requirements;
 	use config;
-	use logging_file;
 	use safe_paths;
 
 	// handled file types which for simplicity are also the file extensions
@@ -94,10 +93,6 @@ abstract class Module extends Object {
 
 	private static $decode_depth = 512;
 
-
-	public function logger() {
-
-	}
 	/**
 	 * Iterate config.$configVariable map and return map excluding false values
 	 * and with 'true' values as []

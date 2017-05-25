@@ -4,9 +4,7 @@ namespace Modular;
 
 use Modular\Controllers\Model as ModelController;
 use Modular\Exceptions\Application as Exception;
-use Modular\Extensions\Model\SiteConfig;
 use Modular\Traits\reflection;
-use Modular\Traits\requirements;
 use SSViewer;
 
 class Application extends Module {
