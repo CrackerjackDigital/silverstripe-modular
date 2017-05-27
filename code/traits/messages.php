@@ -1,11 +1,50 @@
 <?php
 namespace Modular\Traits;
+
+use Session;
+
 /**
  * Add the ability to get and format messages from localisation files depending on context.
  *
  * @package Modular\Traits
  */
 trait messages {
+
+	/**
+	 *
+	 * Set session messages
+	 *
+	 */
+	public function setSessionMessage( $message, $type = 'success' ) {
+		Session::set( "Page.message", $message );
+		Session::set( "Page.messageType", $type );
+	}
+
+	/**
+	 * Return Session message and type, if clear is true  (default behaviour) then also clear it, subsequent calls will return nothing.
+	 *
+	 * @param bool $clear
+	 *
+	 * @return \ArrayData|bool
+	 */
+	public function getSessionMessage( $clear = true ) {
+		if ( $clear ) {
+			$this->ClearSessionMessage();
+		}
+
+		return $this->message;
+	}
+
+	/**
+	 *
+	 * Clear all session messages
+	 *
+	 */
+	public function ClearSessionMessage() {
+		Session::clear( 'Page.message' );
+		Session::clear( 'Page.messageType' );
+	}
+
 	/**
 	 * Try and find a language yml entry with a composite key of extended model name and the provided key
 	 * e.g. 'Member.Confirmed', then key of extension class name, provided key and model class e.g.

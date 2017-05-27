@@ -67,7 +67,7 @@ class Form extends \Form {
 	public static function set_message($messageOrLangKey, $messageType, $data = []) {
 		Session::setFormMessage(
 			static::get_full_name(),
-			static::get_form_message($messageOrLangKey, $data),
+			static::get_message_translation($messageOrLangKey, $data),
 			$messageType
 		);
 	}
@@ -281,23 +281,25 @@ class Form extends \Form {
 		return _t(get_called_class() . ".$fieldName." . self::LabelSuffix, $default ?: Strings::decamel($fieldName), $data);
 	}
 
+
+	public static function set_form_message($messageOrLangKey, $type, array $data = []) {
+		Session::setFormMessage(static::get_full_name(), static::get_message_translation($messageOrLangKey, null, $data), $type);
+	}
+
+	public static function clear_form_message() {
+		Session::setFormMessage(static::get_full_name(), '', '');
+	}
+
 	/**
 	 * @param string      $messageOrLangKey key for localised yml e.g. MemberPreferencesForm.PreferencesSaved or
 	 *                                      default message
 	 * @param string|null $default          optional textual default if not using decamelized $messageOrLangKey
 	 * @param array       $data
+	 *
 	 * @return string
 	 */
-	public static function get_form_message($messageOrLangKey, $default = null, array $data = []) {
-		return _t(get_called_class() . ".$messageOrLangKey", $default ?: Strings::decamel($messageOrLangKey), $data);
-	}
-
-	public static function set_form_message($code, $type, array $data = []) {
-		Session::setFormMessage(static::get_full_name(), static::get_form_message($code, null, $data), $type);
-	}
-
-	public static function clear_form_message() {
-		Session::setFormMessage(static::get_full_name(), '', '');
+	public static function get_message_translation( $messageOrLangKey, $default = null, array $data = [] ) {
+		return _t( get_called_class() . ".$messageOrLangKey", $default ?: Strings::decamel( $messageOrLangKey ), $data );
 	}
 
 	/**
