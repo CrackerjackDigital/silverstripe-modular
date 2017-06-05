@@ -11,17 +11,17 @@ class CacheHash extends ModelExtension  {
 	];
 
 	public function onBeforeWrite() {
-		if ($this()->isChanged() || $this()->{self::CacheHashFieldName}) {
-			$this()->{self::CacheHashFieldName} = date('Y-m-d_h:i:s');
+		if ($this()->isChanged() || !$this()->{self::CacheHashFieldName}) {
+			$this()->{self::CacheHashFieldName} = md5(microtime());
 		}
 		parent::onBeforeWrite();
 	}
 
 	/**
-	 * Set CacheHash field to null, this will also trigger an 'isChanged' next write.
+	 * Set CacheHash field to now
 	 */
 	public function cacheHashInvalidate() {
-		$this()->{self::CacheHashFieldName} = null;
+		$this()->{self::CacheHashFieldName} = md5(microtime());
 	}
 
 }
