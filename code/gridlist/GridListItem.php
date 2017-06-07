@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular\GridList;
 
 use Modular\ModelExtension;
@@ -12,20 +13,21 @@ class GridListItem extends ModelExtension {
 	 * Renders the item into the gridlist with selected template passing through Filters which are defined on the item.
 	 * GridListItem constructor.
 	 */
-	public function GridListItem($columns = 0) {
+	public function GridListItem( $columns = 0 ) {
 		$filters = [];
 
-		if ($this()->hasExtension(HasGridListFilters::class_name())) {
+		if ( $this()->hasExtension( HasGridListFilters::class_name() ) ) {
 			$filters = $this()->{HasGridListFilters::relationship_name()}();
 		}
 		$template = $this->template();
 
-		return $this()->renderWith($template, new \ArrayData([
-			'Columns' => $columns,
-			'Filters' => $filters,
-			'Hash'    => md5($this()->ClassName . $this()->ID),
-			'ID'      => $this()->ID,
-		]));
+		return $this()->renderWith( $template, new \ArrayData( [
+			'Columns'   => $columns,
+			'Filters'   => $filters,
+			'Hash'      => md5( $this()->ClassName . $this()->ID ),
+			'ID'        => $this()->ID,
+			'CacheHash' => $this()->CacheHash
+		] ) );
 	}
 
 	/**
@@ -37,9 +39,10 @@ class GridListItem extends ModelExtension {
 	protected function template() {
 		$mode = GridList::service()->mode();
 
-		if (!$template = $this()->config()->get('gridlist_template')) {
+		if ( ! $template = $this()->config()->get( 'gridlist_template' ) ) {
 			$template = "GridList/" . $this()->ClassName;
 		}
+
 		return "$template" . '_' . $mode;
 	}
 }

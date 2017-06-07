@@ -25,7 +25,6 @@ class GridListFilter extends \Modular\Model {
 		$fields->replaceField( self::SortFieldName, new \ReadonlyField( self::SortFieldName, 'Sort order' ) );
 
 		return $fields;
-
 	}
 
 	/**

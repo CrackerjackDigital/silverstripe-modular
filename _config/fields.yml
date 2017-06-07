@@ -1,6 +1,12 @@
 ---
 Name: modular-models-config
 ---
+Modular\Model:
+  extensions:
+    - Modular\Fields\CacheHash
+Modular\VersionedModel:
+  extensions:
+    - Modular\Fields\CacheHash
 Modular\Blocks\GridList:
   extensions:
     - Modular\GridList\Fields\Mode

@@ -94,25 +94,6 @@ class GridList extends ContentControllerExtension {
 	}
 
 	/**
-	 * Use for partial caching, extensions will provide additional information for cache hash generation.
-	 *
-	 * @return mixed
-	 */
-	public function CacheHash() {
-		$data = implode(':',
-			array_filter(
-				array_merge(
-					$this()->extend('provideGridListCacheHashData'),
-					[
-						Application::get_current_page()->LastEdited,
-					]
-				)
-			)
-		);
-		return md5(Controller::curr()->getRequest()->getURL(true) . ':' . $data);
-	}
-
-	/**
 	 * Request data via extensions provideGridListTemplateData method which we can pass into the template and also for subsequent processing.
 	 *
 	 * @param $items
