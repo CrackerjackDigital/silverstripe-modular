@@ -7,6 +7,7 @@ use Modular\ModelExtension;
 
 class CacheHash extends ModelExtension {
 	const CacheHashFieldName = 'CacheHash';
+	const CacheHashChangedFieldName = '_PreviousCacheHash';
 
 	private static $db = [
 		self::CacheHashFieldName => 'Varchar(255)',
@@ -18,30 +19,35 @@ class CacheHash extends ModelExtension {
 	public function onBeforeWrite() {
 		$changed = $this->model()->getChangedFields( true, DataObject::CHANGE_VALUE );
 		if ( $changed ) {
-			$this()->{self::CacheHashFieldName} = $this->cacheHashGenerate();
-			$invalidateParents = $this->config()->get( 'cache_hash_invalidate_parents' );
-
-			/** @var \DataObject|\Modular\Extensions\Model\CacheHash $parent */
-			if ( $invalidateParents && $this->owner->ParentID ) {
-				$parent = $this->owner->Parent();
-				if ( $parent->exists() && $parent->hasExtension( self::class ) ) {
-					// invalidate and write the parent also
-					$parent->{self::CacheHashFieldName} = $parent->cacheHashGenerate();
-					$parent->write();
-				}
-			}
+			$this->cacheHashRegenerate();
 		}
 		parent::onBeforeWrite();
 	}
 
 	public function onAfterWrite() {
 		parent::onAfterWrite();
-
-
+		if ($this->cacheHashChanged() && $this->config()->get( 'cache_hash_invalidate_parents' )) {
+			/** @var \DataObject|\Modular\Extensions\Model\CacheHash $parent */
+			if ( $this->owner->ParentID ) {
+				$parent = $this->owner->Parent();
+				if ( $parent->exists() && $parent->hasExtension( self::class ) ) {
+					$parent->cacheHashRegenerate(true);
+				}
+			}
+		}
 	}
 
-	public function cacheHashGenerate() {
-		return md5( uniqid( microtime() ) );
+	public function cacheHashRegenerate($write = false) {
+		$newHash = md5( uniqid( microtime() ) );
+		$this()->{self::CacheHashChangedFieldName} = $this()->{self::CacheHashFieldName};
+		$this()->{self::CacheHashFieldName} = $newHash;
+		if ($write) {
+			$this()->write();
+		}
+		return $newHash;
 	}
 
+	protected function cacheHashChanged() {
+		return $this()->{self::CacheHashFieldName} != $this()->{self::CacheHashChangedFieldName};
+	}
 }
