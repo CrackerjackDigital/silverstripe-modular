@@ -1,7 +1,6 @@
 <?php
 namespace Modular\Tasks;
 
-use Modular\Extensions\Model\CacheHash;
 use Modular\Task;
 
 /**

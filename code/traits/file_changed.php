@@ -25,15 +25,19 @@ trait file_changed {
 	// abstract static public function hash_file($fileName = '');
 
 	/**
-	 * Check if the model exhibiting the extension (or the extended mode if an extension) has changed
+	 * Check if the extended model (probably a File) has changed
 	 *
+	 * @param bool   $filesOnly don't do folders just files if true, otherwise both
 	 * @param string $previousFileName
 	 * @param string $modifiedField
 	 * @param string $hashField
 	 *
 	 * @return bool
 	 */
-	public function fileChanged( $previousFileName = '', $modifiedField = FileModifiedStamp::Name, $hashField = FileContentHash::Name) {
+	public function fileChanged( $filesOnly, $previousFileName = '', $modifiedField = FileModifiedStamp::Name, $hashField = FileContentHash::Name ) {
+		if ($filesOnly && ($this->model()->ClassName == \Folder::class)) {
+			return false;
+		}
 		return static::file_changed( $this->model(), $previousFileName, $modifiedField, $hashField );
 	}
 
@@ -48,13 +52,13 @@ trait file_changed {
 	 *
 	 * @param File   $file
 	 *
-	 * @param string $previousFileName if not supplied then attempt will be made to get from changed fields on File
-	 * @param string $modifiedField    name of field which stores the last modified time of the file, supply empty to skip test
-	 * @param string $hashField        name of field which stores the file hash value, supply empty to skip test
+	 * @param string $previousFileName   if not supplied then attempt will be made to get from changed fields on File
+	 * @param string $modifiedStampField name of field which stores the last modified time of the file, supply empty to skip test
+	 * @param string $hashField          name of field which stores the file hash value, supply empty to skip test
 	 *
 	 * @return bool
 	 */
-	public static function file_changed( File $file, $previousFileName = '', $modifiedField = FileModifiedStamp::Name, $hashField = FileContentHash::Name) {
+	public static function file_changed( File $file, $previousFileName = '', $modifiedStampField = FileModifiedStamp::Name, $hashField = FileContentHash::Name ) {
 		if ( $previousFileName || $file->isChanged( 'Filename' ) ) {
 			$previousFileName = $previousFileName ?: $file->getChangedFields()['Filename']['before'];
 
@@ -64,16 +68,12 @@ trait file_changed {
 		}
 
 		$fileName = Director::getAbsFile( $file->Filename );
-		if ( ! file_exists( $fileName ) ) {
-			return true;
-		}
-
-		if ( $modifiedField && $file->hasField($modifiedField)) {
-			if ( $file->$modifiedField != filemtime( $fileName ) ) {
+		if ( $modifiedStampField && $file->hasField( $modifiedStampField ) ) {
+			if ( $file->$modifiedStampField != filemtime( $fileName ) ) {
 				return true;
 			}
 		}
-		if ($hashField && $file->hasField($hashField)) {
+		if ( $hashField && $file->hasField( $hashField ) ) {
 			if ( $file->$hashField != static::hash_file( $fileName ) ) {
 				return true;
 			}
