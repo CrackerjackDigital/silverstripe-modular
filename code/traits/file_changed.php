@@ -25,20 +25,12 @@ trait file_changed {
 	// abstract static public function hash_file($fileName = '');
 
 	/**
-	 * Check if the extended model (probably a File) has changed
-	 *
-	 * @param bool   $filesOnly don't do folders just files if true, otherwise both
-	 * @param string $previousFileName
-	 * @param string $modifiedField
-	 * @param string $hashField
+	 * Check if the extended File has changed
 	 *
 	 * @return bool
 	 */
-	public function fileChanged( $filesOnly, $previousFileName = '', $modifiedField = FileModifiedStamp::Name, $hashField = FileContentHash::Name ) {
-		if ($filesOnly && ($this->model()->ClassName == \Folder::class)) {
-			return false;
-		}
-		return static::file_changed( $this->model(), $previousFileName, $modifiedField, $hashField );
+	public function fileChanged() {
+		return static::file_changed( $this->model(), '', FileModifiedStamp::Name, FileContentHash::Name );
 	}
 
 	/**
