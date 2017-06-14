@@ -63,7 +63,6 @@ trait debugging {
 
 	/**
 	 * @param string $message
-	 * @throws null
 	 */
 	public static function debug_error($message) {
 		static::debugger()->error($message, get_called_class());
