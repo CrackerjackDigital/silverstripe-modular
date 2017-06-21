@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular\Models;
 
 class InternalOrExternalLink extends \Modular\Model {
@@ -13,13 +14,14 @@ class InternalOrExternalLink extends \Modular\Model {
 		self::RelationshipName => self::RelatedClassName,
 	];
 	private static $summary_fields = [
-		'Title'        => 'Title',
-		'ResolvedLink' => 'Link',
+		'Title'             => 'Title',
+	    'ResolvedLinkValue' => 'Link'
 	];
 
 	public function getCMSFields() {
 		$fields = parent::getCMSFields();
-		$fields->replaceField(self::SortFieldName, new \HiddenField(self::SortFieldName));
+		$fields->replaceField( self::SortFieldName, new \HiddenField( self::SortFieldName ) );
+
 		return $fields;
 	}
 

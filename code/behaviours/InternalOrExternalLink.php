@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular\Behaviours;
 
 use Modular\Fields\Field;
@@ -28,16 +29,17 @@ class InternalOrExternalLink extends Field {
 	 *
 	 * @param null $class
 	 * @param null $extension
+	 *
 	 * @return array
 	 */
-	public function extraStatics($class = null, $extension = null) {
-		$values = implode(',', $this->config()->get('enum_values'));
+	public function extraStatics( $class = null, $extension = null ) {
+		$values = implode( ',', $this->config()->get( 'enum_values' ) );
 
 		return array_merge_recursive(
-			parent::extraStatics($class, $extension) ?: [],
+			parent::extraStatics( $class, $extension ) ?: [],
 			[
 				'db' => [
-					static::LinkTypeFieldName => 'enum("' . $values . '")'
+					static::LinkTypeFieldName => 'enum("' . $values . '")',
 				],
 			]
 		);
@@ -45,7 +47,7 @@ class InternalOrExternalLink extends Field {
 
 	public function cmsFields() {
 		return [
-			new DropdownField(self::LinkTypeFieldName, 'Link type', $this->linkOptions())
+			new DropdownField( self::LinkTypeFieldName, 'Link type', $this->linkOptions() ),
 		];
 	}
 
@@ -55,19 +57,19 @@ class InternalOrExternalLink extends Field {
 	 * @param \FormField $field
 	 * @param array      $allFieldConstraints
 	 */
-	public function customFieldConstraints(FormField $field, array $allFieldConstraints) {
-		if (ClassInfo::exists('DisplayLogicCriteria')) {
+	public function customFieldConstraints( FormField $field, array $allFieldConstraints ) {
+		if ( ClassInfo::exists( 'DisplayLogicCriteria' ) ) {
 			$fieldName = $field->getName();
 
-			if ($fieldName == InternalLink::InternalLinkFieldName) {
+			if ( $fieldName == InternalLink::InternalLinkFieldName ) {
 
-				$field->hideUnless(self::LinkTypeFieldName)
-					->isEqualTo(InternalLink::InternalLinkOption);
+				$field->hideUnless( self::LinkTypeFieldName )
+				      ->isEqualTo( InternalLink::InternalLinkOption );
 
-			} elseif ($fieldName == ExternalLink::SingleFieldName) {
+			} elseif ( $fieldName == ExternalLink::SingleFieldName ) {
 
-				$field->hideUnless(self::LinkTypeFieldName)
-					->isEqualTo(ExternalLink::ExternalLinkOption);
+				$field->hideUnless( self::LinkTypeFieldName )
+				      ->isEqualTo( ExternalLink::ExternalLinkOption );
 
 			}
 		}
@@ -81,25 +83,36 @@ class InternalOrExternalLink extends Field {
 	 */
 	public function ResolvedLink() {
 		$link = '';
-		if ($this->IsExternal()) {
+		if ( $this->IsExternal() ) {
 			$externalLink = $this()->ExternalLink;
-			if (!\Director::is_absolute_url($externalLink)) {
+			if ( ! \Director::is_absolute_url( $externalLink ) ) {
 				$link = \Director::protocol() . $externalLink;
 			} else {
 				$link = $externalLink;
 			}
-		} elseif ($this()->InternalLink()) {
+		} elseif ( $this()->InternalLink() ) {
 			$link = $this()->InternalLink()->Link();
 		}
-		return new \ArrayData([
-			'Link' => $link
-		]);
+
+		return new \ArrayData( [
+			'Link' => $link,
+		] );
+	}
+
+	/**
+	 * Return the Link value from the ResolvedLink e.g. for use in summary_fields or template directly.
+	 *
+	 * @return string
+	 */
+	public function ResolvedLinkValue() {
+		return $this->ResolvedLink()->Link;
 	}
 
 	public function LinkText() {
-		$class = get_class($this());
-		$type = $this->IsInternal() ? 'InternalLinkText' : 'ExternalLinkText';
-		return _t("$class.$type", _t("$class.LinkText", ''));
+		$class = get_class( $this() );
+		$type  = $this->IsInternal() ? 'InternalLinkText' : 'ExternalLinkText';
+
+		return _t( "$class.$type", _t( "$class.LinkText", '' ) );
 	}
 
 	/**
@@ -122,10 +135,9 @@ class InternalOrExternalLink extends Field {
 
 	protected function linkOptions() {
 		return [
-			InternalLink::InternalLinkOption => singleton('Modular\Models\InternalOrExternalLink')->fieldDecoration(InternalLink::InternalLinkFieldName, 'Label', 'Internal link'),
-			ExternalLink::ExternalLinkOption => singleton('Modular\Models\InternalOrExternalLink')->fieldDecoration(ExternalLink::SingleFieldName, 'Label', 'External link'),
+			InternalLink::InternalLinkOption => singleton( 'Modular\Models\InternalOrExternalLink' )->fieldDecoration( InternalLink::InternalLinkFieldName, 'Label', 'Internal link' ),
+			ExternalLink::ExternalLinkOption => singleton( 'Modular\Models\InternalOrExternalLink' )->fieldDecoration( ExternalLink::SingleFieldName, 'Label', 'External link' ),
 		];
 	}
-
 
 }
