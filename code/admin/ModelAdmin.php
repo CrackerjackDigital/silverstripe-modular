@@ -6,4 +6,5 @@ use Modular\Traits\enabler;
 
 class ModelAdmin extends \ModelAdmin {
 	use enabler;
+
 }

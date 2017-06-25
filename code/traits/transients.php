@@ -14,15 +14,18 @@ trait transients {
 	/**
 	 * Sets all passed values as transients, e.g. from a form post so returning to form will restore values.
 	 *
-	 * @param array  $values    map of [ name => value ] pairs to set
-	 *
-	 * @param string $className optional to filter what fields are returned, e.g. the className against which the transient was stored.
-	 *                          if this is set to '' then a 'global' setting is selected.
+	 * @param array  $values        map of [ name => value ] pairs to set
+	 * @param bool   $clearExisting all transient values for the object before setting new ones.
+	 * @param string $className     optional to filter what fields are returned, e.g. the className against which the transient was stored.
+	 *                              if this is set to '' then a 'global' setting is selected.
 	 *
 	 * @return array map of all transient [ name => value ] pairs currently set which match the key of those passed in
 	 *
 	 */
-	public static function transient_values( array $values = [], $className = null ) {
+	public static function transient_values( array $values = [], $clearExisting = false, $className = null ) {
+		if ( $clearExisting ) {
+			self::transient_values_clear( $className );
+		}
 		foreach ( $values as $key => $value ) {
 			self::transient_value( $key, $value, $className );
 		}
@@ -56,7 +59,7 @@ trait transients {
 	 */
 	public static function transient_values_clear( $className = null ) {
 		$prefix = self::transient_key( '', $className );
-		Session::clear($prefix);
+		Session::clear( $prefix );
 	}
 
 	/**
