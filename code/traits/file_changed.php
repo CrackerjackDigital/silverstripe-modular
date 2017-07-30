@@ -60,14 +60,16 @@ trait file_changed {
 		}
 
 		$fileName = Director::getAbsFile( $file->Filename );
-		if ( $modifiedStampField && $file->hasField( $modifiedStampField ) ) {
-			if ( $file->$modifiedStampField != filemtime( $fileName ) ) {
-				return true;
+		if ( file_exists( $fileName ) ) {
+			if ( $modifiedStampField && $file->hasField( $modifiedStampField ) ) {
+				if ( $file->$modifiedStampField != filemtime( $fileName ) ) {
+					return true;
+				}
 			}
-		}
-		if ( $hashField && $file->hasField( $hashField ) ) {
-			if ( $file->$hashField != static::hash_file( $fileName ) ) {
-				return true;
+			if ( $hashField && $file->hasField( $hashField ) ) {
+				if ( $file->$hashField != static::hash_file( $fileName ) ) {
+					return true;
+				}
 			}
 		}
 

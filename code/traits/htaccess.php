@@ -15,23 +15,28 @@ trait htaccess {
 	 *                             the rule will be relative to the written directory (e.g. applying to that directory). If not written then the path will
 	 *                             be relative to site root, e.g. '/path/' for inclusion at the root.
 	 * @param bool   $overwrite    if true any existing .htaccess file will be overwritten, otherwise existing file will silently be left alone
+	 *                             file will be overwritten if its content differs from generated content no matter what this setting is
 	 *
 	 * @return string the generated rule
 	 */
 	public static function rewrite_to_controller( $path, $toRoute, $pathVariable = 'path', $writeToPath = true, $overwrite = false ) {
-		$rule = "RewriteCond %{REQUEST_URI} ^(.*)$" . PHP_EOL;
 		$htAccessFile = Director::getAbsFile( $path . DIRECTORY_SEPARATOR . '.htaccess' );
 
-		if ( $writeToPath && ($overwrite || !file_exists( $htAccessFile))) {
-			$rule         .= "RewriteRule .* $toRoute" . ( $pathVariable ? "?$pathVariable=%1" : '' ) . PHP_EOL;
 
-			file_put_contents( $htAccessFile, $rule );
+		$content         = "RewriteCond %{REQUEST_URI} ^(.*)$" . PHP_EOL;
+
+		if ( $writeToPath) {
+			$content .= "RewriteRule .* $toRoute" . ( $pathVariable ? "?$pathVariable=%1 [B]" : '' ) . PHP_EOL;
+
+			if ($overwrite || !file_exists($htAccessFile) || (file_get_contents( $htAccessFile) != $content)) {
+				file_put_contents( $htAccessFile, $content );
+			}
 		} else {
 			// return suitable for adding to 'root' .htaccess
-			$rule .= "RewriteRule $path/.* $toRoute" . ( $pathVariable ? "?$pathVariable=%1" : '' ) . PHP_EOL;
+			$content .= "RewriteRule $path/.* $toRoute" . ( $pathVariable ? "?$pathVariable=%1 [B]" : '' ) . PHP_EOL;
 		}
 
-		return $rule;
+		return $content;
 
 	}
 
