@@ -27,7 +27,7 @@ trait md5 {
 
 	/**
 	 *
-	 * @param string $fileName
+	 * @param string $fileName will be turned to absolute path if not already
 	 *
 	 * @param null   $seed not used
 	 *
@@ -47,5 +47,17 @@ trait md5 {
 	 */
 	public static function hash_length() {
 		return 32;
+	}
+
+	/**
+	 * Return the name of method used to get the hash.
+	 *
+	 * @param mixed $for an identifier e.g. if for mysql then could pass 'mysql' or if same in php and mysql just return same value
+	 *                   in this case it is ignored as mysql and php do both use 'md5' as the method name.
+	 *
+	 * @return string
+	 */
+	public static function hash_method_name($for = null) {
+		return 'md5';
 	}
 }

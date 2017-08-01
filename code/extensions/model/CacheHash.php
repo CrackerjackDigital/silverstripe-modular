@@ -20,6 +20,10 @@ class CacheHash extends ModelExtension {
 		'CacheHash',
 	];
 
+	public function CacheHashWithPermission() {
+		return $this()->{self::CacheHashFieldName} . $this()->canView();
+	}
+
 	public function onBeforeWrite() {
 		$changed = $this->model()->getChangedFields( true, DataObject::CHANGE_VALUE );
 		$ignore  = $this->model()->config()->get( 'cache_hash_ignore_fields' ) ?: [];
