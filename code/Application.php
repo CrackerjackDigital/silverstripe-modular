@@ -33,6 +33,8 @@ class Application extends Module {
 	// use this
 	private static $default_theme = self::ThemeDefault;
 
+	private static $send_all_emails_from = '';
+
 	// who to send errors, logs etc, SiteConfig will be tried with precedence
 	private static $system_admin_email = '';
 
@@ -164,6 +166,28 @@ class Application extends Module {
 
 		return $member ?: \Member::default_admin();
 	}
+
+	/**
+	 * Try and get Email from
+	 * @return mixed|string
+	 */
+	public static function send_all_emails_from() {
+		$email = '';
+		if ($siteConfig = \SiteConfig::current_site_config()) {
+			if ( $siteConfig->{\SiteConfigExtension::SendAllEmailsFromFieldName} ) {
+				$email = $siteConfig->{\SiteConfigExtension::SendAllEmailsFromFieldName};
+			}
+		}
+		if (!$email) {
+			// default to configured options if not set in siteconfig
+			$email = static::config()->get( 'send_all_emails_from' )
+				?: \Email::config()->get( 'admin_email' )
+					?: \Member::default_admin()->Email;
+		}
+
+		return $email;
+	}
+
 
 	/**
 	 * Find a system admin and return the Email address.
