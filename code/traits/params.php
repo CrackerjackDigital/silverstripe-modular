@@ -50,7 +50,7 @@ trait params {
 	 *
 	 * @param string|array $value
 	 *
-	 * @param string       $separator if empty then config.parameter_seperator will be used
+	 * @param string       $separator if empty then config.parameter_separator will be used
 	 *
 	 * @return array
 	 */
