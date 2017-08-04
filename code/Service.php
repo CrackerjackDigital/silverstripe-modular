@@ -1,7 +1,9 @@
 <?php
 namespace Modular;
 
-abstract class Service extends Object implements \Modular\Interfaces\Service {
+use Modular\Interfaces\Service as ServiceInterface;
+
+abstract class Service extends Object implements ServiceInterface {
 	// service name to use with Injector when creating an instance, if not set then the called class name will be used
 	const ServiceName = '';
 
@@ -9,15 +11,27 @@ abstract class Service extends Object implements \Modular\Interfaces\Service {
 	private static $service_name = '';
 
 	/**
-	 * Service interface method.
-	 *
-	 * @param null   $params
-	 *
-	 * @param string $resultMessage
-	 *
-	 * @return mixed
+	 * Fixure out service name from config, const or called class.
+	 * @return string
 	 */
-	abstract public function execute( $params = null, &$resultMessage = '' );
+	public static function service_name() {
+		return static::config()->get( 'service_name' )
+			?: static::ServiceName
+				?: get_called_class();
+	}
+	/**
+	 * Return a configured instance of the service via config.service_name, self.ServiceName or the called class name.
+	 *
+	 * @param mixed  $options
+	 * @param string $env
+	 *
+	 * @return \Modular\Interfaces\Service
+	 */
+	public static function create( $options = null, $env = '' ) {
+		$serviceName = static::service_name();
+
+		return \Injector::inst()->create( $serviceName, $options, $env);
+	}
 
 	/**
 	 * Return a configured instance of the service via config.service_name, self.ServiceName or the called class name.
@@ -28,11 +42,9 @@ abstract class Service extends Object implements \Modular\Interfaces\Service {
 	 * @return \Modular\Interfaces\Service
 	 */
 	public static function get( $options = null, $env = '' ) {
-		$serviceName = static::config()->get( 'service_name' )
-			?: static::ServiceName
-				?: get_called_class();
+		$serviceName = static::service_name();
 
-		return \Injector::inst()->create( $serviceName, $options, $env );
+		return \Injector::inst()->get( $serviceName, true, [ $options, $env ] );
 	}
 
 }

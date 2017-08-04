@@ -14,30 +14,31 @@ trait md5 {
 	 * Return md5 hash of value.
 	 *
 	 * @param mixed  $value
-	 * @param null   $seed not used
+	 * @param mixed  $salt   prepended to value before hashing if provided
 	 * @param string $method used to calculate the hash
-	 * @param bool   $raw
+	 * @param bool   $raw    see md5()
 	 *
 	 * @return string
 	 */
-	public static function hash( $value, $seed = null, &$method = 'md5', $raw = false ) {
+	public static function hash( $value, $salt = '', &$method = 'md5', $raw = false ) {
 		$method = 'md5';
-		return md5( $value, $raw );
+
+		return md5( $salt . $value, $raw );
 	}
 
 	/**
 	 *
-	 * @param string $fileName
-	 *
-	 * @param null   $seed not used
-	 *
-	 * @param string $method
+	 * @param string      $fileName either relative to site root or absolute to file system
+	 * @param null|string $salt     not used
+	 * @param string      $method
+	 * @param bool        $raw      see md5()
 	 *
 	 * @return string
 	 */
-	public static function hash_file( $fileName, $seed = null, &$method = 'md5' ) {
+	public static function hash_file( $fileName, $salt = '', &$method = 'md5', $raw = false ) {
 		$method = 'md5';
-		return md5_file( Director::getAbsFile($fileName ));
+
+		return md5( $salt . md5_file( Director::getAbsFile( $fileName ) ), $raw );
 	}
 
 	/**

@@ -41,7 +41,7 @@ class Form extends \Form {
 	 * @param null $validator
 	 * @return Form
 	 */
-	public static function create_for_action($action, ContentController $controller, $name, FieldList $fields, FieldList $actions, $validator = null) {
+	public static function create_for_action($action, ContentController $controller, $name, FieldList $fields = null, FieldList $actions = null, $validator = null) {
 		$formClassName = get_called_class();
 
 		$name = $name ?: $formClassName;

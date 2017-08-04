@@ -2,7 +2,7 @@
 
 namespace Modular\Interfaces;
 
-interface Service {
+interface Service extends Executable {
 
 	/**
 	 * Return a configured instance of the service.
@@ -13,15 +13,5 @@ interface Service {
 	 * @return Service
 	 */
 	public static function get( $options = null, $env = '' );
-
-	/**
-	 * Get the service to do something.
-	 *
-	 * @param array|\ArrayAccess $params e.g. to merge into fields or configure service execution
-	 * @param string $resultMessage
-	 *
-	 * @return mixed
-	 */
-	public function execute( $params = [], &$resultMessage = '' );
 
 }
