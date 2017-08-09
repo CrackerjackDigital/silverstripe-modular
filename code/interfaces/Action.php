@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular\Interfaces;
 
 use Modular\Model;
@@ -11,6 +12,16 @@ use Modular\Model;
  * @package Modular\Interfaces
  */
 interface Action extends RouteProvider {
+	// crud actions
+	const ActionCreate = 'create';
+	const ActionRead   = self::ActionView;
+	const ActionUpdate = self::ActionEdit;
+	const ActionDelete = 'remove';
+
+	// usefull synonyms
+	const ActionView = 'view';
+	const ActionEdit = 'edit';
+
 	/**
 	 * Return the model which action is to be applied to, e.g. the owner on a model extension or the model
 	 * from a ModelController.
@@ -18,28 +29,31 @@ interface Action extends RouteProvider {
 	 * @return Model
 	 */
 	public function model();
-	
+
 	/**
 	 * Return the class name for the implementing model (PHP >= 5.5 just use ::class)
+	 *
 	 * @return mixed
 	 */
 	public static function class_name();
-	
+
 	/**
 	 * Apply the action to the target model.
 	 *
 	 * @param string $alias
 	 * @param null   $data
+	 *
 	 * @return mixed
 	 */
-	public function apply($alias, $data = null);
-	
+	public function apply( $alias, $data = null );
+
 	/**
 	 * Reverse the action on the target model.
 	 *
 	 * @param string $alias
 	 * @param null   $data
+	 *
 	 * @return mixed
 	 */
-	public function revert($alias, $data = null);
+	public function revert( $alias, $data = null );
 }
