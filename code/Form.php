@@ -216,12 +216,26 @@ class Form extends \Form {
 		}
 	}
 
-	public static function form_fields($for) {
-		return static::get_config_setting('form_fields', $for);
+	/**
+	 * Fields to add can be configured on the form for particular actions.
+	 *
+	 * @param $action
+	 *
+	 * @return array
+	 */
+	public static function form_fields($action) {
+		return static::get_config_setting('form_fields', $action) ?: [];
 	}
 
-	public static function form_actions($for) {
-		return static::get_config_setting('form_actions', $for);
+	/**
+	 * Fields to add can be configured on the form for particular actions.
+	 *
+	 * @param $action
+	 *
+	 * @return array
+	 */
+	public static function form_actions($action) {
+		return static::get_config_setting('form_actions', $action) ?: [];
 	}
 
 	public static function make_field($fieldName, array $info, $value = null) {
