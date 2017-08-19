@@ -13,15 +13,16 @@ trait md5 {
 	/**
 	 * Return md5 hash of value.
 	 *
-	 * @param mixed  $value
+	 * @param mixed  $value if not provided then a randomish value is used
 	 * @param mixed  $salt   prepended to value before hashing if provided
 	 * @param string $method used to calculate the hash
 	 * @param bool   $raw    see md5()
 	 *
 	 * @return string
 	 */
-	public static function hash( $value, $salt = '', &$method = 'md5', $raw = false ) {
+	public static function hash( $value = '', $salt = '', &$method = 'md5', $raw = false ) {
 		$method = 'md5';
+		$value = $value ?: microtime(true) + rand(100, 1000000);
 
 		return md5( $salt . $value, $raw );
 	}

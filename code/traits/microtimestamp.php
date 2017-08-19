@@ -2,7 +2,7 @@
 namespace Modular\Traits;
 
 trait microtimestamp {
-	public static function microtimestamp() {
-		return microtime(true);
+	public static function microtimestamp($asFloat = false) {
+		return microtime($asFloat);
 	}
 }
