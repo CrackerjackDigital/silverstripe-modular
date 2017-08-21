@@ -21,7 +21,7 @@ trait hash {
 	 *
 	 * @return mixed
 	 */
-	abstract public function hash( $value, $salt = '', &$method = 'md5', $raw = false );
+	abstract public function hash( $value = '', $salt = '', &$method = 'md5', $raw = false );
 
 	/**
 	 * If field on model is empty then fill with a new hash.
