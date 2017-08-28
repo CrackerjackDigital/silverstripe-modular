@@ -65,7 +65,11 @@ class TrackedValue extends ModelExtension {
 	 */
 	public static function add_to_class( $class, $extensionClass, $args = null ) {
 		if ( func_num_args() ) {
-			static::$field_registry[ $class ][ $args[0] ] = static::TrackedFieldPrefix . $args[0];
+			$fieldNames = array_filter(is_array($args[0]) ? $args[0] : explode(',', $args[0]));
+			foreach ($fieldNames as $fieldName) {
+				static::$field_registry[ $class ][ $fieldName ] = static::TrackedFieldPrefix . $fieldName;
+			}
+
 		}
 		parent::add_to_class( $class, $extensionClass, $args );
 	}
