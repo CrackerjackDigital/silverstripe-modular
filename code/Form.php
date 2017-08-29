@@ -41,7 +41,7 @@ class Form extends \Form {
 	 * @param null $validator
 	 * @return Form
 	 */
-	public static function create_for_action($action, ContentController $controller, $name, FieldList $fields, FieldList $actions, $validator = null) {
+	public static function create_for_action($action, ContentController $controller, $name, FieldList $fields = null, FieldList $actions = null, $validator = null) {
 		$formClassName = get_called_class();
 
 		$name = $name ?: $formClassName;
@@ -216,12 +216,26 @@ class Form extends \Form {
 		}
 	}
 
-	public static function form_fields($for) {
-		return static::get_config_setting('form_fields', $for);
+	/**
+	 * Fields to add can be configured on the form for particular actions.
+	 *
+	 * @param $action
+	 *
+	 * @return array
+	 */
+	public static function form_fields($action) {
+		return static::get_config_setting('form_fields', $action) ?: [];
 	}
 
-	public static function form_actions($for) {
-		return static::get_config_setting('form_actions', $for);
+	/**
+	 * Fields to add can be configured on the form for particular actions.
+	 *
+	 * @param $action
+	 *
+	 * @return array
+	 */
+	public static function form_actions($action) {
+		return static::get_config_setting('form_actions', $action) ?: [];
 	}
 
 	public static function make_field($fieldName, array $info, $value = null) {

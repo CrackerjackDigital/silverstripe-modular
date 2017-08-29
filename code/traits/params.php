@@ -4,7 +4,7 @@ namespace Modular\Traits;
 
 /**
  * Trait params add to class which deals with parameters, e.g. those coming
- * from query string. Provides handy functions for retrieving, parsing etc.
+ * from query string. Provides functions for extracting and parsing multiple parameters csv separated.
  *
  * @package Modular\Traits
  */
@@ -17,7 +17,7 @@ trait params {
 	/**
 	 * Return the first value of the parameter which matches the name after splitting it (so if not a csv-like value will just return the value).
 	 *
-	 * @param array  $params
+	 * @param array  $params map of name => value pairs, values may be csv seperated
 	 * @param string $incomingName
 	 * @param null   $default
 	 *
@@ -25,7 +25,6 @@ trait params {
 	 */
 	public function param( $params, $incomingName, $default = null ) {
 		$array = $this->paramArray( $params, $incomingName, $default ) ?: [];
-
 		return current( $array );
 	}
 
@@ -51,16 +50,18 @@ trait params {
 	 *
 	 * @param string|array $value
 	 *
-	 * @param string       $separator if empty then config.parameter_seperator will be used
+	 * @param string       $separator if empty then config.parameter_separator will be used
 	 *
 	 * @return array
 	 */
 	protected function splitParam( $value, $separator = '' ) {
+		$separator = $separator ?: $this->config()->get( 'parameter_separator' );
+
 		return is_array( $value )
 			? $value
 			: array_filter(
 				explode(
-					((strlen($separator) == 0) ? $this->config()->get( 'parameter_separator' ) : $separator),
+					$separator,
 					$value
 				)
 			);

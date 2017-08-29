@@ -12,6 +12,8 @@ abstract class Module extends Object {
 	use config;
 	use safe_paths;
 
+	const CurrentEnvironment = SS_ENVIRONMENT_TYPE;
+
 	// handled file types which for simplicity are also the file extensions
 	const FileTypeCSS                = 'css';
 	const FileTypeJavascript         = 'js';
@@ -75,7 +77,7 @@ abstract class Module extends Object {
 	 *
 	 * @var array
 	 */
-	private static $combine = [
+	private static $combine_types = [
 		self::FileTypeCSS                => false,
 		self::FileTypeJavascript         => true,
 		self::FileTypeJavascriptTemplate => true
@@ -92,7 +94,6 @@ abstract class Module extends Object {
 	private static $json_decode_options = 0;
 
 	private static $decode_depth = 512;
-
 
 	/**
 	 * Iterate config.$configVariable map and return map excluding false values
@@ -113,68 +114,6 @@ abstract class Module extends Object {
 				return is_array($item);
 			}
 		);
-	}
-
-	/**
-	 * Iterate through 'block' key in config.requirements and block each script.
-	 *
-	 * @param array $block map of paths to block.
-	 * @return array of blocked scripts as ['js' => 'path'] type entries
-	 */
-	protected static function block(array $block) {
-		if ($block) {
-			$blocked = $scriptTypes = static::include_script_types();
-
-			$required = array_merge(
-				$scriptTypes,
-				[
-					self::FileTypeCSS                => \Requirements::backend()->get_css(),
-					self::FileTypeJavascript         => \Requirements::backend()->get_javascript(),
-					self::FileTypeJavascriptTemplate => \Requirements::backend()->get_custom_scripts(),
-				]
-			);
-
-			foreach ($scriptTypes as $fileType => $_) {
-				foreach ($block as $path) {
-
-					$path = static::requirement_path($path);
-
-					foreach ($required[ $fileType ] as $require) {
-
-						if (fnmatch($path, $require)) {
-
-							$blocked[ $fileType ][] = $require;
-
-							\Requirements::block(
-								$required
-							);
-						}
-					}
-				}
-			}
-			return $blocked;
-		}
-		return [];
-	}
-
-	/**
-	 * SilverStripe require CSS
-	 *
-	 * @param $controller
-	 * @param $path
-	 */
-	protected static function css($controller, $path) {
-		\Requirements::css($path);
-	}
-
-	/**
-	 * SilverStripe require javascript
-	 *
-	 * @param $controller
-	 * @param $path
-	 */
-	protected static function js($controller, $path) {
-		\Requirements::javascript($path);
 	}
 
 	/**
@@ -205,11 +144,11 @@ abstract class Module extends Object {
 	 */
 	protected static function combine(array $requirements, $moduleName) {
 		if ($requirements) {
-			$scriptTypes = static::include_script_types('combine');
+			$scriptTypes = static::include_script_types('combine_type');
 
 			foreach ($scriptTypes as $fileType => $_) {
 				// check we should combine this file type
-				if ($combine = static::get_config_setting('combine', $fileType)) {
+				if ($combine = static::get_config_setting('combine_types', $fileType)) {
 
 					if (is_array($combine[ $fileType ])) {
 						// if config is an array then we are filtering,

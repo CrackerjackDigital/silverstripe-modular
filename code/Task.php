@@ -22,6 +22,8 @@ abstract class Task extends \BuildTask implements ServiceInterface, TaskInterfac
 	// can't use 'enabled' as that is a member var on BuildTask
 	private static $task_enabled = true;
 
+	private static $parameter_separator = ',';
+
 	/**
 	 * Service interface method.
 	 *

@@ -9,6 +9,9 @@ use Modular\Model;
  * @property \Object $owner
  */
 trait owned {
+	/**
+	 * @return \Controller|\DataObject|\Modular\Model
+	 */
 	public function __invoke() {
 		return $this->owner();
 	}
