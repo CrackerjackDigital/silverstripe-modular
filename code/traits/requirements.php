@@ -5,6 +5,9 @@ use \Requirements as Requirement;
 use \Modular\Module;
 
 trait requirements {
+	public function requirements($beforeOrAfterInit) {
+		static::require_all($beforeOrAfterInit);
+	}
 
 	/**
 	 * Includes requirements from Injector configured Application. If a requirement starts with '/' then

@@ -5,10 +5,12 @@ namespace Modular;
 use Modular\Controllers\Model as ModelController;
 use Modular\Exceptions\Application as Exception;
 use Modular\Traits\reflection;
+use Modular\Traits\requirements;
 use SSViewer;
 
 class Application extends Module {
 	use reflection;
+	use requirements;
 
 	// convenience constants for referencing string constants
 	const SystemAdmin = 'SystemAdmin';
@@ -69,6 +71,8 @@ class Application extends Module {
 	/** Log a 'Start' message
 	 *
 	 * @param string $message for log
+	 *
+	 * @throws \Modular\Exceptions\Debug
 	 */
 	protected function start( $message = 'START' ) {
 		static::debug_trace( $message );
@@ -127,6 +131,7 @@ class Application extends Module {
 	 *
 	 * @return string
 	 * @throws \InvalidArgumentException
+	 * @throws \Modular\Exceptions\Debug
 	 */
 	public static function find_system_admin() {
 		// hardcoded from config or use admin as default
@@ -186,12 +191,12 @@ class Application extends Module {
 		return $email;
 	}
 
-
 	/**
 	 * Find a system admin and return the Email address.
 	 *
 	 * @return string
 	 * @throws \InvalidArgumentException
+	 * @throws \Modular\Exceptions\Debug
 	 */
 	public static function system_admin_email() {
 		/** @var \Member $sysAdmin */
@@ -205,6 +210,7 @@ class Application extends Module {
 	 * this apps config.admin_email, Email.admin_email or Member.default_admin's Email.
 	 *
 	 * @return string
+	 * @throws \Modular\Exceptions\Debug
 	 */
 	public static function admin_email() {
 		// default to configured options if not set in siteconfig
@@ -258,6 +264,7 @@ class Application extends Module {
 	 * Controller url via page_for_path.
 	 *
 	 * @return \DataObject|\Page|\SiteTree
+	 * @throws \InvalidArgumentException
 	 */
 	public static function get_current_page() {
 		$page = null;
@@ -371,6 +378,7 @@ class Application extends Module {
 	 * Return the theme name matching on domain name via config.theme_domains
 	 *
 	 * @return string
+	 * @throws \Modular\Exceptions\Application
 	 */
 	public static function domain_theme() {
 		$hostName = static::hostname();
