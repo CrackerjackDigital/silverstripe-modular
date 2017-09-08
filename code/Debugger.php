@@ -226,7 +226,7 @@ class Debugger extends Object implements Logger {
 		$source = $source ?: ($this->source() ?: get_called_class());
 
 		if ($level = $this->lvl($facilities)) {
-			$this->logger->log(($source ? "$source: " : '') . $message . PHP_EOL, $level);
+			$this->logger->log( ( $source ? "$source: " : '' ) . $message . PHP_EOL, $level );
 		}
 		return $this;
 	}
