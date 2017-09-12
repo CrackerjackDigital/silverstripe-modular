@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular\Extensions\Model;
 
 /**
@@ -8,11 +9,13 @@ namespace Modular\Extensions\Model;
  * @package Modular\Extensions\Model
  */
 class SiteConfig extends \DataExtension {
-	const AdminFieldName = 'AdminEmail';
-	const SystemAdminFieldName = 'SystemAdminEmail';
+	const AdminFieldName             = 'AdminEmail';
+	const SystemAdminFieldName       = 'SystemAdminEmail';
+	const SendAllEmailsFromFieldName = 'SendAllEmailsFrom';
 
 	private static $db = [
-		self::AdminFieldName => 'Varchar(255)',
-		self::SystemAdminFieldName => 'Varchar(255)'
+		self::AdminFieldName             => 'Varchar(255)',
+		self::SystemAdminFieldName       => 'Varchar(255)',
+		self::SendAllEmailsFromFieldName => 'Varchar(255)',
 	];
 }

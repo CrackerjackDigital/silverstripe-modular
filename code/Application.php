@@ -4,6 +4,7 @@ namespace Modular;
 
 use Modular\Controllers\Model as ModelController;
 use Modular\Exceptions\Application as Exception;
+use Modular\Extensions\Model\SiteConfig;
 use Modular\Traits\reflection;
 use Modular\Traits\requirements;
 use SSViewer;
@@ -177,8 +178,8 @@ class Application extends Module {
 	public static function send_all_emails_from() {
 		$email = '';
 		if ($siteConfig = \SiteConfig::current_site_config()) {
-			if ( $siteConfig->{\SiteConfigExtension::SendAllEmailsFromFieldName} ) {
-				$email = $siteConfig->{\SiteConfigExtension::SendAllEmailsFromFieldName};
+			if ( $siteConfig->{SiteConfig::SendAllEmailsFromFieldName} ) {
+				$email = $siteConfig->{SiteConfig::SendAllEmailsFromFieldName};
 			}
 		}
 		if (!$email) {
