@@ -1,13 +1,15 @@
 <?php
 namespace Modular\GridField\Configs;
 
+use Modular\GridField\Components\GridFieldAddNewMultiClassSorted;
+
 /**
  * Alters the config to be suitable for adding/removing many_many related models to the extended model, configurably using 'Add New MultClass' support.
  *
  * Adds an 'AddNewMultiClass' selector
  */
 class HasManyManyGridFieldConfig extends GridFieldConfig {
-	const ComponentAddNewMultiClass = 'Modular\GridField\GridFieldAddNewMultiClassSorted';
+	const ComponentAddNewMultiClass = GridFieldAddNewMultiClassSorted::class;
 
 	private static $allowed_related_classes = [];
 

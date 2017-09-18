@@ -3,6 +3,8 @@ namespace Modular\GridField\Components;
 
 use GridFieldAddNewMultiClass;
 use Modular\Traits\config;
+use Modular\Traits\owned;
+use owner;
 
 /**
  * A component which lets the user select from a list of classes to create a new record form.
@@ -11,5 +13,6 @@ use Modular\Traits\config;
  * subclasses. This can be customised using {@link setClasses()}.
  */
 class GridFieldAddNewMultiClassSorted extends GridFieldAddNewMultiClass {
+	use owner;
 	use config;
 }
