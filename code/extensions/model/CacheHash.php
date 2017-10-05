@@ -44,6 +44,7 @@ class CacheHash extends ModelExtension {
 			while ( $parent && $parent->exists() && $parent->hasExtension( self::class ) ) {
 				$hash = static::generate_hash();
 
+				// don't trigger a cascade through ORM do it directly
 				\DB::query( "update File set CacheHash = '$hash' where ID = $parent->ID" );
 				$parent = $parent->Parent();
 			}
