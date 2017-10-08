@@ -98,6 +98,19 @@ trait transients {
 	}
 
 	/**
+	 * Return but don't clear a transient value
+	 *
+	 * @param      $fieldName
+	 * @param null $className
+	 *
+	 * @return array|mixed|null|\Session
+	 */
+	public static function transient_peek($fieldName, $className = null) {
+		$key = self::transient_key( $fieldName, $className );
+		return Session::get($key);
+	}
+
+	/**
 	 * Return a unique key for stashing things ('transient values') in the session between e.g. pages or form renders.
 	 *
 	 * @param string $name      , e.g. of a field
