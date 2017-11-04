@@ -8,7 +8,6 @@ use Modular\Traits\requirements;
 use Modular\Traits\safe_paths;
 
 abstract class Module extends Object {
-	use requirements;
 	use config;
 	use safe_paths;
 
@@ -148,7 +147,7 @@ abstract class Module extends Object {
 
 			foreach ($scriptTypes as $fileType => $_) {
 				// check we should combine this file type
-				if ($combine = static::get_config_setting('combine_types', $fileType)) {
+				if ($combine = static::config_subsetting('combine_types', $fileType)) {
 
 					if (is_array($combine[ $fileType ])) {
 						// if config is an array then we are filtering,
@@ -206,26 +205,6 @@ abstract class Module extends Object {
 			?: rtrim(static::module_path(), '/');
 	}
 
-	/**
-	 * This should be overriden by/copy-pasted to implementation to provide a
-	 * default module path to the module, where the module installs relative to
-	 * site root e.g. '/swipestreak-gallery'. Sadly can't seem to declare a
-	 * static method abstract in php without getting an E_STRICT.
-	 *
-	 * @param string $append - add this to end of found path
-	 * @return string
-	 */
-	public static function module_path($append = '') {
-		if (get_called_class() == __CLASS__) {
-			user_error('This method should be overridden in implementation');
-		}
-		// TODO fix so we can find directory of called class not this class's directory
-		return Controller::join_links(
-			ltrim(static::config()->get('module_path')
-				?: Director::makeRelative(realpath(Controller::join_links(__DIR__, '..')))),
-			$append
-		);
-	}
 
 	/**
 	 * A module's requirements load from the same base path as the module.
@@ -265,4 +244,26 @@ abstract class Module extends Object {
 		);
 	}
 
+	/**
+	 * This should be overriden by/copy-pasted to implementation to provide a
+	 * default module path to the module, where the module installs relative to
+	 * site root e.g. '/swipestreak-gallery'. Sadly can't seem to declare a
+	 * static method abstract in php without getting an E_STRICT.
+	 *
+	 * @param string $append - add this to end of found path
+	 *
+	 * @return string
+	 */
+	public static function module_path( $append = '' ) {
+		if ( get_called_class() == __CLASS__ ) {
+			user_error( 'This method should be overridden in implementation' );
+		}
+
+		// TODO fix so we can find directory of called class not this class's directory
+		return Controller::join_links(
+			ltrim( static::config()->get( 'module_path' )
+				?: Director::makeRelative( realpath( Controller::join_links( __DIR__, '..' ) ) ) ),
+			$append
+		);
+	}
 }

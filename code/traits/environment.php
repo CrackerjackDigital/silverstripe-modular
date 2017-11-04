@@ -1,4 +1,5 @@
 <?php
+
 namespace Modular\Traits;
 
 use Director;
@@ -16,7 +17,7 @@ trait environment {
 	 *
 	 * @return mixed
 	 */
-	abstract public function config($forClass = null);
+	abstract public function config( $forClass = null );
 
 	public function environment() {
 		return $this()->config()->get( 'environment' )
