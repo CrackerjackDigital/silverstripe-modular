@@ -1,10 +1,8 @@
 <?php
 namespace Modular\GridField\Components;
 
-use GridFieldAddNewMultiClass;
 use Modular\Traits\config;
-use Modular\Traits\owned;
-use owner;
+use Modular\Traits\owner;
 
 /**
  * A component which lets the user select from a list of classes to create a new record form.
