@@ -37,15 +37,19 @@ class CacheHash extends ModelExtension {
 	public function onAfterWrite() {
 		parent::onAfterWrite();
 		if ( $this->cacheHashChanged() && $this->config()->get( 'cache_hash_invalidate_parents' ) ) {
-			$this()->{self::CacheHashChangedFieldName} = '';
+			if ($this->owner->hasMethod( 'Parent')) {
+				$this()->{self::CacheHashChangedFieldName} = '';
 
-			// update parents without triggering regeneration etc
-			$parent = $this->owner->Parent();
-			while ( $parent && $parent->exists() && $parent->hasExtension( self::class ) ) {
-				$hash = static::generate_hash();
-
-				\DB::query( "update File set CacheHash = '$hash' where ID = $parent->ID" );
-				$parent = $parent->Parent();
+				// update parents without triggering regeneration etc
+				$parent = $this->owner->Parent();
+				while ( $parent && $parent->exists() && $parent->hasExtension( self::class ) ) {
+					// don't trigger a cascade through ORM do it directly
+					\DB::query( 'update "File" set CacheHash = ? where ID = ?', [
+						static::generate_hash(),
+						$parent->ID
+					]);
+					$parent = $parent->Parent();
+				}
 			}
 		}
 	}

@@ -53,9 +53,11 @@ trait requirements {
 	 * @param string $beforeOrAfterInit
 	 * @param string $className
 	 * @param string $modulePath
+	 * @param string $includeDefault if single level requirements, not 'before' and 'after' then use this initialisation step to include them
+	 *
 	 * @return $this
 	 */
-	protected static function add_requirement($beforeOrAfterInit, $className, $modulePath = '') {
+	protected static function add_requirement($beforeOrAfterInit, $className, $modulePath = '', $includeDefault = Module::AfterInit) {
 		// we want the config for the actual class instance we are in as we will be doing Config::UNINHERITED
 		// to read from that level first.
 
@@ -66,22 +68,42 @@ trait requirements {
 				?: $config->get('module_path', \Config::UNINHERITED)
 					?: \SSViewer::get_theme_folder();
 
-			if (isset($requirements[ $beforeOrAfterInit ])) {
-				// exclude any requirements which have been set to 'false' in config
-				$requirements = array_filter($requirements[ $beforeOrAfterInit ]);
+			if (is_array(current($requirements))) {
+				// two level requirements, probably with 'before' => [] and 'after' => []
+				if ( isset( $requirements[ $beforeOrAfterInit ] ) ) {
+					// exclude any requirements which have a value of 'false' in config
+					$requirements = array_filter( $requirements[ $beforeOrAfterInit ] );
+				} else {
+					// no 'before' or 'after' requirements
+					$requirements = [];
+				}
+			} else {
+				// single level requirements, we will do according to default
+				if ($includeDefault == $beforeOrAfterInit) {
+					$requirements = array_filter( $requirements );
+				} else {
+					$requirements = [];
+				}
 			}
+			if ($requirements) {
+				if ( ! is_int( key( $requirements ) ) ) {
+					// filenames are the keys, swap so the values
+					$requirements = array_keys( $requirements );
+				}
 
-			foreach ($requirements as $path => $info) {
-				// atm info is just a boolean so parent requirements can be turned off in config
-				if ($info) {
-					if (stream_is_local( $path)) {
-						if (substr($path, 0, 1) != '/') {
+				$basePathLen = strlen(BASE_PATH);
+
+				foreach ( $requirements as $path ) {
+					if ( stream_is_local( $path ) ) {
+						if ( substr( $path, 0, 1 ) != '/' ) {
 							// prepend module path as not 'absolute' path (relative to web root)
-							$path = \Controller::join_links($modulePath, $path);
+							$path = \Controller::join_links( $modulePath, $path );
 						}
-						static::require_file( $path );
+						foreach (glob(BASE_PATH . '/' . $path) as $file) {
+							static::require_file( substr($file, $basePathLen));
+						}
 					} else {
-						static::require_url( $path);
+						static::require_url( $path );
 					}
 				}
 			}
@@ -139,13 +161,21 @@ trait requirements {
 	 * @return string
 	 */
 	public static function require_file( $path) {
-		if ( $path = trim( $path, '/')) {
-			if ( substr( $path, -3) == '.js') {
-				Requirement::javascript( $path);
-			} else {
-				Requirement::css( $path);
+		static $required = [];
+
+		if ($path = ltrim($path, '/')) {
+
+			if ( ! isset( $required[ $path ] ) ) {
+				$required[ $path ] = true;
+
+				if ( substr( $path, - 3 ) == '.js' ) {
+					Requirement::javascript( $path );
+				} else {
+					Requirement::css( $path );
+				}
 			}
 		}
+
 		return $path;
 	}
 

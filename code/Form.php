@@ -123,7 +123,7 @@ class Form extends \Form {
 	 * @return string HTML text of tabstrip in a 'ul'
 	 */
 	public static function tab_strip($forAction, $fullLinks = false) {
-		$tabs = static::get_config_setting(
+		$tabs = static::config_subsetting(
 			'tabs',
 			$forAction
 		) ?: [];
@@ -157,7 +157,7 @@ class Form extends \Form {
 	}
 
 	protected static function tabify($action, FieldList $fields) {
-		$tabs = static::get_config_setting(
+		$tabs = static::config_subsetting(
 			'tabs',
 			$action
 		) ?: [];
@@ -224,7 +224,7 @@ class Form extends \Form {
 	 * @return array
 	 */
 	public static function form_fields($action) {
-		return static::get_config_setting('form_fields', $action) ?: [];
+		return static::config_subsetting('form_fields', $action) ?: [];
 	}
 
 	/**
@@ -235,7 +235,7 @@ class Form extends \Form {
 	 * @return array
 	 */
 	public static function form_actions($action) {
-		return static::get_config_setting('form_actions', $action) ?: [];
+		return static::config_subsetting('form_actions', $action) ?: [];
 	}
 
 	public static function make_field($fieldName, array $info, $value = null) {

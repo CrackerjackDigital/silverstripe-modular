@@ -4,16 +4,16 @@ namespace Modular\Traits;
 use Modular\Exceptions\Config as Exception;
 
 trait config {
-	
+
 	/**
 	 * @return mixed
 	 */
 	abstract public function __invoke();
-	
+
 	public static function config($className = null) {
 		return \Config::inst()->forClass($className ?: get_called_class());
 	}
-	
+
 	/**
 	 * Try the owner first then the exhibiting object, only one or the other will be returned with no merging.
 	 *
@@ -22,9 +22,9 @@ trait config {
 	 * @return string|array|null
 	 */
 	public function ownerOverThisConfig($name, $key = null) {
-		return $this()->get_config_setting($name, $key) ?: $this->get_config_setting($name, $key);
+		return $this()->get_config_setting($name, $key) ?: $this->config_subsetting($name, $key);
 	}
-	
+
 	/**
 	 * Try the exhibiting object then the owner object, only one or the other will be returned with no merging.
 	 *
@@ -33,9 +33,9 @@ trait config {
 	 * @return string|array|null
 	 */
 	public function thisOverOwnerConfig($name, $key = null) {
-		return $this->get_config_setting($name, $key) ?: $this()->get_config_setting($name, $key);
+		return $this->config_subsetting($name, $key) ?: $this()->get_config_setting($name, $key);
 	}
-	
+
 	/**
 	 * Merge the owner's config over the exhibiting objects config so owner's config takes precedence.
 	 *
@@ -45,17 +45,17 @@ trait config {
 	 */
 	public function ownerOverThisMergedConfig($name, $key = null) {
 		$merged = [];
-		if ($thisConfig = $this->get_config_setting($name)) {
+		if ($thisConfig = $this->config_subsetting($name)) {
 			$merged[ $name ] = $thisConfig;
 		}
 		// this will override thisConfig
 		if ($ownerConfig = $this()->get_config_setting($name)) {
 			$merged[ $name ] = $ownerConfig;
 		}
-		
+
 		return $this->v_or_kv($this->v_or_n($merged, $name), $key);
 	}
-	
+
 	/**
 	 * Merge the exhibiting objects config over the owner's config so the exhibiting objects config takes precedence.
 	 *
@@ -69,13 +69,13 @@ trait config {
 		if ($ownerConfig = $this()->get_config_setting($name)) {
 			$merged[ $name ] = $ownerConfig;
 		}
-		if ($thisConfig = $this->get_config_setting($name)) {
+		if ($thisConfig = $this->config_subsetting($name)) {
 			$merged[ $name ] = $thisConfig;
 		}
-		
+
 		return $this->v_or_kv($this->v_or_n($merged, $name), $key);
 	}
-	
+
 	/**
 	 * If the value is an array and key exists return the value for the key or null.
 	 *
@@ -90,10 +90,10 @@ trait config {
 				$out = $value[ $key ];
 			}
 		}
-		
+
 		return $out;
 	}
-	
+
 	/**
 	 * If the value is an array and key exists return the value for the key or return the value as provided.
 	 *
@@ -107,10 +107,10 @@ trait config {
 				$value = $value[ $key ];
 			}
 		}
-		
+
 		return $value;
 	}
-	
+
 	/**
 	 * Given an array of variable name => value do a config.update for config on the called
 	 * class or supplied class name.
@@ -123,7 +123,7 @@ trait config {
 			\Config::inst()->update($className ?: get_called_class(), $variable, $value);
 		}
 	}
-	
+
 	/**
 	 * Require a non-null setting.
 	 *
@@ -135,7 +135,7 @@ trait config {
 	 * @return mixed
 	 */
 	public static function require_config_setting($name, $key = null, $className = null, $sourceOptions = null) {
-		$value = static::get_config_setting($name, $key, $className, $sourceOptions);
+		$value = static::config_subsetting($name, $key, $className, $sourceOptions);
 		if (is_null($value)) {
 			throw new Exception("config variable '$name' not set");
 		}
@@ -145,10 +145,10 @@ trait config {
 			}
 			$value = $value[ $key ];
 		}
-		
+
 		return $value;
 	}
-	
+
 	/**
 	 * @param      $name
 	 * @param null $key           if value is an array and key is supplied return this key or null
@@ -156,14 +156,14 @@ trait config {
 	 * @param null $sourceOptions SilverStripe config.get options e.g. Config::UNINHERITED
 	 * @return array|null|string
 	 */
-	public static function get_config_setting($name, $key = null, $className = null, $sourceOptions = null) {
+	public static function config_subsetting($name, $key = null, $className = null, $sourceOptions = null) {
 		$className = $className ?: get_called_class();
-		
+
 		$value = static::config($className)->get($name, $sourceOptions);
-		
+
 		return static::v_or_n($value, $key);
 	}
-	
+
 	/**
 	 * Return multiple config settings for class as an array in provided order with null as value where not found.
 	 *
@@ -172,19 +172,19 @@ trait config {
 	 * @param null  $sourceOptions
 	 * @return array
 	 */
-	public static function get_config_settings(array $names, $className, $sourceOptions = null) {
+	public static function config_subsettings(array $names, $className, $sourceOptions = null) {
 		$values = [];
 		foreach ($names as $key => $name) {
 			if (is_int($key)) {
-				$values[] = static::get_config_setting($name, null, $className, $sourceOptions);
+				$values[] = static::config_subsetting($name, null, $className, $sourceOptions);
 			} else {
-				$values[] = static::get_config_setting($key, $name, $className, $sourceOptions);
+				$values[] = static::config_subsetting($key, $name, $className, $sourceOptions);
 			}
 		}
-		
+
 		return $values;
 	}
-	
+
 	/**
 	 * Do an fnmatch with keys of config var $name to $match and return the first found match.
 	 *
@@ -197,20 +197,22 @@ trait config {
 	 * @param string $match     with this test value against keys in the config using fnmatch($key, $match)
 	 * @param null   $className of configuration to get (by default get_called_class will be used).
 	 * @param null   $sourceOptions
+	 *
 	 * @return mixed
-	 * @throws \Modular\Exceptions\Exception
+	 * @throws \Exception
+	 * @throws \Modular\Exceptions\Debug
 	 */
 	public static function match_config_setting($name, $match, $className = null, $sourceOptions = null) {
 		$className = $className ?: get_called_class();
 
 		// try a direct get first
-		if (!$type = static::get_config_setting($name, $match, $className, $sourceOptions)) {
+		if (!$type = static::config_subsetting($name, $match, $className, $sourceOptions)) {
 
 			// get the map as is
 			$map = static::config($className)->get($name, $sourceOptions);
 
 			if (!($map && is_array($map))) {
-				static::debug_fail(new Exception("No such config array '$name' set on class '$className'"));
+				static::debugger()->fail(new Exception("No such config array '$name' set on class '$className'"));
 			}
 			// now loop through map treating as pattern => type
 			foreach ($map as $pattern => $type) {
@@ -224,5 +226,5 @@ trait config {
 		}
 		return $type;
 	}
-	
+
 }

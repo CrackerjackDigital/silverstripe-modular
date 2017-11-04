@@ -1,7 +1,9 @@
 <?php
 namespace Modular\Tasks;
 
+use Modular\Extensions\Model\CacheHash;
 use Modular\Task;
+use Modular\Traits\md5;
 
 /**
  * CacheHashInvalidationTask update all files in the system with a new CacheHash
@@ -9,6 +11,7 @@ use Modular\Task;
  * @package Modular\Tasks
  */
 class CacheHashInvalidationTask extends Task {
+	use md5;
 
 	/**
 	 * Update all files in system with new cache hash.
@@ -16,9 +19,20 @@ class CacheHashInvalidationTask extends Task {
 	 * @throws \InvalidArgumentException
 	 */
 	public function execute( $params = [], &$resultMessage = '' ) {
-		static::debug_info( "Updating all File cache hashes" );
-		\DB::query( "update File set CacheHash = md5(concat(Filename, now()))" );
-		static::debug_info( \DB::affected_rows() . " updated" );
+
+		$tableNames = [];
+		foreach (\ClassInfo::subclassesFor( 'Object') as $className) {
+			if (\Object::has_extension( $className, CacheHash::class)) {
+				if ($tableName = \ClassInfo::table_for_object_field( $className, CacheHash::CacheHashFieldName)) {
+					if (!in_array($tableName, $tableNames)) {
+						\DB::prepared_query( 'update "' . $tableName . '" set CacheHash = ?', [ $this->hash( '', $className ) ] );
+						static::debug_info( "Updated " . \DB::affected_rows() . " rows in '$tableName'" );
+						$tableNames[] = $tableName;
+					}
+				}
+
+			}
+		}
 	}
 
 }

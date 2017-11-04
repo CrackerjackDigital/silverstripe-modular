@@ -9,9 +9,8 @@ use Modular\Traits\reflection;
 use Modular\Traits\requirements;
 use SSViewer;
 
-class Application extends Module {
+abstract class Application extends Module {
 	use reflection;
-	use requirements;
 
 	// convenience constants for referencing string constants
 	const SystemAdmin = 'SystemAdmin';
@@ -68,6 +67,15 @@ class Application extends Module {
 	public function __destruct() {
 		$this->end();
 	}
+
+	/**
+	 * Make us provide requirements in concrete Application class, e.g. via requirements trait
+	 *
+	 * @param $beforeOrAfterInit
+	 *
+	 * @return mixed
+	 */
+	abstract public function requirements( $beforeOrAfterInit );
 
 	/** Log a 'Start' message
 	 *
@@ -383,7 +391,7 @@ class Application extends Module {
 	 */
 	public static function domain_theme() {
 		$hostName = static::hostname();
-		foreach ( array_reverse( static::get_config_setting( 'theme_domains' ), true ) as $theme => $domains ) {
+		foreach ( array_reverse( static::config_subsetting( 'theme_domains' ), true ) as $theme => $domains ) {
 			foreach ( $domains as $pattern ) {
 				if ( fnmatch( $pattern, $hostName ) ) {
 					return $theme;
@@ -391,7 +399,7 @@ class Application extends Module {
 			}
 		}
 
-		return static::get_config_setting( 'default_theme' );
+		return static::config_subsetting( 'default_theme' );
 	}
 
 	/**

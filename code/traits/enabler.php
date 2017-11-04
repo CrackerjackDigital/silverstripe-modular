@@ -34,13 +34,16 @@ trait enabler {
 
 	/**
 	 * Enable the extension (generally if previously disabled to e.g. skip checks etc). Ephemeral so will only affect
-	 * the currently running process.
+	 * the currently running process. Returns the previous state.
 	 *
 	 * @param bool $enable
+	 * @return bool
 	 */
 	public static function enable($enable = true) {
-		$configVarName = defined('static::EnablerConfigVar') ? static::EnablerConfigVar : 'enabled';
+		$previous = static::enabled();
+		$configVarName = defined( 'static::EnablerConfigVar' ) ? static::EnablerConfigVar : 'enabled';
 		\Config::inst()->update(get_called_class(), $configVarName, $enable);
+		return $previous;
 	}
 
 	/**

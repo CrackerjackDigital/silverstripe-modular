@@ -139,7 +139,7 @@ trait lang {
 			return $value;
 		}
 
-		if ($value = self::get_config_setting($source, strtolower($name), get_called_class(), $configOptions)) {
+		if ($value = self::config_subsetting($source, strtolower($name), get_called_class(), $configOptions)) {
 			if (is_string($value)) {
 				return _t($value, $value, $data);
 			}
