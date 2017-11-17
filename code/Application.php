@@ -68,6 +68,12 @@ abstract class Application extends Module {
 		$this->end();
 	}
 
+	public static function create() {
+		return \Injector::inst()->hasService( 'Application')
+			? \Injector::inst()->create( 'Application' )
+			: parent::create();
+	}
+
 	/**
 	 * Make us provide requirements in concrete Application class, e.g. via requirements trait
 	 *
