@@ -14,6 +14,10 @@ trait config {
 		return \Config::inst()->forClass($className ?: get_called_class());
 	}
 
+	public static function get_config_setting($setting) {
+		return static::config()->get($setting);
+	}
+
 	/**
 	 * Try the owner first then the exhibiting object, only one or the other will be returned with no merging.
 	 *
