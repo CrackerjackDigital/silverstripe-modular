@@ -2,10 +2,9 @@
 
 namespace Modular\Traits;
 
+use ArrayData;
 use ClassInfo;
-use Modular\Helpers\Localiser;
 use Session;
-
 /**
  * Add the ability to get and format messages from localisation files depending on context.
  *
@@ -18,9 +17,9 @@ trait messages {
 	 * Set session messages
 	 *
 	 */
-	public function setSessionMessage( $message, $type = 'success' ) {
-		Session::set( "Page.message", $message );
-		Session::set( "Page.messageType", $type );
+	public function setSessionMessage($message, $type = 'success') {
+		Session::set("Page.message", $message);
+		Session::set("Page.messageType", $type);
 	}
 
 	/**
@@ -30,12 +29,21 @@ trait messages {
 	 *
 	 * @return \ArrayData|bool
 	 */
-	public function getSessionMessage( $clear = true ) {
-		if ( $clear ) {
-			$this->ClearSessionMessage();
+	public function getSessionMessage($clear = true) {
+		if (Session::get('Page.message')) {
+			$msg = new ArrayData([
+				'Message' => Session::get('Page.message'),
+				'Type' => Session::get('Page.messageType'),
+			]);
+		} else {
+			$msg = false;
 		}
 
-		return $this->message;
+		if ($clear) {
+			// $this->ClearMessage();
+		}
+
+		return $msg;
 	}
 
 	/**
@@ -43,9 +51,9 @@ trait messages {
 	 * Clear all session messages
 	 *
 	 */
-	public function ClearSessionMessage() {
-		Session::clear( 'Page.message' );
-		Session::clear( 'Page.messageType' );
+	public function ClearMessage() {
+		Session::clear('Page.message');
+		Session::clear('Page.messageType');
 	}
 
 	/**
@@ -72,58 +80,58 @@ trait messages {
 	 *
 	 * @return string
 	 */
-	public function actionMessage( $modelOrClassName, $actionOrKey, $subKey = '', $default = null, $tokens = [] ) {
-		$model = is_object( $modelOrClassName )
-			? $modelOrClassName
-			: (ClassInfo::exists( $modelOrClassName ) ?
-				singleton($modelOrClassName)
-				: $modelOrClassName
-			);
+	public function actionMessage($modelOrClassName, $actionOrKey, $subKey = '', $default = null, $tokens = []) {
+		$model = is_object($modelOrClassName)
+		? $modelOrClassName
+		: (ClassInfo::exists($modelOrClassName) ?
+			singleton($modelOrClassName)
+			: $modelOrClassName
+		);
 
-		if ( is_object( $modelOrClassName)) {
+		if (is_object($modelOrClassName)) {
 			$modelClass = Reflection::derive_class_name(
 				$model,
 				true
 			);
 			/** @var \DataObject $modelClass */
-			$tokens  = array_merge(
+			$tokens = array_merge(
 				[
-					'ModelNiceName'  => $model->i18n_singular_name(),
+					'ModelNiceName' => $model->i18n_singular_name(),
 					'PluralNiceName' => $model->i18n_plural_name(),
-					'ModelClass'     => $model->ClassName,
-					'ModelID'        => $model->ID ?: '[none]',
-					'Action'         => $actionOrKey,
-					'SubKey'         => $subKey,
+					'ModelClass' => $model->ClassName,
+					'ModelID' => $model->ID ?: '[none]',
+					'Action' => $actionOrKey,
+					'SubKey' => $subKey,
 				],
 				$model->toMap(),
 				$tokens
 			);
-			$subKey  = $subKey ?: $actionOrKey;
-			$default = is_null( $default ) ? "{Action}" : $default;
-			if ( false !== strpos( $subKey, '.' ) ) {
+			$subKey = $subKey ?: $actionOrKey;
+			$default = is_null($default) ? "{Action}" : $default;
+			if (false !== strpos($subKey, '.')) {
 				// use key verbatim as contains a '.'
-				$message = _t( $subKey, $default, $tokens );
+				$message = _t($subKey, $default, $tokens);
 			} else {
-				$extensionClass = get_class( $this );
+				$extensionClass = get_class($this);
 				// lang yml keys in order they are tried before default is returned if not found
-				$key1 = "$modelClass.$subKey";                     // Member.Confirmed or Member.confirm
-				$key2 = "$extensionClass.$subKey.$modelClass";     // ConfirmableExtension.Confirmed.Member or ConfirmableExtension.confirm.Member
-				$key3 = "$extensionClass.$subKey";                 // ConfirmableExtension.Confirmed or ConfirmableExtension.confirm
-				if ( ! $message = _t( $key1, '', $tokens ) ) {
-					if ( ! $message = _t( $key2, '', $tokens ) ) {
-						$message = _t( $key3, $default, $tokens );
+				$key1 = "$modelClass.$subKey"; // Member.Confirmed or Member.confirm
+				$key2 = "$extensionClass.$subKey.$modelClass"; // ConfirmableExtension.Confirmed.Member or ConfirmableExtension.confirm.Member
+				$key3 = "$extensionClass.$subKey"; // ConfirmableExtension.Confirmed or ConfirmableExtension.confirm
+				if (!$message = _t($key1, '', $tokens)) {
+					if (!$message = _t($key2, '', $tokens)) {
+						$message = _t($key3, $default, $tokens);
 					}
 				}
 			}
 		} else {
 			// no model use the global message key 'Application'
 			$message = _t(
-				implode( '.', array_filter( [ 'Application', $modelOrClassName, $actionOrKey , $subKey ] ) ),
+				implode('.', array_filter(['Application', $modelOrClassName, $actionOrKey, $subKey])),
 				$default,
 				[
 					'ModelClass' => ($modelOrClassName && is_string($modelOrClassName)) ? $modelOrClassName : 'Thing',
-					'Action'     => $actionOrKey,
-					'SubKey'     => $subKey,
+					'Action' => $actionOrKey,
+					'SubKey' => $subKey,
 				]
 			);
 		}
