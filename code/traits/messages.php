@@ -40,7 +40,7 @@ trait messages {
 		}
 
 		if ($clear) {
-			// $this->ClearMessage();
+			$this->ClearMessage();
 		}
 
 		return $msg;
