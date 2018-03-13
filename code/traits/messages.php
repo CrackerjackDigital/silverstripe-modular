@@ -39,10 +39,6 @@ trait messages {
 			$msg = false;
 		}
 
-		if ($clear) {
-			$this->ClearMessage();
-		}
-
 		return $msg;
 	}
 
