@@ -11,11 +11,15 @@ trait config {
 	abstract public function __invoke();
 
 	public static function config($className = null) {
-		return \Config::inst()->forClass($className ?: get_called_class());
+		return \Modular\Helpers\Config::inst()->forClass($className ?: get_called_class());
 	}
 
 	public static function get_config_setting($setting) {
 		return static::config()->get($setting);
+	}
+
+	public static function config_get_many($class, ...$names) {
+		return \Modular\Helpers\Config::inst()->getMany($class, $names);
 	}
 
 	/**
