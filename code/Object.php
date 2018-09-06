@@ -4,8 +4,10 @@ namespace Modular;
 require_once( __DIR__ . '/traits/bitfield.php' );
 require_once( __DIR__ . '/traits/cache.php' );
 require_once( __DIR__ . '/traits/config.php' );
+require_once( __DIR__ . '/traits/enabler.php' );
 require_once( __DIR__ . '/traits/lang.php' );
 require_once( __DIR__ . '/traits/reflection.php' );
+require_once( __DIR__ . '/traits/safe_paths.php' );
 
 use Modular\Traits\bitfield;
 use Modular\Traits\cache;
@@ -18,7 +20,6 @@ class Object extends \Object {
 	use bitfield;
 	use cache;
 	use config;
-	use debugging;
 	use lang;
 	use reflection;
 

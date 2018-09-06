@@ -10,7 +10,7 @@ use Modular\Model;
  */
 trait owned {
 	/**
-	 * @return \Controller|\DataObject|\Modular\Model
+	 * @return \Controller|\DataObject|\Modular\Model|\Modular\Object
 	 */
 	public function __invoke() {
 		return $this->owner();

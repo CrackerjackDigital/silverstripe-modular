@@ -5,12 +5,15 @@ namespace Modular;
 use Modular\Controllers\Model as ModelController;
 use Modular\Exceptions\Application as Exception;
 use Modular\Extensions\Model\SiteConfig;
+use Modular\Traits\debugging;
 use Modular\Traits\reflection;
 use Modular\Traits\requirements;
 use SSViewer;
 
 abstract class Application extends Module {
+	use debugging;
 	use reflection;
+
 
 	// convenience constants for referencing string constants
 	const SystemAdmin = 'SystemAdmin';

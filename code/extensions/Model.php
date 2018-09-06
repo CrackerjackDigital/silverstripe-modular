@@ -4,8 +4,6 @@ namespace Modular;
 
 use DataExtension;
 use Modular\Traits\bitfield;
-use DateField;
-use FieldList;
 use Modular\Traits\config;
 use Modular\Traits\debugging;
 use Modular\Traits\enabler;

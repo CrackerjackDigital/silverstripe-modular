@@ -10,6 +10,10 @@ ContentController:
     - Modular\Extensions\Controller\Content
 #    - Modular\Extensions\Controller\Requirements # added by mosaic
 
+DataObject:
+  extensions:
+    class: Modular\Extensions\DataObjectExtension
+
 Modular\Controllers\Model:
   extensions:
     - Modular\Extensions\Controller\Model
