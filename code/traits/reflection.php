@@ -47,7 +47,10 @@ trait reflection {
 	 */
 	public static function derive_class_name( $modelOrClassName, $stripNamespace = false ) {
 		if ( $modelOrClassName ) {
-			$modelOrClassName = is_object( $modelOrClassName ) ? get_class( $modelOrClassName ) : $modelOrClassName;
+			$modelOrClassName = is_object( $modelOrClassName )
+				? get_class( $modelOrClassName )
+				: $modelOrClassName;
+
 			if ( $stripNamespace && is_array( $modelOrClassName ) ) {
 				foreach ( $modelOrClassName as &$className ) {
 					$className = static::strip_namespace( $className );
